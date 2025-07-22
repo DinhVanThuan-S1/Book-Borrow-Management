@@ -351,6 +351,49 @@ class MuonSachService {
       .populate("MaSach", "TenSach TacGia")
       .sort({ NgayTra: 1 });
   }
+
+  /**
+   * Lấy lịch sử mượn sách theo ID sách
+   */
+  static async getLichSuMuonTheoSach(sachId, queryParams = {}) {
+    const {
+      page = PAGINATION.DEFAULT_PAGE,
+      limit = PAGINATION.DEFAULT_LIMIT,
+      trangthai = "",
+    } = queryParams;
+
+    const query = {
+      MaSach: sachId,
+      deleted: false,
+    };
+
+    // Lọc theo trạng thái
+    if (trangthai && Object.values(MUON_SACH_STATUS).includes(trangthai)) {
+      query.TrangThai = trangthai;
+    }
+
+    const skip = (page - 1) * limit;
+    const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
+
+    const lichSu = await TheoDoiMuonSach.find(query)
+      .populate("MaDocGia", "HoLot Ten Email DienThoai")
+      .populate("MaSach", "TenSach TacGia BiaSach DonGia")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    const total = await TheoDoiMuonSach.countDocuments(query);
+
+    return {
+      lichSu,
+      pagination: {
+        current: parseInt(page),
+        pages: Math.ceil(total / limitNum),
+        total,
+        limit: limitNum,
+      },
+    };
+  }
 }
 
 module.exports = MuonSachService;

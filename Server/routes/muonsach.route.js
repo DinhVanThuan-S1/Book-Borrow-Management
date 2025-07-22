@@ -25,6 +25,12 @@ router.get(
   requireEmployee,
   MuonSachController.getOverdueBooks
 );
+router.get(
+  "/sach/:id",
+  authenticateToken,
+  requireEmployee,
+  MuonSachController.getBorrowHistoryByBook
+);
 router.put(
   "/status/:id",
   authenticateToken,

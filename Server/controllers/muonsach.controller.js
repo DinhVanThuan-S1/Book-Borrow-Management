@@ -164,6 +164,27 @@ class MuonSachController {
       return ApiResponse.error(res, error.message);
     }
   }
+
+  /**
+   * Lấy lịch sử mượn sách theo ID sách (cho admin)
+   */
+  static async getBorrowHistoryByBook(req, res) {
+    try {
+      const { id: sachId } = req.params;
+
+      if (!sachId) {
+        return ApiResponse.badRequest(res, "ID sách là bắt buộc");
+      }
+
+      const result = await MuonSachService.getLichSuMuonTheoSach(
+        sachId,
+        req.query
+      );
+      return ApiResponse.paginated(res, result.lichSu, result.pagination);
+    } catch (error) {
+      return ApiResponse.error(res, error.message);
+    }
+  }
 }
 
 module.exports = MuonSachController;

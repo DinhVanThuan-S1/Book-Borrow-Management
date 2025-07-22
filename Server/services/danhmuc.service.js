@@ -17,11 +17,11 @@ class DanhMucService {
       sort = SORT_OPTIONS.NEWEST,
     } = queryParams;
 
-    const query = { deleted: false };
+    const matchQuery = { deleted: false };
 
     // Tìm kiếm theo tên danh mục
     if (search) {
-      query.TenDM = { $regex: search, $options: "i" };
+      matchQuery.TenDM = { $regex: search, $options: "i" };
     }
 
     // Sắp xếp
@@ -30,14 +30,70 @@ class DanhMucService {
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
-    const [danhmucs, total] = await Promise.all([
-      DanhMuc.find(query)
-        .populate("NguoiTao", "HoTenNV")
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum),
-      DanhMuc.countDocuments(query),
+    // Sử dụng aggregation để thêm thống kê số sách
+    const aggregationPipeline = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "saches",
+          localField: "_id",
+          foreignField: "MaDM",
+          as: "saches",
+        },
+      },
+      {
+        $addFields: {
+          soLuongSach: {
+            $size: {
+              $filter: {
+                input: "$saches",
+                cond: { $eq: ["$$this.deleted", false] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "nhanviens",
+          localField: "NguoiTao",
+          foreignField: "_id",
+          as: "NguoiTao",
+        },
+      },
+      {
+        $addFields: {
+          NguoiTao: { $arrayElemAt: ["$NguoiTao", 0] },
+        },
+      },
+      {
+        $project: {
+          TenDM: 1,
+          MaDM: 1,
+          MoTa: 1,
+          soLuongSach: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          "NguoiTao.HoTenNV": 1,
+        },
+      },
+      { $sort: sortOption },
+    ];
+
+    // Thêm pagination
+    const countPipeline = [...aggregationPipeline, { $count: "total" }];
+    const dataPipeline = [
+      ...aggregationPipeline,
+      { $skip: skip },
+      { $limit: limitNum },
+    ];
+
+    const [countResult, danhmucs] = await Promise.all([
+      DanhMuc.aggregate(countPipeline),
+      DanhMuc.aggregate(dataPipeline),
     ]);
+
+    const total = countResult.length > 0 ? countResult[0].total : 0;
 
     return {
       danhmucs,
@@ -202,42 +258,94 @@ class DanhMucService {
    * Thống kê danh mục
    */
   static async getDanhMucStats() {
-    const Sach = require("../models/Sach.model");
-
-    const stats = await DanhMuc.aggregate([
-      { $match: { deleted: false } },
-      {
-        $lookup: {
-          from: "saches",
-          localField: "_id",
-          foreignField: "MaDM",
-          as: "saches",
+    const [overview, topCategories] = await Promise.all([
+      // Thống kê tổng quan
+      DanhMuc.aggregate([
+        { $match: { deleted: false } },
+        {
+          $lookup: {
+            from: "saches",
+            localField: "_id",
+            foreignField: "MaDM",
+            as: "saches",
+          },
         },
-      },
-      {
-        $addFields: {
-          soLuongSach: {
-            $size: {
-              $filter: {
-                input: "$saches",
-                cond: { $eq: ["$$this.deleted", false] },
+        {
+          $addFields: {
+            soLuongSach: {
+              $size: {
+                $filter: {
+                  input: "$saches",
+                  cond: { $eq: ["$$this.deleted", false] },
+                },
               },
             },
           },
         },
-      },
-      {
-        $project: {
-          TenDM: 1,
-          MoTa: 1,
-          soLuongSach: 1,
-          createdAt: 1,
+        {
+          $group: {
+            _id: null,
+            total: { $sum: 1 },
+            withBooks: {
+              $sum: {
+                $cond: [{ $gt: ["$soLuongSach", 0] }, 1, 0],
+              },
+            },
+            withoutBooks: {
+              $sum: {
+                $cond: [{ $eq: ["$soLuongSach", 0] }, 1, 0],
+              },
+            },
+          },
         },
-      },
-      { $sort: { soLuongSach: -1 } },
+      ]),
+
+      // Top danh mục có nhiều sách nhất
+      DanhMuc.aggregate([
+        { $match: { deleted: false } },
+        {
+          $lookup: {
+            from: "saches",
+            localField: "_id",
+            foreignField: "MaDM",
+            as: "saches",
+          },
+        },
+        {
+          $addFields: {
+            soLuongSach: {
+              $size: {
+                $filter: {
+                  input: "$saches",
+                  cond: { $eq: ["$$this.deleted", false] },
+                },
+              },
+            },
+          },
+        },
+        {
+          $match: { soLuongSach: { $gt: 0 } },
+        },
+        {
+          $project: {
+            TenDM: 1,
+            MoTa: 1,
+            soLuongSach: 1,
+            createdAt: 1,
+          },
+        },
+        { $sort: { soLuongSach: -1 } },
+        { $limit: 5 },
+      ]),
     ]);
 
-    return stats;
+    return {
+      overview:
+        overview.length > 0
+          ? overview[0]
+          : { total: 0, withBooks: 0, withoutBooks: 0 },
+      topCategories: topCategories || [],
+    };
   }
 }
 

@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Quản lý danh mục</h1>
-          <p class="page-subtitle">Danh mục sách trong thư viện</p>
+          <!-- <p class="page-subtitle">Danh mục sách trong thư viện</p> -->
         </div>
         <button
           @click="
@@ -25,7 +25,6 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Tìm kiếm</label>
             <div class="input-group">
               <span class="input-group-text">
                 <i class="bi bi-search"></i>
@@ -34,33 +33,37 @@
                 v-model="filters.search"
                 type="text"
                 class="form-control"
-                placeholder="Tên danh mục..."
+                placeholder="Tìm kiếm danh mục..."
                 @input="debouncedSearch"
               />
             </div>
           </div>
 
           <div class="col-md-3">
-            <label class="form-label">Sắp xếp</label>
-            <select
-              v-model="filters.sort"
-              class="form-select"
-              @change="fetchCategories"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="a-to-z">Tên A-Z</option>
-              <option value="z-to-a">Tên Z-A</option>
-            </select>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-sort-down"></i>
+              </span>
+              <select
+                v-model="filters.sort"
+                class="form-select"
+                @change="fetchCategories"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="a-z">Tên A-Z</option>
+                <option value="z-a">Tên Z-A</option>
+              </select>
+            </div>
           </div>
 
           <div class="col-md-3 d-flex align-items-end">
             <button
               @click="resetFilters"
-              class="btn btn-outline-secondary w-100"
+              class="btn btn-outline-secondary rounded-circle reset-btn"
+              title="Reset bộ lọc"
             >
-              <i class="bi bi-arrow-clockwise me-1"></i>
-              Reset
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </div>
@@ -74,7 +77,7 @@
           <div class="card-header-custom">
             <h5 class="mb-0">
               <i class="bi bi-grid-3x3-gap me-2"></i>
-              Danh sách danh mục ({{ pagination.total }})
+              Danh sách danh mục ( {{ pagination.total }} )
             </h5>
           </div>
 
@@ -808,5 +811,33 @@ export default {
   justify-content: center;
   font-weight: 600;
   font-size: 0.8rem;
+}
+
+/* Reset button styling */
+.reset-btn {
+  width: 38px;
+  height: 35px; /* Match form-control height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.2s ease-in-out;
+}
+
+.reset-btn:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.reset-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.reset-btn i {
+  font-size: 1rem;
 }
 </style>

@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Quản lý sách</h1>
-          <p class="page-subtitle">Danh sách tất cả sách trong thư viện</p>
+          <!-- <p class="page-subtitle">Quản lý sách trong thư viện</p> -->
         </div>
         <router-link to="/books/create" class="btn btn-primary btn-custom">
           <i class="bi bi-plus-circle me-2"></i>
@@ -67,8 +67,8 @@
               >
                 <option value="newest">Mới nhất</option>
                 <option value="oldest">Cũ nhất</option>
-                <option value="a-to-z">Tên A-Z</option>
-                <option value="z-to-a">Tên Z-A</option>
+                <option value="a-z">Tên A-Z</option>
+                <option value="z-a">Tên Z-A</option>
                 <option value="price-low">Giá tăng dần</option>
                 <option value="price-high">Giá giảm dần</option>
               </select>
@@ -191,7 +191,7 @@
                     text-align: center;
                   "
                 >
-                  Giá (VND)
+                  Giá ( VND )
                 </th>
                 <th
                   style="

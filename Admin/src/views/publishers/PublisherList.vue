@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Quản lý nhà xuất bản</h1>
-          <p class="page-subtitle">Quản lý thông tin các nhà xuất bản</p>
+          <!-- <p class="page-subtitle">Quản lý thông tin các nhà xuất bản</p> -->
         </div>
         <button
           @click="showCreateModal = true"

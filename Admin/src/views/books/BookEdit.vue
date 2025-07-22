@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Chỉnh sửa sách</h1>
-          <p class="page-subtitle">Cập nhật thông tin sách</p>
+          <!-- <p class="page-subtitle">Cập nhật thông tin sách</p> -->
         </div>
         <router-link to="/books" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-left me-2"></i>
@@ -180,7 +180,7 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="donGia" class="form-label">
-                    Đơn giá (VND) <span class="text-danger">*</span>
+                    Đơn giá <span class="text-danger">*</span>
                   </label>
                   <div class="input-group">
                     <input

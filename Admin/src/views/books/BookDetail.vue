@@ -5,9 +5,13 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Chi tiết sách</h1>
-          <p class="page-subtitle">Thông tin chi tiết về sách trong thư viện</p>
+          <!-- <p class="page-subtitle">Thông tin chi tiết về sách trong thư viện</p> -->
         </div>
         <div class="d-flex gap-2">
+          <router-link to="/books" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>
+            Quay lại
+          </router-link>
           <router-link
             :to="`/books/${book._id}/edit`"
             class="btn btn-primary"
@@ -126,7 +130,7 @@
           </div>
           <div class="card-body">
             <div class="row g-3">
-              <div class="col-12">
+              <div class="col-6">
                 <div class="info-group">
                   <label class="info-label">Tên sách</label>
                   <div class="info-value h5 text-dark mb-0">
@@ -188,6 +192,15 @@
                   </div>
                 </div>
               </div>
+              <div class="col-md-6">
+                <div class="info-group">
+                  <label class="info-label">Phần</label>
+                  <div class="info-value">
+                    <i class="bi bi-file-text me-2 text-muted"></i>
+                    {{ book.Phan || "Chưa cập nhật" }}
+                  </div>
+                </div>
+              </div>
               <div class="col-12" v-if="book.MoTa">
                 <div class="info-group">
                   <label class="info-label">Mô tả</label>
@@ -243,10 +256,10 @@
               </div>
               <div class="col-md-6">
                 <div class="info-group">
-                  <label class="info-label">Vị trí</label>
+                  <label class="info-label">Người tạo</label>
                   <div class="info-value">
-                    <i class="bi bi-geo-alt me-2 text-muted"></i>
-                    {{ book.ViTri || "Chưa cập nhật" }}
+                    <i class="bi bi-person me-2 text-muted"></i>
+                    {{ book.NguoiTao.HoTenNV || "Chưa cập nhật" }}
                   </div>
                 </div>
               </div>
@@ -384,7 +397,7 @@ export default {
         const response = await api.get(`/muonsach/sach/${bookId}`);
 
         if (response.success) {
-          borrowHistory.value = response.data;
+          borrowHistory.value = response.data || [];
 
           // Calculate borrowed count (currently borrowed)
           borrowedCount.value = borrowHistory.value.filter(
@@ -393,9 +406,17 @@ export default {
 
           // Update available count
           availableCount.value = book.value.SoQuyen - borrowedCount.value;
+        } else {
+          borrowHistory.value = [];
+          borrowedCount.value = 0;
+          availableCount.value = book.value.SoQuyen;
         }
       } catch (err) {
         console.error("Error fetching borrow history:", err);
+        // Set default values on error
+        borrowHistory.value = [];
+        borrowedCount.value = 0;
+        availableCount.value = book.value.SoQuyen;
       }
     };
 
@@ -418,10 +439,7 @@ export default {
     };
 
     const formatCurrency = (amount) => {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(amount);
+      return new Intl.NumberFormat("vi-VN").format(amount);
     };
 
     const formatDate = (dateString) => {
