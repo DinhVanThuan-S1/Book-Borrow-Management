@@ -333,7 +333,9 @@
               </div>
 
               <div class="mb-3">
-                <label for="moTa" class="form-label">Mô tả</label>
+                <label for="moTa" class="form-label">
+                  Mô tả <span class="text-danger">*</span>
+                </label>
                 <textarea
                   class="form-control"
                   id="moTa"
@@ -360,7 +362,11 @@
               <button
                 type="submit"
                 class="btn btn-primary"
-                :disabled="categoryLoading || !categoryForm.TenDM?.trim()"
+                :disabled="
+                  categoryLoading ||
+                  !categoryForm.TenDM?.trim() ||
+                  !categoryForm.MoTa?.trim()
+                "
               >
                 <span
                   v-if="categoryLoading"
@@ -580,7 +586,13 @@ export default {
         isValid = false;
       }
 
-      if (categoryForm.MoTa && categoryForm.MoTa.length > 500) {
+      if (!categoryForm.MoTa?.trim()) {
+        categoryErrors.MoTa = "Mô tả là bắt buộc";
+        isValid = false;
+      } else if (categoryForm.MoTa.trim().length < 5) {
+        categoryErrors.MoTa = "Mô tả phải có ít nhất 5 ký tự";
+        isValid = false;
+      } else if (categoryForm.MoTa.length > 500) {
         categoryErrors.MoTa = "Mô tả không được vượt quá 500 ký tự";
         isValid = false;
       }
@@ -598,6 +610,12 @@ export default {
           TenDM: categoryForm.TenDM.trim(),
           MoTa: categoryForm.MoTa?.trim() || "",
         };
+
+        // Ensure MoTa is not empty since it's required on server
+        if (!submitData.MoTa) {
+          categoryErrors.MoTa = "Mô tả là bắt buộc";
+          return;
+        }
 
         let response;
 
@@ -686,6 +704,7 @@ export default {
       editCategory,
       deleteCategory,
       closeModal,
+      resetCategoryForm,
       handleSubmitCategory,
       formatDate,
     };
@@ -759,6 +778,7 @@ export default {
   margin-bottom: 1rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   min-height: 2.4em;

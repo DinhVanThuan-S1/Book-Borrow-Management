@@ -82,7 +82,9 @@
                 </div>
 
                 <div class="col-md-12">
-                  <label for="moTa" class="form-label">Mô tả</label>
+                  <label for="moTa" class="form-label">
+                    Mô tả <span class="text-danger">*</span>
+                  </label>
                   <textarea
                     class="form-control"
                     id="moTa"
@@ -406,6 +408,10 @@ export default {
         newErrors.TacGia = "Vui lòng nhập tên tác giả";
       }
 
+      if (!form.MoTa?.trim()) {
+        newErrors.MoTa = "Vui lòng nhập mô tả sách";
+      }
+
       if (!form.NamXuatBan) {
         newErrors.NamXuatBan = "Vui lòng nhập năm xuất bản";
       } else if (
@@ -448,7 +454,11 @@ export default {
 
         // Add form data
         Object.keys(form).forEach((key) => {
-          if (form[key] !== null && form[key] !== "") {
+          if (
+            form[key] !== null &&
+            form[key] !== "" &&
+            form[key] !== undefined
+          ) {
             formData.append(key, form[key]);
           }
         });
