@@ -30,6 +30,13 @@ class DanhMucService {
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
+    // Cài đặt collation cho Tiếng Việt
+    const collationOptions = {
+      locale: "vi",
+      strength: 1, // Case insensitive
+      numericOrdering: true,
+    };
+
     // Sử dụng aggregation để thêm thống kê số sách
     const aggregationPipeline = [
       { $match: matchQuery },
@@ -88,9 +95,15 @@ class DanhMucService {
       { $limit: limitNum },
     ];
 
+    // Sử dụng collation cho sắp xếp Tiếng Việt khi cần thiết
+    const aggregateOptions = {};
+    if (sort === SORT_OPTIONS.A_TO_Z || sort === SORT_OPTIONS.Z_TO_A) {
+      aggregateOptions.collation = collationOptions;
+    }
+
     const [countResult, danhmucs] = await Promise.all([
-      DanhMuc.aggregate(countPipeline),
-      DanhMuc.aggregate(dataPipeline),
+      DanhMuc.aggregate(countPipeline, aggregateOptions),
+      DanhMuc.aggregate(dataPipeline, aggregateOptions),
     ]);
 
     const total = countResult.length > 0 ? countResult[0].total : 0;

@@ -47,14 +47,29 @@ class SachService {
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
+    // Cài đặt collation cho Tiếng Việt
+    const collationOptions = {
+      locale: "vi",
+      strength: 1, // Case insensitive
+      numericOrdering: true,
+    };
+
+    // Sử dụng collation cho sắp xếp Tiếng Việt khi cần thiết
+    const findOptions = {
+      skip: skip,
+      limit: limitNum,
+    };
+
+    if (sort === SORT_OPTIONS.A_TO_Z || sort === SORT_OPTIONS.Z_TO_A) {
+      findOptions.collation = collationOptions;
+    }
+
     const [saches, total] = await Promise.all([
-      Sach.find(query)
+      Sach.find(query, null, findOptions)
         .populate("MaDM", "TenDM")
         .populate("MaNXB", "TenNXB")
         .populate("NguoiTao", "HoTenNV")
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum),
+        .sort(sortOption),
       Sach.countDocuments(query),
     ]);
 
