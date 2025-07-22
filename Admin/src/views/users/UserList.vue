@@ -123,7 +123,7 @@
         </div>
 
         <!-- Users Table -->
-        <div v-else class="table">
+        <div v-else>
           <table class="table table-hover table-bordered mb-0">
             <thead>
               <tr>

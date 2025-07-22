@@ -30,36 +30,12 @@
     </div>
 
     <div class="header-right">
-      <!-- Notifications -->
-      <div class="dropdown">
-        <button
-          class="btn btn-link text-secondary position-relative"
-          data-bs-toggle="dropdown"
-        >
+      <!-- Symbolic Icons -->
+      <div class="d-flex align-items-center">
+        <!-- Bell Icon (symbolic) -->
+        <button class="btn btn-link text-secondary">
           <i class="bi bi-bell" style="font-size: 1.1rem"></i>
-          <span
-            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-            style="font-size: 0.6rem"
-          >
-            {{ notifications.length }}
-          </span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><h6 class="dropdown-header">Thông báo</h6></li>
-          <li v-if="notifications.length === 0">
-            <span class="dropdown-item-text text-muted"
-              >Không có thông báo mới</span
-            >
-          </li>
-          <li v-for="notification in notifications" :key="notification.id">
-            <a class="dropdown-item" href="#">
-              <small class="text-muted">{{ notification.time }}</small>
-              <div>{{ notification.message }}</div>
-            </a>
-          </li>
-          <li><hr class="dropdown-divider" /></li>
-          <li><a class="dropdown-item text-center" href="#">Xem tất cả</a></li>
-        </ul>
       </div>
 
       <!-- User Menu -->
@@ -111,19 +87,6 @@ export default {
     const router = useRouter();
     const authStore = useAuthStore();
     const toast = useToast();
-
-    const notifications = ref([
-      {
-        id: 1,
-        message: "Có 3 phiếu mượn sách mới cần duyệt",
-        time: "5 phút trước",
-      },
-      {
-        id: 2,
-        message: 'Sách "JavaScript Guide" sắp hết trong kho',
-        time: "1 giờ trước",
-      },
-    ]);
 
     const currentPageTitle = computed(() => {
       return route.meta.title || "";
@@ -204,7 +167,6 @@ export default {
     return {
       authStore,
       currentPageTitle,
-      notifications,
       logout,
       changePassword,
     };
