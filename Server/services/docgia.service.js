@@ -36,17 +36,29 @@ class DocGiaService {
     }
 
     // Sắp xếp
-    const sortOption = this.getSortOption(sort);
+    const { sortOption, needsCollation } = this.getSortOption(sort);
 
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
+    // Tạo query với collation cho Vietnamese nếu cần
+    let docgiasQuery = DocGia.find(query)
+      .select("-Password") // Không trả về password
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNum);
+
+    // Áp dụng collation Vietnamese cho sắp xếp theo tên
+    if (needsCollation) {
+      docgiasQuery = docgiasQuery.collation({
+        locale: "vi",
+        strength: 1, // Primary level comparison (ignore case and accents)
+        numericOrdering: true,
+      });
+    }
+
     const [docgias, total] = await Promise.all([
-      DocGia.find(query)
-        .select("-Password") // Không trả về password
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum),
+      docgiasQuery,
       DocGia.countDocuments(query),
     ]);
 
@@ -326,14 +338,26 @@ class DocGiaService {
   }
 
   /**
-   * Lấy option sắp xếp
+   * Lấy tùy chọn sắp xếp
    */
   static getSortOption(sort) {
     const sortOptions = {
-      [SORT_OPTIONS.NEWEST]: { createdAt: -1 },
-      [SORT_OPTIONS.OLDEST]: { createdAt: 1 },
-      [SORT_OPTIONS.A_TO_Z]: { HoLot: 1, Ten: 1 },
-      [SORT_OPTIONS.Z_TO_A]: { HoLot: -1, Ten: -1 },
+      [SORT_OPTIONS.NEWEST]: {
+        sortOption: { createdAt: -1 },
+        needsCollation: false,
+      },
+      [SORT_OPTIONS.OLDEST]: {
+        sortOption: { createdAt: 1 },
+        needsCollation: false,
+      },
+      [SORT_OPTIONS.A_TO_Z]: {
+        sortOption: { HoLot: 1, Ten: 1 },
+        needsCollation: true,
+      },
+      [SORT_OPTIONS.Z_TO_A]: {
+        sortOption: { HoLot: -1, Ten: -1 },
+        needsCollation: true,
+      },
     };
 
     return sortOptions[sort] || sortOptions[SORT_OPTIONS.NEWEST];

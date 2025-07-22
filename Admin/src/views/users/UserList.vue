@@ -5,7 +5,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Quản lý độc giả</h1>
-          <p class="page-subtitle">Danh sách tất cả độc giả trong hệ thống</p>
+          <!-- <p class="page-subtitle">Danh sách tất cả độc giả trong hệ thống</p> -->
         </div>
         <button
           @click="showCreateModal = true"
@@ -17,71 +17,11 @@
       </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row mb-4">
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card primary">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-primary">
-                {{ stats.total || 0 }}
-              </div>
-              <p class="stats-label">Tổng độc giả</p>
-            </div>
-            <i class="bi bi-people stats-icon text-primary"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card success">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-success">
-                {{ stats.active || 0 }}
-              </div>
-              <p class="stats-label">Đang hoạt động</p>
-            </div>
-            <i class="bi bi-person-check stats-icon text-success"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card warning">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-warning">
-                {{ stats.borrowing || 0 }}
-              </div>
-              <p class="stats-label">Đang mượn sách</p>
-            </div>
-            <i class="bi bi-book stats-icon text-warning"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card info">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-info">
-                {{ stats.newThisMonth || 0 }}
-              </div>
-              <p class="stats-label">Mới tháng này</p>
-            </div>
-            <i class="bi bi-person-plus stats-icon text-info"></i>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Search and Filters -->
     <div class="admin-card mb-4">
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-4">
-            <label class="form-label">Tìm kiếm</label>
             <div class="input-group">
               <span class="input-group-text">
                 <i class="bi bi-search"></i>
@@ -96,41 +36,49 @@
             </div>
           </div>
 
-          <div class="col-md-2">
-            <label class="form-label">Giới tính</label>
-            <select
-              v-model="filters.gender"
-              class="form-select"
-              @change="fetchUsers"
-            >
-              <option value="">Tất cả</option>
-              <option value="Nam">Nam</option>
-              <option value="Nữ">Nữ</option>
-            </select>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-funnel"></i>
+              </span>
+              <select
+                v-model="filters.gender"
+                class="form-select"
+                @change="fetchUsers"
+              >
+                <option value="">Tất cả</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+              </select>
+            </div>
           </div>
 
           <div class="col-md-3">
-            <label class="form-label">Sắp xếp</label>
-            <select
-              v-model="filters.sort"
-              class="form-select"
-              @change="fetchUsers"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="a-to-z">Tên A-Z</option>
-              <option value="z-to-a">Tên Z-A</option>
-              <option value="most-borrowed">Mượn nhiều nhất</option>
-            </select>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-sort-down"></i>
+              </span>
+              <select
+                v-model="filters.sort"
+                class="form-select"
+                @change="fetchUsers"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="a-z">Tên A-Z</option>
+                <option value="z-a">Tên Z-A</option>
+                <option value="most-borrowed">Mượn nhiều nhất</option>
+              </select>
+            </div>
           </div>
 
-          <div class="col-md-3 d-flex align-items-end">
+          <div class="col-md-2 d-flex align-items-end">
             <button
               @click="resetFilters"
-              class="btn btn-outline-secondary w-100"
+              class="btn btn-outline-secondary rounded-circle reset-btn"
+              title="Reset bộ lọc"
             >
-              <i class="bi bi-arrow-clockwise me-1"></i>
-              Reset
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </div>
@@ -144,14 +92,8 @@
       >
         <h5 class="mb-0">
           <i class="bi bi-people me-2"></i>
-          Danh sách độc giả ({{ pagination.total }})
+          Danh sách độc giả ( {{ pagination.total }} )
         </h5>
-        <div class="d-flex gap-2">
-          <button @click="exportUsers" class="btn btn-sm btn-outline-success">
-            <i class="bi bi-download me-1"></i>
-            Xuất Excel
-          </button>
-        </div>
       </div>
 
       <div class="card-body p-0">
@@ -181,27 +123,28 @@
         </div>
 
         <!-- Users Table -->
-        <div v-else class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
+        <div v-else class="table">
+          <table class="table table-hover table-bordered mb-0">
+            <thead>
               <tr>
-                <th style="width: 60px">#</th>
-                <th style="width: 80px">Avatar</th>
-                <th>Thông tin cá nhân</th>
-                <th style="width: 100px">Giới tính</th>
-                <th style="width: 120px">Liên hệ</th>
-                <th style="width: 100px">Mã độc giả</th>
-                <th style="width: 100px">Số sách mượn</th>
-                <th style="width: 120px">Ngày đăng ký</th>
-                <th style="width: 150px">Thao tác</th>
+                <th style="width: 60px" class="text-center">STT</th>
+                <th style="width: 80px" class="text-center">Avatar</th>
+                <th style="width: 230px" class="text-center">
+                  Thông tin cá nhân
+                </th>
+                <th style="width: 100px" class="text-center">Giới tính</th>
+                <th style="width: 200px" class="text-center">Liên hệ</th>
+                <th style="width: 100px" class="text-center">Mã độc giả</th>
+                <th style="width: 130px" class="text-center">Số sách mượn</th>
+                <th style="width: 150px" class="text-center">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(user, index) in users" :key="user._id">
-                <td>
+                <td class="text-center align-middle">
                   {{ (pagination.current - 1) * pagination.limit + index + 1 }}
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <div class="user-avatar-wrapper">
                     <img
                       v-if="user.Avatar"
@@ -214,7 +157,7 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="align-middle">
                   <div>
                     <div class="fw-bold">{{ getFullName(user) }}</div>
                     <div class="text-muted small">{{ user.Email }}</div>
@@ -224,7 +167,7 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="align-middle">
                   <span
                     class="badge"
                     :class="user.Phai === 'Nam' ? 'bg-info' : 'bg-pink'"
@@ -239,7 +182,7 @@
                     {{ user.Phai }}
                   </span>
                 </td>
-                <td>
+                <td class="align-middle">
                   <div class="small">
                     <div class="text-muted">
                       <i class="bi bi-telephone me-1"></i>
@@ -247,7 +190,7 @@
                     </div>
                     <div
                       class="text-muted text-truncate"
-                      style="max-width: 120px"
+                      style="max-width: 280px"
                       :title="user.DiaChi"
                     >
                       <i class="bi bi-geo-alt me-1"></i>
@@ -255,12 +198,12 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <code class="bg-light px-2 py-1 rounded">{{
                     user.MaDocGia
                   }}</code>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <span
                     class="badge"
                     :class="getBorrowCountBadgeClass(user.soSachDangMuon)"
@@ -268,12 +211,7 @@
                     {{ user.soSachDangMuon || 0 }}/5
                   </span>
                 </td>
-                <td>
-                  <small class="text-muted">{{
-                    formatDate(user.createdAt)
-                  }}</small>
-                </td>
-                <td>
+                <td class="text-center align-middle">
                   <div class="btn-group" role="group">
                     <button
                       @click="viewUserDetail(user)"
@@ -281,13 +219,6 @@
                       title="Xem chi tiết"
                     >
                       <i class="bi bi-eye"></i>
-                    </button>
-                    <button
-                      @click="viewBorrowHistory(user)"
-                      class="btn btn-sm btn-outline-warning"
-                      title="Lịch sử mượn"
-                    >
-                      <i class="bi bi-clock-history"></i>
                     </button>
                     <button
                       @click="editUser(user)"
@@ -370,12 +301,6 @@
       :user="selectedUser"
       @close="showDetailModal = false"
     />
-
-    <UserBorrowHistoryModal
-      :show="showHistoryModal"
-      :user="selectedUser"
-      @close="showHistoryModal = false"
-    />
   </div>
 </template>
 
@@ -386,14 +311,12 @@ import Swal from "sweetalert2";
 import api from "@/services/api";
 import UserModal from "@/components/modals/UserModal.vue";
 import UserDetailModal from "@/components/modals/UserDetailModal.vue";
-import UserBorrowHistoryModal from "@/components/modals/UserBorrowHistoryModal.vue";
 
 export default {
   name: "UserList",
   components: {
     UserModal,
     UserDetailModal,
-    UserBorrowHistoryModal,
   },
   setup() {
     const toast = useToast();
@@ -404,7 +327,6 @@ export default {
     const showCreateModal = ref(false);
     const showEditModal = ref(false);
     const showDetailModal = ref(false);
-    const showHistoryModal = ref(false);
     const selectedUser = ref(null);
 
     const filters = reactive({
@@ -523,11 +445,6 @@ export default {
     const viewUserDetail = (user) => {
       selectedUser.value = user;
       showDetailModal.value = true;
-    };
-
-    const viewBorrowHistory = (user) => {
-      selectedUser.value = user;
-      showHistoryModal.value = true;
     };
 
     const deleteUser = async (user) => {
@@ -677,7 +594,6 @@ export default {
       showCreateModal,
       showEditModal,
       showDetailModal,
-      showHistoryModal,
       selectedUser,
       filters,
       pagination,
@@ -688,7 +604,6 @@ export default {
       changePage,
       editUser,
       viewUserDetail,
-      viewBorrowHistory,
       deleteUser,
       exportUsers,
       closeModal,
@@ -711,6 +626,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0 auto;
 }
 
 .user-avatar-img {
@@ -736,5 +652,110 @@ export default {
 
 .bg-pink {
   background-color: #e91e63 !important;
+}
+
+/* Reset button styling */
+.reset-btn {
+  width: 38px;
+  height: 35px; /* Match form-control height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.2s ease-in-out;
+}
+
+.reset-btn:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.reset-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.reset-btn i {
+  font-size: 1rem;
+}
+
+/* Custom Pagination Styles */
+.pagination {
+  gap: 0.25rem;
+}
+
+.pagination .page-link {
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
+  outline: 0;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: none;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #adb5bd;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Navigation arrows styling */
+.pagination .page-link i {
+  font-size: 0.875rem;
+}
+
+/* Card footer styling for pagination */
+.card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
 }
 </style>

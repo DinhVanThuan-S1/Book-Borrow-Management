@@ -112,7 +112,7 @@
             <thead>
               <tr>
                 <th style="width: 60px" class="text-center fw-bold">STT</th>
-                <th class="text-center fw-bold">Tên NXB</th>
+                <th class="text-center fw-bold">Tên nhà xuất bản</th>
                 <th class="text-center fw-bold">Địa chỉ</th>
                 <th style="width: 140px" class="text-center fw-bold">
                   Số lượng sách
@@ -128,7 +128,7 @@
             </thead>
             <tbody>
               <tr v-for="(publisher, index) in publishers" :key="publisher._id">
-                <td class="text-center align-middle">
+                <td class="text-center align-middle centered-content">
                   {{ (pagination.current - 1) * pagination.limit + index + 1 }}
                 </td>
                 <td class="align-middle">
@@ -142,9 +142,12 @@
                   </div>
                 </td>
                 <td class="align-middle">
-                  <span class="text-muted">{{ publisher.DiaChi }}</span>
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-geo-alt text-muted me-2"></i>
+                    <span class="text-muted">{{ publisher.DiaChi }}</span>
+                  </div>
                 </td>
-                <td class="text-center align-middle">
+                <td class="text-center align-middle centered-content">
                   <span
                     class="badge"
                     :class="getBookCountBadgeClass(publisher.soLuongSach)"
@@ -152,17 +155,17 @@
                     {{ publisher.soLuongSach || 0 }} sách
                   </span>
                 </td>
-                <td class="text-center align-middle">
+                <td class="text-center align-middle centered-content">
                   <code class="bg-light px-2 py-1 rounded">{{
                     publisher.MaNXB
                   }}</code>
                 </td>
-                <td class="text-center align-middle">
+                <td class="text-center align-middle centered-content">
                   <small class="text-muted">{{
                     formatDate(publisher.createdAt)
                   }}</small>
                 </td>
-                <td class="text-center align-middle">
+                <td class="text-center align-middle centered-content">
                   <div class="btn-group" role="group">
                     <button
                       @click="viewBooks(publisher)"
@@ -511,7 +514,7 @@ export default {
 .table th,
 .table td {
   vertical-align: middle !important;
-  padding: 6px 4px;
+  padding: 6px 4px 6px 12px; /* Thêm padding-left 12px */
   border-color: #dee2e6;
 }
 
@@ -522,7 +525,7 @@ export default {
   color: #495057;
   text-align: center;
   vertical-align: middle;
-  padding: 10px 6px;
+  padding: 10px 6px 10px 12px; /* Thêm padding-left 12px */
 }
 
 .table tbody tr:hover {
@@ -532,6 +535,12 @@ export default {
 /* Bootstrap align-middle override */
 .align-middle {
   vertical-align: middle !important;
+}
+
+/* Centered content for specific columns */
+.centered-content {
+  padding-left: 4px !important; /* Reset left padding for centered columns */
+  padding-right: 4px !important;
 }
 
 /* Giảm chiều cao các hàng */
@@ -608,22 +617,20 @@ code {
   padding: 1rem 1.5rem;
 }
 
+/* Custom Pagination Styles */
 .pagination {
-  margin-bottom: 0;
-}
-
-.pagination .page-item {
-  margin: 0 2px;
+  gap: 0.25rem;
 }
 
 .pagination .page-link {
   border: 1px solid #dee2e6;
   color: #6c757d;
   padding: 0.5rem 0.75rem;
+  margin: 0;
   border-radius: 0.375rem;
   font-weight: 500;
-  transition: all 0.15s ease-in-out;
-  background-color: white;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
   min-width: 40px;
   text-align: center;
   display: flex;
@@ -632,38 +639,52 @@ code {
 }
 
 .pagination .page-link:hover {
-  background-color: #e9ecef;
-  border-color: #adb5bd;
-  color: #495057;
+  background-color: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .pagination .page-link:focus {
-  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
+  outline: 0;
 }
 
 .pagination .page-item.active .page-link {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
   color: white;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: none;
 }
 
 .pagination .page-item.disabled .page-link {
-  color: #6c757d;
-  background-color: #e9ecef;
+  color: #adb5bd;
+  background-color: #f8f9fa;
   border-color: #dee2e6;
-  opacity: 0.5;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .pagination .page-item.disabled .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
   transform: none;
   box-shadow: none;
+}
+
+/* Navigation arrows styling */
+.pagination .page-link i {
+  font-size: 0.875rem;
 }
 
 /* Responsive pagination */
