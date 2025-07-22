@@ -93,7 +93,9 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="ngaySinh" class="form-label">Ngày sinh</label>
+                <label for="ngaySinh" class="form-label">
+                  Ngày sinh <span class="text-danger">*</span>
+                </label>
                 <input
                   type="date"
                   class="form-control"
@@ -108,7 +110,9 @@
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="phai" class="form-label">Giới tính</label>
+                <label for="phai" class="form-label">
+                  Giới tính <span class="text-danger">*</span>
+                </label>
                 <select
                   class="form-select"
                   id="phai"
@@ -129,14 +133,17 @@
           <div class="row">
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="dienThoai" class="form-label">Điện thoại</label>
+                <label for="dienThoai" class="form-label">
+                  Điện thoại <span class="text-danger">*</span>
+                </label>
                 <input
                   type="tel"
                   class="form-control"
                   id="dienThoai"
                   v-model="form.DienThoai"
                   :class="{ 'is-invalid': errors.DienThoai }"
-                  placeholder="0123456789"
+                  placeholder="0912345678"
+                  maxlength="10"
                 />
                 <div v-if="errors.DienThoai" class="invalid-feedback">
                   {{ errors.DienThoai }}
@@ -145,7 +152,9 @@
             </div>
             <div class="col-md-6">
               <div class="mb-3">
-                <label for="diaChi" class="form-label">Địa chỉ</label>
+                <label for="diaChi" class="form-label">
+                  Địa chỉ <span class="text-danger">*</span>
+                </label>
                 <input
                   type="text"
                   class="form-control"
@@ -274,8 +283,22 @@ export default {
         errors.Password = "Mật khẩu phải có ít nhất 6 ký tự";
       }
 
-      if (form.DienThoai && !/^[0-9]{10,11}$/.test(form.DienThoai)) {
-        errors.DienThoai = "Số điện thoại không hợp lệ";
+      if (!form.NgaySinh) {
+        errors.NgaySinh = "Ngày sinh là bắt buộc";
+      }
+
+      if (!form.Phai) {
+        errors.Phai = "Giới tính là bắt buộc";
+      }
+
+      if (!form.DiaChi?.trim()) {
+        errors.DiaChi = "Địa chỉ là bắt buộc";
+      }
+
+      if (!form.DienThoai?.trim()) {
+        errors.DienThoai = "Số điện thoại là bắt buộc";
+      } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(form.DienThoai.trim())) {
+        errors.DienThoai = "Số điện thoại không hợp lệ (VD: 0912345678)";
       }
 
       return Object.keys(errors).length === 0;
@@ -283,16 +306,25 @@ export default {
 
     const handleSubmit = async () => {
       if (!validateForm()) {
+        toast.error("Vui lòng kiểm tra lại thông tin");
         return;
       }
 
       isLoading.value = true;
       try {
-        const submitData = { ...form };
+        const submitData = {
+          HoLot: form.HoLot.trim(),
+          Ten: form.Ten.trim(),
+          Email: form.Email.trim(),
+          NgaySinh: form.NgaySinh,
+          Phai: form.Phai,
+          DiaChi: form.DiaChi.trim(),
+          DienThoai: form.DienThoai.trim(),
+        };
 
-        // Remove password from edit form
-        if (props.isEdit) {
-          delete submitData.Password;
+        // Add password for new users only
+        if (!props.isEdit) {
+          submitData.Password = form.Password.trim();
         }
 
         let response;
@@ -314,7 +346,12 @@ export default {
       } catch (error) {
         console.error("Error saving user:", error);
 
-        if (error.response?.data?.message) {
+        if (error.response?.data?.errors) {
+          // Handle validation errors from server
+          Object.keys(error.response.data.errors).forEach((field) => {
+            errors[field] = error.response.data.errors[field];
+          });
+        } else if (error.response?.data?.message) {
           toast.error(error.response.data.message);
         } else {
           toast.error(
