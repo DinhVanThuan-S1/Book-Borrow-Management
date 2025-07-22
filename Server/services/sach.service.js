@@ -16,6 +16,7 @@ class SachService {
       search = "",
       sort = SORT_OPTIONS.NEWEST,
       danhmuc = "",
+      nhaxuatban = "",
       minPrice = 0,
       maxPrice = 999999999,
     } = queryParams;
@@ -33,6 +34,11 @@ class SachService {
     // Lọc theo danh mục
     if (danhmuc) {
       query.MaDM = danhmuc;
+    }
+
+    // Lọc theo nhà xuất bản
+    if (nhaxuatban) {
+      query.MaNXB = nhaxuatban;
     }
 
     // Lọc theo giá

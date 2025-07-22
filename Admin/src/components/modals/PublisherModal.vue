@@ -1,26 +1,22 @@
 <template>
   <div
-    class="modal fade"
-    id="publisherModal"
+    v-if="show"
+    class="modal fade show d-block"
     tabindex="-1"
-    aria-labelledby="publisherModalLabel"
-    aria-hidden="true"
+    style="background-color: rgba(0, 0, 0, 0.5)"
+    @click.self="closeModal"
   >
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="publisherModalLabel">
+          <h5 class="modal-title">
             {{ isEdit ? "Chỉnh sửa nhà xuất bản" : "Thêm nhà xuất bản mới" }}
           </h5>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-          ></button>
+          <button type="button" class="btn-close" @click="closeModal"></button>
         </div>
-        <div class="modal-body">
-          <form @submit.prevent="handleSubmit">
+
+        <form @submit.prevent="handleSubmit">
+          <div class="modal-body">
             <div class="mb-3">
               <label for="tenNXB" class="form-label">Tên nhà xuất bản *</label>
               <input
@@ -30,130 +26,211 @@
                 v-model="form.TenNXB"
                 required
                 :class="{ 'is-invalid': errors.TenNXB }"
+                placeholder="Nhập tên nhà xuất bản..."
               />
               <div v-if="errors.TenNXB" class="invalid-feedback">
                 {{ errors.TenNXB }}
               </div>
             </div>
+
             <div class="mb-3">
               <label for="diaChi" class="form-label">Địa chỉ *</label>
-              <input
-                type="text"
+              <textarea
                 class="form-control"
                 id="diaChi"
                 v-model="form.DiaChi"
                 required
                 :class="{ 'is-invalid': errors.DiaChi }"
-              />
+                placeholder="Nhập địa chỉ nhà xuất bản..."
+                rows="3"
+              ></textarea>
               <div v-if="errors.DiaChi" class="invalid-feedback">
                 {{ errors.DiaChi }}
               </div>
             </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            data-bs-dismiss="modal"
-          >
-            Hủy
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary"
-            @click="handleSubmit"
-            :disabled="loading"
-          >
-            <span
-              v-if="loading"
-              class="spinner-border spinner-border-sm me-2"
-              role="status"
-            ></span>
-            {{ isEdit ? "Cập nhật" : "Thêm mới" }}
-          </button>
-        </div>
+          </div>
+
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="closeModal"
+              :disabled="loading"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              :disabled="
+                loading || !form.TenNXB?.trim() || !form.DiaChi?.trim()
+              "
+            >
+              <span
+                v-if="loading"
+                class="spinner-border spinner-border-sm me-2"
+                role="status"
+              ></span>
+              {{ isEdit ? "Cập nhật" : "Thêm mới" }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, reactive, computed, watch } from "vue";
+import { useToast } from "vue-toastification";
+import api from "@/services/api";
+
 export default {
   name: "PublisherModal",
   props: {
+    show: {
+      type: Boolean,
+      default: false,
+    },
     publisher: {
       type: Object,
       default: null,
     },
-  },
-  data() {
-    return {
-      form: {
-        TenNXB: "",
-        DiaChi: "",
-      },
-      errors: {},
-      loading: false,
-    };
-  },
-  computed: {
-    isEdit() {
-      return this.publisher && this.publisher._id;
+    isEdit: {
+      type: Boolean,
+      default: false,
     },
   },
-  watch: {
-    publisher: {
-      handler(newVal) {
-        if (newVal) {
-          this.form = { ...newVal };
+  emits: ["close", "saved"],
+  setup(props, { emit }) {
+    const toast = useToast();
+
+    const loading = ref(false);
+    const form = reactive({
+      TenNXB: "",
+      DiaChi: "",
+    });
+    const errors = reactive({});
+
+    // Methods
+    const clearErrors = () => {
+      Object.keys(errors).forEach((key) => {
+        delete errors[key];
+      });
+    };
+
+    const resetForm = () => {
+      form.TenNXB = "";
+      form.DiaChi = "";
+      clearErrors();
+    };
+
+    const validateForm = () => {
+      clearErrors();
+      let isValid = true;
+
+      if (!form.TenNXB?.trim()) {
+        errors.TenNXB = "Tên nhà xuất bản là bắt buộc";
+        isValid = false;
+      } else if (form.TenNXB.trim().length < 2) {
+        errors.TenNXB = "Tên nhà xuất bản phải có ít nhất 2 ký tự";
+        isValid = false;
+      }
+
+      if (!form.DiaChi?.trim()) {
+        errors.DiaChi = "Địa chỉ là bắt buộc";
+        isValid = false;
+      } else if (form.DiaChi.trim().length < 5) {
+        errors.DiaChi = "Địa chỉ phải có ít nhất 5 ký tự";
+        isValid = false;
+      }
+
+      return isValid;
+    };
+
+    const handleSubmit = async () => {
+      if (!validateForm()) return;
+
+      loading.value = true;
+
+      try {
+        const submitData = {
+          TenNXB: form.TenNXB.trim(),
+          DiaChi: form.DiaChi.trim(),
+        };
+
+        let response;
+
+        if (props.isEdit && props.publisher?._id) {
+          response = await api.put(
+            `/nhaxuatban/${props.publisher._id}`,
+            submitData
+          );
         } else {
-          this.resetForm();
+          response = await api.post("/nhaxuatban", submitData);
+        }
+
+        if (response.success) {
+          toast.success(
+            props.isEdit
+              ? "Cập nhật nhà xuất bản thành công!"
+              : "Thêm nhà xuất bản mới thành công!"
+          );
+          emit("saved");
+        }
+      } catch (error) {
+        console.error("Error saving publisher:", error);
+
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error(
+            props.isEdit
+              ? "Có lỗi khi cập nhật nhà xuất bản!"
+              : "Có lỗi khi thêm nhà xuất bản mới!"
+          );
+        }
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    const closeModal = () => {
+      emit("close");
+    };
+
+    // Watch for prop changes
+    watch(
+      () => props.publisher,
+      (newPublisher) => {
+        if (newPublisher && props.isEdit) {
+          form.TenNXB = newPublisher.TenNXB || "";
+          form.DiaChi = newPublisher.DiaChi || "";
+        } else {
+          resetForm();
         }
       },
-      immediate: true,
-      deep: true,
-    },
-  },
-  methods: {
-    async handleSubmit() {
-      this.clearErrors();
+      { immediate: true }
+    );
 
-      if (!this.validateForm()) {
-        return;
+    watch(
+      () => props.show,
+      (show) => {
+        if (!show) {
+          resetForm();
+        }
       }
+    );
 
-      this.loading = true;
-      try {
-        this.$emit("submit", { ...this.form });
-      } finally {
-        this.loading = false;
-      }
-    },
-    validateForm() {
-      const errors = {};
-
-      if (!this.form.TenNXB?.trim()) {
-        errors.TenNXB = "Tên nhà xuất bản là bắt buộc";
-      }
-
-      if (!this.form.DiaChi?.trim()) {
-        errors.DiaChi = "Địa chỉ là bắt buộc";
-      }
-
-      this.errors = errors;
-      return Object.keys(errors).length === 0;
-    },
-    clearErrors() {
-      this.errors = {};
-    },
-    resetForm() {
-      this.form = {
-        TenNXB: "",
-        DiaChi: "",
-      };
-      this.clearErrors();
-    },
+    return {
+      loading,
+      form,
+      errors,
+      validateForm,
+      handleSubmit,
+      closeModal,
+      resetForm,
+    };
   },
 };
 </script>

@@ -17,11 +17,11 @@ class NhaXuatBanService {
       sort = SORT_OPTIONS.NEWEST,
     } = queryParams;
 
-    const query = { deleted: false };
+    const matchQuery = { deleted: false };
 
     // Tìm kiếm theo tên nhà xuất bản và địa chỉ
     if (search) {
-      query.$or = [
+      matchQuery.$or = [
         { TenNXB: { $regex: search, $options: "i" } },
         { DiaChi: { $regex: search, $options: "i" } },
       ];
@@ -33,10 +33,69 @@ class NhaXuatBanService {
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
-    const [nhaxuatbans, total] = await Promise.all([
-      NhaXuatBan.find(query).sort(sortOption).skip(skip).limit(limitNum),
-      NhaXuatBan.countDocuments(query),
+    // Cài đặt collation cho Tiếng Việt
+    const collationOptions = {
+      locale: "vi",
+      strength: 1, // Case insensitive
+      numericOrdering: true,
+    };
+
+    // Sử dụng aggregation để thêm thống kê số sách
+    const aggregationPipeline = [
+      { $match: matchQuery },
+      {
+        $lookup: {
+          from: "saches",
+          localField: "_id",
+          foreignField: "MaNXB",
+          as: "saches",
+        },
+      },
+      {
+        $addFields: {
+          soLuongSach: {
+            $size: {
+              $filter: {
+                input: "$saches",
+                cond: { $eq: ["$$this.deleted", false] },
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          TenNXB: 1,
+          MaNXB: 1,
+          DiaChi: 1,
+          soLuongSach: 1,
+          createdAt: 1,
+          updatedAt: 1,
+        },
+      },
+      { $sort: sortOption },
+    ];
+
+    // Thêm pagination
+    const countPipeline = [...aggregationPipeline, { $count: "total" }];
+    const dataPipeline = [
+      ...aggregationPipeline,
+      { $skip: skip },
+      { $limit: limitNum },
+    ];
+
+    // Sử dụng collation cho sắp xếp Tiếng Việt khi cần thiết
+    const aggregateOptions = {};
+    if (sort === SORT_OPTIONS.A_TO_Z || sort === SORT_OPTIONS.Z_TO_A) {
+      aggregateOptions.collation = collationOptions;
+    }
+
+    const [countResult, nhaxuatbans] = await Promise.all([
+      NhaXuatBan.aggregate(countPipeline, aggregateOptions),
+      NhaXuatBan.aggregate(dataPipeline, aggregateOptions),
     ]);
+
+    const total = countResult.length > 0 ? countResult[0].total : 0;
 
     return {
       nhaxuatbans,

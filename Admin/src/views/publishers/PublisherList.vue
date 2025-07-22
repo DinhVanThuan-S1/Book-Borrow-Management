@@ -22,7 +22,6 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-6">
-            <label class="form-label">Tìm kiếm</label>
             <div class="input-group">
               <span class="input-group-text">
                 <i class="bi bi-search"></i>
@@ -38,26 +37,30 @@
           </div>
 
           <div class="col-md-3">
-            <label class="form-label">Sắp xếp</label>
-            <select
-              v-model="filters.sort"
-              class="form-select"
-              @change="fetchPublishers"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="a-to-z">Tên A-Z</option>
-              <option value="z-to-a">Tên Z-A</option>
-            </select>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-sort-down"></i>
+              </span>
+              <select
+                v-model="filters.sort"
+                class="form-select"
+                @change="fetchPublishers"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="a-z">Tên A-Z</option>
+                <option value="z-a">Tên Z-A</option>
+              </select>
+            </div>
           </div>
 
           <div class="col-md-3 d-flex align-items-end">
             <button
               @click="resetFilters"
-              class="btn btn-outline-secondary w-100"
+              class="btn btn-outline-secondary rounded-circle reset-btn"
+              title="Reset bộ lọc"
             >
-              <i class="bi bi-arrow-clockwise me-1"></i>
-              Reset
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </div>
@@ -69,7 +72,7 @@
       <div class="card-header-custom">
         <h5 class="mb-0">
           <i class="bi bi-building me-2"></i>
-          Danh sách nhà xuất bản ({{ pagination.total }})
+          Danh sách nhà xuất bản ( {{ pagination.total }} )
         </h5>
       </div>
 
@@ -103,25 +106,32 @@
         </div>
 
         <!-- Publishers Table -->
-        <div v-else class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
+
+        <div v-else class="table">
+          <table class="table table-bordered table-hover mb-0">
+            <thead>
               <tr>
-                <th style="width: 60px">#</th>
-                <th>Tên nhà xuất bản</th>
-                <th>Địa chỉ</th>
-                <th style="width: 120px">Số lượng sách</th>
-                <th style="width: 100px">Mã NXB</th>
-                <th style="width: 120px">Ngày tạo</th>
-                <th style="width: 120px">Thao tác</th>
+                <th style="width: 60px" class="text-center fw-bold">STT</th>
+                <th class="text-center fw-bold">Tên NXB</th>
+                <th class="text-center fw-bold">Địa chỉ</th>
+                <th style="width: 140px" class="text-center fw-bold">
+                  Số lượng sách
+                </th>
+                <th style="width: 100px" class="text-center fw-bold">Mã NXB</th>
+                <th style="width: 120px" class="text-center fw-bold">
+                  Ngày tạo
+                </th>
+                <th style="width: 120px" class="text-center fw-bold">
+                  Thao tác
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(publisher, index) in publishers" :key="publisher._id">
-                <td>
+                <td class="text-center align-middle">
                   {{ (pagination.current - 1) * pagination.limit + index + 1 }}
                 </td>
-                <td>
+                <td class="align-middle">
                   <div class="d-flex align-items-center">
                     <div class="publisher-icon me-3">
                       <i class="bi bi-building-fill"></i>
@@ -131,10 +141,10 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td class="align-middle">
                   <span class="text-muted">{{ publisher.DiaChi }}</span>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <span
                     class="badge"
                     :class="getBookCountBadgeClass(publisher.soLuongSach)"
@@ -142,17 +152,17 @@
                     {{ publisher.soLuongSach || 0 }} sách
                   </span>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <code class="bg-light px-2 py-1 rounded">{{
                     publisher.MaNXB
                   }}</code>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <small class="text-muted">{{
                     formatDate(publisher.createdAt)
                   }}</small>
                 </td>
-                <td>
+                <td class="text-center align-middle">
                   <div class="btn-group" role="group">
                     <button
                       @click="viewBooks(publisher)"
@@ -491,5 +501,181 @@ export default {
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
+}
+
+/* Table styling với căn giữa theo chiều dọc */
+.table {
+  margin-bottom: 0;
+}
+
+.table th,
+.table td {
+  vertical-align: middle !important;
+  padding: 6px 4px;
+  border-color: #dee2e6;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 700 !important;
+  color: #495057;
+  text-align: center;
+  vertical-align: middle;
+  padding: 10px 6px;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Bootstrap align-middle override */
+.align-middle {
+  vertical-align: middle !important;
+}
+
+/* Giảm chiều cao các hàng */
+.table td {
+  height: 45px; /* Giảm từ 60px xuống 45px */
+}
+
+.table .d-flex {
+  height: 100%;
+  align-items: center;
+}
+
+/* Reset button styling */
+.reset-btn {
+  width: 38px;
+  height: 35px; /* Match form-control height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.2s ease-in-out;
+}
+
+.reset-btn:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.reset-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.reset-btn i {
+  font-size: 1rem;
+}
+
+/* Badge styling */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+}
+
+/* Code styling */
+code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+/* Button group styling */
+.btn-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-group .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Pagination styling đẹp tương tự Book Management */
+.card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.5rem;
+}
+
+.pagination {
+  margin-bottom: 0;
+}
+
+.pagination .page-item {
+  margin: 0 2px;
+}
+
+.pagination .page-link {
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  background-color: white;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+  color: #495057;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
+}
+
+.pagination .page-item.active .page-link {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: #667eea;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  transform: translateY(-1px);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive pagination */
+@media (max-width: 576px) {
+  .pagination .page-link {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+    min-width: 35px;
+  }
+
+  .card-footer {
+    padding: 0.75rem 1rem;
+  }
 }
 </style>
