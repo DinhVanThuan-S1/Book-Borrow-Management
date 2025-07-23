@@ -317,7 +317,9 @@
           <form @submit.prevent="handleSubmitCategory">
             <div class="modal-body">
               <div class="mb-3">
-                <label for="tenDM" class="form-label">Tên danh mục *</label>
+                <label for="tenDM" class="form-label"
+                  >Tên danh mục <span class="text-danger">*</span></label
+                >
                 <input
                   type="text"
                   class="form-control"

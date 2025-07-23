@@ -18,7 +18,9 @@
         <form @submit.prevent="handleSubmit">
           <div class="modal-body">
             <div class="mb-3">
-              <label for="tenNXB" class="form-label">Tên nhà xuất bản *</label>
+              <label for="tenNXB" class="form-label"
+                >Tên nhà xuất bản <span class="text-danger">*</span></label
+              >
               <input
                 type="text"
                 class="form-control"
@@ -34,7 +36,9 @@
             </div>
 
             <div class="mb-3">
-              <label for="diaChi" class="form-label">Địa chỉ *</label>
+              <label for="diaChi" class="form-label"
+                >Địa chỉ <span class="text-danger">*</span></label
+              >
               <textarea
                 class="form-control"
                 id="diaChi"

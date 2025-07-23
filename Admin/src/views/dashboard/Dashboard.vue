@@ -3,7 +3,7 @@
     <!-- Page Header -->
     <div class="page-header">
       <h1 class="page-title">Tổng quan</h1>
-      <p class="page-subtitle">Tổng quan hệ thống quản lý mượn sách</p>
+      <!-- <p class="page-subtitle">Tổng quan hệ thống quản lý mượn sách</p> -->
     </div>
 
     <!-- Stats Cards -->
