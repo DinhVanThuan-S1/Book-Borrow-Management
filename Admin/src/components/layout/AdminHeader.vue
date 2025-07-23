@@ -53,12 +53,12 @@
               Thông tin cá nhân
             </router-link>
           </li>
-          <li>
+          <!-- <li>
             <a class="dropdown-item" href="#" @click="changePassword">
               <i class="bi bi-key me-2"></i>
               Đổi mật khẩu
             </a>
-          </li>
+          </li> -->
           <li><hr class="dropdown-divider" /></li>
           <li>
             <a class="dropdown-item text-danger" href="#" @click="logout">
@@ -102,6 +102,21 @@ export default {
         cancelButtonColor: "#6c757d",
         confirmButtonText: "Đăng xuất",
         cancelButtonText: "Hủy",
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        focusConfirm: false,
+        customClass: {
+          container: "swal-container-logout",
+        },
+        didOpen: () => {
+          // Đảm bảo modal không bị aria-hidden
+          const swalContainer = document.querySelector(
+            ".swal-container-logout"
+          );
+          if (swalContainer) {
+            swalContainer.removeAttribute("aria-hidden");
+          }
+        },
       });
 
       if (result.isConfirmed) {
@@ -128,6 +143,25 @@ export default {
         showCancelButton: true,
         confirmButtonText: "Đổi mật khẩu",
         cancelButtonText: "Hủy",
+        allowOutsideClick: false,
+        allowEscapeKey: true,
+        customClass: {
+          container: "swal-container-password",
+        },
+        didOpen: () => {
+          // Đảm bảo modal không bị aria-hidden
+          const swalContainer = document.querySelector(
+            ".swal-container-password"
+          );
+          if (swalContainer) {
+            swalContainer.removeAttribute("aria-hidden");
+          }
+          // Focus vào input đầu tiên
+          const firstInput = document.getElementById("currentPassword");
+          if (firstInput) {
+            firstInput.focus();
+          }
+        },
         preConfirm: () => {
           const currentPassword =
             document.getElementById("currentPassword").value;
