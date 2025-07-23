@@ -32,9 +32,6 @@ import BorrowList from "@/views/borrowing/BorrowList.vue";
 // Reports
 import Reports from "@/views/reports/Reports.vue";
 
-// Profile
-import Profile from "@/views/auth/Profile.vue";
-
 const routes = [
   {
     path: "/login",
@@ -156,14 +153,6 @@ const routes = [
           title: "Báo cáo thống kê",
           icon: "bi-graph-up",
           sidebar: true,
-        },
-      },
-      {
-        path: "/profile",
-        name: "Profile",
-        component: Profile,
-        meta: {
-          title: "Thông tin cá nhân",
         },
       },
     ],

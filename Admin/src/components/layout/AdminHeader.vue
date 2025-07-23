@@ -48,17 +48,11 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
-            <router-link to="/profile" class="dropdown-item">
+            <router-link to="#" class="dropdown-item">
               <i class="bi bi-person me-2"></i>
               Thông tin cá nhân
             </router-link>
           </li>
-          <!-- <li>
-            <a class="dropdown-item" href="#" @click="changePassword">
-              <i class="bi bi-key me-2"></i>
-              Đổi mật khẩu
-            </a>
-          </li> -->
           <li><hr class="dropdown-divider" /></li>
           <li>
             <a class="dropdown-item text-danger" href="#" @click="logout">
