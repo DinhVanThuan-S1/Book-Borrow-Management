@@ -34,30 +34,64 @@ class NhanVienService {
       query.ChucVu = chucvu;
     }
 
-    // Sắp xếp
-    const sortOption = this.getSortOption(sort);
-
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
-    const [nhanviens, total] = await Promise.all([
-      NhanVien.find(query)
-        .select("-Password") // Không trả về password
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limitNum),
-      NhanVien.countDocuments(query),
-    ]);
+    let nhanviens;
 
-    return {
-      nhanviens,
-      pagination: {
-        current: parseInt(page),
-        pages: Math.ceil(total / limitNum),
-        total,
-        limit: limitNum,
-      },
-    };
+    // Handle Vietnamese sorting for name fields
+    if (sort === SORT_OPTIONS.A_TO_Z || sort === SORT_OPTIONS.Z_TO_A) {
+      // Get all matching records first, then sort in JavaScript for proper Vietnamese handling
+      nhanviens = await NhanVien.find(query).select("-Password").exec();
+
+      // Sort with Vietnamese collation
+      nhanviens.sort((a, b) => {
+        const nameA = this.removeVietnameseTones(a.HoTenNV || "").toLowerCase();
+        const nameB = this.removeVietnameseTones(b.HoTenNV || "").toLowerCase();
+
+        if (sort === SORT_OPTIONS.A_TO_Z) {
+          return nameA.localeCompare(nameB, "vi", { sensitivity: "base" });
+        } else {
+          return nameB.localeCompare(nameA, "vi", { sensitivity: "base" });
+        }
+      });
+
+      // Apply pagination after sorting
+      const total = nhanviens.length;
+      nhanviens = nhanviens.slice(skip, skip + limitNum);
+
+      return {
+        nhanviens,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limitNum),
+          total,
+          limit: limitNum,
+        },
+      };
+    } else {
+      // For date-based sorting, use MongoDB sort
+      const sortOption = this.getSortOption(sort);
+
+      const [nhanviens, total] = await Promise.all([
+        NhanVien.find(query)
+          .select("-Password")
+          .sort(sortOption)
+          .skip(skip)
+          .limit(limitNum),
+        NhanVien.countDocuments(query),
+      ]);
+
+      return {
+        nhanviens,
+        pagination: {
+          current: parseInt(page),
+          pages: Math.ceil(total / limitNum),
+          total,
+          limit: limitNum,
+        },
+      };
+    }
   }
 
   /**
@@ -342,6 +376,17 @@ class NhanVienService {
     };
 
     return sortOptions[sort] || sortOptions[SORT_OPTIONS.NEWEST];
+  }
+
+  /**
+   * Remove Vietnamese tones for proper sorting
+   */
+  static removeVietnameseTones(str) {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D");
   }
 
   /**
