@@ -35,7 +35,7 @@ Quản lý mượn sách
 - Phiếu mượn (Tên độc giả mượn sách, Bìa sách, Tên sách, Ngày mượn, Ngày trả (Tự động đặt 10 ngày sau ngày mượn), Trạng thái).
 - Khi độc giả đăng ký mượn sách, hệ thống sẽ kiểm tra tính hợp lệ (Còn sách + Tài khoản chưa vượt quá 5 lần mượn, tức là mỗi tài khoản chỉ có thể đang mượn 5 quyển), sau đó tự động Duyệt hoặc Từ chối.
 - Quy trình mượn sách cơ bản:
-  TrangThai (Đã duyệt | Từ chối | Đã mượn | Đã trả)
+  TrangThai (Đã duyệt | Từ chối | Đang mượn | Đã trả)
   Khi được duyệt (Số lượng của quyển sách sẽ -1), phiếu mượn được hiển thị bên admin
   Admin có thể chuyển trạng thái sang đã mượn (Khi độc giả đến lấy sách).
   Admin có thể chuyển trạng thái sang đã trả (Số lượng của quyển sách +1) (Khi độc giả đến trả sách).

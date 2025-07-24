@@ -5,64 +5,51 @@
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="page-title">Quản lý mượn sách</h1>
-          <p class="page-subtitle">Theo dõi và xử lý các phiếu mượn sách</p>
-        </div>
-        <div class="d-flex gap-2">
-          <button
-            @click="showQuickLendModal = true"
-            class="btn btn-success btn-custom"
-          >
-            <i class="bi bi-plus-circle me-2"></i>
-            Cho mượn nhanh
-          </button>
-          <button @click="refreshData" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-clockwise me-2"></i>
-            Làm mới
-          </button>
+          <!-- <p class="page-subtitle">Theo dõi và xử lý các phiếu mượn sách</p> -->
         </div>
       </div>
     </div>
 
     <!-- Stats Cards -->
     <div class="row mb-4">
+      <div class="col-xl-3 col-md-3 mb-3">
+        <div class="stats-card primary">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stats-number text-primary">
+                {{ stats.approved || 0 }}
+              </div>
+              <p class="stats-label">Đã duyệt</p>
+            </div>
+            <i class="bi bi-check-circle stats-icon text-primary"></i>
+          </div>
+        </div>
+      </div>
+
       <div class="col-xl-3 col-md-6 mb-3">
         <div class="stats-card warning">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <div class="stats-number text-warning">
-                {{ stats.pending || 0 }}
-              </div>
-              <p class="stats-label">Chờ duyệt</p>
-            </div>
-            <i class="bi bi-clock stats-icon text-warning"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card info">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-info">
-                {{ stats.approved || 0 }}
-              </div>
-              <p class="stats-label">Đã duyệt</p>
-            </div>
-            <i class="bi bi-check-circle stats-icon text-info"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card primary">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-primary">
                 {{ stats.borrowed || 0 }}
               </div>
               <p class="stats-label">Đang mượn</p>
             </div>
-            <i class="bi bi-book stats-icon text-primary"></i>
+            <i class="bi bi-arrow-left-right stats-icon text-warning"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card success">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stats-number text-success">
+                {{ stats.returned || 0 }}
+              </div>
+              <p class="stats-label">Đã trả</p>
+            </div>
+            <i class="bi bi-check-square stats-icon text-success"></i>
           </div>
         </div>
       </div>
@@ -87,7 +74,6 @@
       <div class="card-body">
         <div class="row g-3">
           <div class="col-md-3">
-            <label class="form-label">Tìm kiếm</label>
             <div class="input-group">
               <span class="input-group-text">
                 <i class="bi bi-search"></i>
@@ -102,50 +88,41 @@
             </div>
           </div>
 
-          <div class="col-md-2">
-            <label class="form-label">Trạng thái</label>
-            <select
-              v-model="filters.status"
-              class="form-select"
-              @change="fetchBorrows"
-            >
-              <option value="">Tất cả</option>
-              <option value="Chờ duyệt">Chờ duyệt</option>
-              <option value="Đã duyệt">Đã duyệt</option>
-              <option value="Đã mượn">Đang mượn</option>
-              <option value="Đã trả">Đã trả</option>
-              <option value="Từ chối">Từ chối</option>
-              <option value="overdue">Quá hạn</option>
-            </select>
-          </div>
-
-          <div class="col-md-2">
-            <label class="form-label">Thời gian</label>
-            <select
-              v-model="filters.timeRange"
-              class="form-select"
-              @change="fetchBorrows"
-            >
-              <option value="">Tất cả</option>
-              <option value="today">Hôm nay</option>
-              <option value="week">Tuần này</option>
-              <option value="month">Tháng này</option>
-              <option value="quarter">Quý này</option>
-            </select>
+          <div class="col-md-3">
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-funnel"></i>
+              </span>
+              <select
+                v-model="filters.timeRange"
+                class="form-select"
+                @change="fetchBorrows"
+              >
+                <option value="">Tất cả</option>
+                <option value="today">Hôm nay</option>
+                <option value="week">Tuần này</option>
+                <option value="month">Tháng này</option>
+                <option value="quarter">Quý này</option>
+              </select>
+            </div>
           </div>
 
           <div class="col-md-3">
-            <label class="form-label">Sắp xếp</label>
-            <select
-              v-model="filters.sort"
-              class="form-select"
-              @change="fetchBorrows"
-            >
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-              <option value="due-date">Gần đến hạn</option>
-              <option value="overdue">Quá hạn trước</option>
-            </select>
+            <div class="input-group">
+              <span class="input-group-text">
+                <i class="bi bi-sort-down"></i>
+              </span>
+              <select
+                v-model="filters.sort"
+                class="form-select"
+                @change="fetchBorrows"
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="due-date">Gần đến hạn</option>
+                <option value="overdue">Quá hạn trước</option>
+              </select>
+            </div>
           </div>
 
           <div class="col-md-2 d-flex align-items-end">
@@ -315,23 +292,7 @@
                 <td>
                   <div class="btn-group" role="group">
                     <button
-                      v-if="borrow.TrangThai === 'Chờ duyệt'"
-                      @click="approveBorrow(borrow)"
-                      class="btn btn-sm btn-success"
-                      title="Duyệt"
-                    >
-                      <i class="bi bi-check"></i>
-                    </button>
-                    <button
                       v-if="borrow.TrangThai === 'Đã duyệt'"
-                      @click="lendBook(borrow)"
-                      class="btn btn-sm btn-primary"
-                      title="Cho mượn"
-                    >
-                      <i class="bi bi-arrow-right"></i>
-                    </button>
-                    <button
-                      v-if="borrow.TrangThai === 'Đã mượn'"
                       @click="returnBook(borrow)"
                       class="btn btn-sm btn-info"
                       title="Trả sách"
@@ -339,9 +300,7 @@
                       <i class="bi bi-arrow-left"></i>
                     </button>
                     <button
-                      v-if="
-                        ['Chờ duyệt', 'Đã duyệt'].includes(borrow.TrangThai)
-                      "
+                      v-if="borrow.TrangThai === 'Đã duyệt'"
                       @click="rejectBorrow(borrow)"
                       class="btn btn-sm btn-danger"
                       title="Từ chối"
@@ -409,12 +368,6 @@
     </div>
 
     <!-- Modals -->
-    <QuickLendModal
-      :show="showQuickLendModal"
-      @close="showQuickLendModal = false"
-      @saved="handleBorrowSaved"
-    />
-
     <BorrowDetailModal
       :show="showDetailModal"
       :borrow="selectedBorrow"
@@ -429,13 +382,11 @@ import { ref, reactive, computed, onMounted } from "vue";
 import { useToast } from "vue-toastification";
 import Swal from "sweetalert2";
 import api from "@/services/api";
-import QuickLendModal from "@/components/modals/QuickLendModal.vue";
 import BorrowDetailModal from "@/components/modals/BorrowDetailModal.vue";
 
 export default {
   name: "BorrowList",
   components: {
-    QuickLendModal,
     BorrowDetailModal,
   },
   setup() {
@@ -466,22 +417,28 @@ export default {
 
     const quickFilters = [
       {
-        value: "Chờ duyệt",
-        label: "Chờ duyệt",
-        icon: "bi bi-clock",
-        key: "pending",
-      },
-      {
         value: "Đã duyệt",
         label: "Đã duyệt",
         icon: "bi bi-check-circle",
         key: "approved",
       },
       {
-        value: "Đã mượn",
+        value: "Từ chối",
+        label: "Từ chối",
+        icon: "bi bi-x-circle",
+        key: "rejected",
+      },
+      {
+        value: "Đang mượn",
         label: "Đang mượn",
-        icon: "bi bi-book",
+        icon: "bi-arrow-left-right",
         key: "borrowed",
+      },
+      {
+        value: "Đã trả",
+        label: "Đã trả",
+        icon: "bi bi-check-square",
+        key: "returned",
       },
       {
         value: "overdue",
@@ -556,12 +513,42 @@ export default {
 
     const fetchStats = async () => {
       try {
-        const response = await api.get("/muonsach/stats");
+        const response = await api.get("/muonsach/statistics");
         if (response.success) {
-          stats.value = response.data;
+          // Xử lý dữ liệu statistics từ backend
+          const rawStats = response.data;
+          const processedStats = {
+            total: rawStats.totalPhieuMuon || 0,
+            borrowed: 0,
+            returned: 0,
+            approved: 0,
+            rejected: 0,
+            overdue: rawStats.overdueBooks || 0,
+          };
+
+          // Xử lý statusStats từ backend
+          if (rawStats.statusStats) {
+            rawStats.statusStats.forEach((stat) => {
+              switch (stat._id) {
+                case "Đã duyệt":
+                  processedStats.approved = stat.count;
+                  processedStats.borrowed = stat.count; // Đã duyệt = Đang mượn
+                  break;
+                case "Đã trả":
+                  processedStats.returned = stat.count;
+                  break;
+                case "Từ chối":
+                  processedStats.rejected = stat.count;
+                  break;
+              }
+            });
+          }
+
+          stats.value = processedStats;
         }
       } catch (error) {
         console.error("Error fetching stats:", error);
+        toast.error("Có lỗi khi tải thống kê");
       }
     };
 
@@ -706,28 +693,26 @@ export default {
 
     const getStatusBadgeClass = (status) => {
       const classes = {
-        "Chờ duyệt": "bg-warning",
-        "Đã duyệt": "bg-info",
-        "Đã mượn": "bg-primary",
+        "Đã duyệt": "bg-primary",
         "Đã trả": "bg-success",
         "Từ chối": "bg-danger",
+        "Quá hạn": "bg-warning",
       };
       return classes[status] || "bg-secondary";
     };
 
     const getStatusIcon = (status) => {
       const icons = {
-        "Chờ duyệt": "bi bi-clock",
-        "Đã duyệt": "bi bi-check-circle",
-        "Đã mượn": "bi bi-book",
+        "Đã duyệt": "bi bi-book",
         "Đã trả": "bi bi-check-square",
         "Từ chối": "bi bi-x-circle",
+        "Quá hạn": "bi bi-exclamation-triangle",
       };
       return icons[status] || "bi bi-question-circle";
     };
 
     const isOverdue = (borrow) => {
-      if (borrow.TrangThai !== "Đã mượn") return false;
+      if (borrow.TrangThai !== "Đã duyệt") return false;
       const dueDate = new Date(borrow.NgayTraDuKien);
       const now = new Date();
       return now > dueDate;
@@ -742,7 +727,7 @@ export default {
     };
 
     const getDaysLeft = (borrow) => {
-      if (borrow.TrangThai !== "Đã mượn") return "-";
+      if (borrow.TrangThai !== "Đã duyệt") return "-";
       const dueDate = new Date(borrow.NgayTraDuKien);
       const now = new Date();
       const diffTime = dueDate - now;
@@ -754,7 +739,7 @@ export default {
     };
 
     const getDaysLeftClass = (borrow) => {
-      if (borrow.TrangThai !== "Đã mượn") return "";
+      if (borrow.TrangThai !== "Đã duyệt") return "";
       const dueDate = new Date(borrow.NgayTraDuKien);
       const now = new Date();
       const diffTime = dueDate - now;
