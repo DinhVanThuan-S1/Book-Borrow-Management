@@ -133,11 +133,12 @@
                   Thông tin cá nhân
                 </th>
                 <th style="width: 100px" class="text-center">Chức vụ</th>
+
+                <th style="width: 130px" class="text-center">Số điện thoại</th>
+                <th style="width: 170px" class="text-center">Địa chỉ</th>
                 <th style="width: 120px" class="text-center">
                   Mã số nhân viên
                 </th>
-                <th style="width: 130px" class="text-center">Số điện thoại</th>
-                <th style="width: 170px" class="text-center">Địa chỉ</th>
                 <th style="width: 150px" class="text-center">Thao tác</th>
               </tr>
             </thead>
@@ -165,11 +166,7 @@
                     {{ getRoleText(staff.ChucVu) }}
                   </span>
                 </td>
-                <td class="text-center align-middle">
-                  <code class="bg-light px-2 py-1 rounded">{{
-                    staff.MSNV || "N/A"
-                  }}</code>
-                </td>
+
                 <td class="align-middle">
                   <div class="small">
                     <div class="text-muted">
@@ -187,6 +184,11 @@
                     <i class="bi bi-geo-alt me-1"></i>
                     {{ staff.DiaChi || "-" }}
                   </div>
+                </td>
+                <td class="text-center align-middle">
+                  <code class="bg-light px-2 py-1 rounded">{{
+                    staff.MSNV || "N/A"
+                  }}</code>
                 </td>
                 <td class="text-center align-middle">
                   <div class="btn-group" role="group">
