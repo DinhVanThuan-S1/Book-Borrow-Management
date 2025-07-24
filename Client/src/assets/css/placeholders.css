@@ -1,0 +1,38 @@
+/* Book Placeholder Styles */
+.book-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #adb5bd;
+  border: 2px dashed #dee2e6;
+}
+
+.book-placeholder i {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.book-placeholder span {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Loading placeholder animation */
+.loading-placeholder {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
