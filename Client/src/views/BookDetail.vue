@@ -44,203 +44,149 @@
       </nav>
 
       <!-- Main Content -->
-      <div class="row">
+      <div class="row g-4">
         <!-- Book Image -->
-        <div class="col-lg-4 mb-4">
-          <div class="book-image-section">
-            <div class="main-image">
+        <div class="col-lg-5">
+          <div class="book-image-wrapper">
+            <div class="book-image-container">
               <img
                 :src="getBookImage(book.BiaSach)"
                 :alt="book.TenSach"
-                class="img-fluid rounded shadow"
+                class="book-image"
                 @error="handleImageError"
               />
-
+              
               <!-- Availability Badge -->
-              <div class="availability-badge-large" :class="availabilityClass">
-                <i :class="availabilityIcon" class="me-2"></i>
+              <div class="status-badge" :class="availabilityClass">
+                <i :class="availabilityIcon"></i>
                 {{ availabilityText }}
               </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div class="quick-actions mt-4">
+            <!-- Price -->
+            <div class="book-price">
+              <span class="price-label">Giá sách</span>
+              <span class="price-value">{{ formatPrice(book.DonGia) }}</span>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
               <button
                 @click="requestBorrow"
-                class="btn btn-primary-gradient btn-lg w-100 mb-3"
-                :disabled="!canBorrow || requesting"
+                class="btn-borrow"
+                :disabled="(!canBorrow && authStore.isAuthenticated) || requesting"
               >
-                <span
-                  v-if="requesting"
-                  class="spinner-border spinner-border-sm me-2"
-                ></span>
-                <i v-else class="bi bi-arrow-right me-2"></i>
+                <span v-if="requesting" class="spinner"></span>
+                <i v-else class="bi bi-download"></i>
                 {{ borrowButtonText }}
               </button>
 
               <button
                 @click="toggleFavorite"
-                class="btn btn-lg w-100"
-                :class="isFavorite ? 'btn-danger' : 'btn-outline-danger'"
+                class="btn-favorite"
+                :class="{ active: isFavorite }"
                 :disabled="togglingFavorite"
               >
-                <span
-                  v-if="togglingFavorite"
-                  class="spinner-border spinner-border-sm me-2"
-                ></span>
-                <i
-                  v-else
-                  :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"
-                  class="me-2"
-                ></i>
-                {{ isFavorite ? "Bỏ yêu thích" : "Thêm vào yêu thích" }}
+                <span v-if="togglingFavorite" class="spinner"></span>
+                <i v-else :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                {{ isFavorite ? "Đã yêu thích" : "Yêu thích" }}
               </button>
             </div>
           </div>
         </div>
 
         <!-- Book Information -->
-        <div class="col-lg-8">
-          <div class="book-info-section">
-            <!-- Title and Basic Info -->
-            <div class="book-header mb-4">
+        <div class="col-lg-7">
+          <div class="book-details">
+            <div class="book-header">
               <h1 class="book-title">{{ book.TenSach }}</h1>
-              <div class="book-meta">
-                <span class="author">
-                  <i class="bi bi-person me-2"></i>
-                  <strong>Tác giả:</strong> {{ book.TacGia }}
-                </span>
-                <span class="category">
-                  <i class="bi bi-tag me-2"></i>
-                  <strong>Danh mục:</strong>
-                  <router-link
-                    :to="{
-                      name: 'BookCatalog',
-                      query: { category: book.MaDM?._id },
-                    }"
-                    class="text-decoration-none"
-                  >
-                    {{ book.MaDM?.TenDM || "Chưa phân loại" }}
-                  </router-link>
-                </span>
-                <span class="publisher">
-                  <i class="bi bi-building me-2"></i>
-                  <strong>Nhà xuất bản:</strong>
-                  {{ book.MaNXB?.TenNXB || "Chưa rõ" }}
-                </span>
-                <span class="year">
-                  <i class="bi bi-calendar me-2"></i>
-                  <strong>Năm xuất bản:</strong> {{ book.NamXuatBan }}
-                </span>
-                <span class="id">
-                  <i class="bi bi-hash me-2"></i>
-                  <strong>Mã sách:</strong> <code>{{ book.MaSach }}</code>
-                </span>
+              <div class="book-author">
+                <i class="bi bi-person-circle"></i>
+                {{ book.TacGia }}
+              </div>
+            </div>
+
+            <div class="book-info-grid">
+              <div class="info-item" v-if="getCategoryName(book)">
+                <span class="label">Danh mục</span>
+                <router-link
+                  :to="{ name: 'BookCatalog', query: { category: getCategoryId(book) } }"
+                  class="value link"
+                >
+                  {{ getCategoryName(book) }}
+                </router-link>
+              </div>
+
+              <div class="info-item" v-if="getPublisherName(book)">
+                <span class="label">Nhà xuất bản</span>
+                <span class="value">{{ getPublisherName(book) }}</span>
+              </div>
+
+              <div class="info-item" v-if="book.NamXuatBan">
+                <span class="label">Năm xuất bản</span>
+                <span class="value">{{ book.NamXuatBan }}</span>
+              </div>
+
+              <div class="info-item">
+                <span class="label">Mã sách</span>
+                <span class="value code">{{ book.MaSach }}</span>
               </div>
             </div>
 
             <!-- Description -->
-            <div class="book-description mb-4">
-              <h5>
-                <i class="bi bi-book-half me-2"></i>
-                Mô tả
-              </h5>
-              <div class="description-content">
-                <p v-if="book.MoTa" class="lead">{{ book.MoTa }}</p>
-                <p v-else class="text-muted fst-italic">
-                  Chưa có mô tả cho cuốn sách này.
-                </p>
-              </div>
+            <div class="description-section" v-if="book.MoTa">
+              <h3 class="section-title">Mô tả</h3>
+              <p class="description-text">{{ book.MoTa }}</p>
             </div>
 
             <!-- Stats -->
-            <div class="book-stats mb-4">
-              <h5>
-                <i class="bi bi-graph-up me-2"></i>
-                Thống kê
-              </h5>
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="bi bi-collection"></i>
-                    </div>
-                    <div class="stat-info">
-                      <div class="stat-number">{{ book.SoQuyen || 0 }}</div>
-                      <div class="stat-label">Số quyển hiện có</div>
-                    </div>
+            <div class="stats-section">
+              <h3 class="section-title">Thông tin</h3>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-icon books">
+                    <i class="bi bi-stack"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-number">{{ book.SoQuyen || 0 }}</div>
+                    <div class="stat-label">Còn lại</div>
                   </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="bi bi-arrow-repeat"></i>
-                    </div>
-                    <div class="stat-info">
-                      <div class="stat-number">{{ book.soLanMuon || 0 }}</div>
-                      <div class="stat-label">Lượt mượn</div>
-                    </div>
+                <div class="stat-card">
+                  <div class="stat-icon borrows">
+                    <i class="bi bi-arrow-repeat"></i>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-number">{{ book.soLanMuon || 0 }}</div>
+                    <div class="stat-label">Lượt mượn</div>
                   </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="bi bi-heart"></i>
-                    </div>
-                    <div class="stat-info">
-                      <div class="stat-number">
-                        {{ book.soLuotYeuThich || 0 }}
-                      </div>
-                      <div class="stat-label">Lượt yêu thích</div>
-                    </div>
+                <div class="stat-card">
+                  <div class="stat-icon favorites">
+                    <i class="bi bi-heart"></i>
                   </div>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <div class="stat-item">
-                    <div class="stat-icon">
-                      <i class="bi bi-star"></i>
-                    </div>
-                    <div class="stat-info">
-                      <div class="stat-number">
-                        {{ book.danhGiaTrungBinh || "N/A" }}
-                      </div>
-                      <div class="stat-label">Đánh giá</div>
-                    </div>
+                  <div class="stat-content">
+                    <div class="stat-number">{{ book.soLuotYeuThich || 0 }}</div>
+                    <div class="stat-label">Yêu thích</div>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- Share -->
-            <div class="book-share">
-              <h6>
-                <i class="bi bi-share me-2"></i>
-                Chia sẻ sách này
-              </h6>
+            <div class="share-section">
+              <span class="share-label">Chia sẻ:</span>
               <div class="share-buttons">
-                <button
-                  @click="shareBook('facebook')"
-                  class="btn btn-outline-primary btn-sm"
-                >
-                  <i class="bi bi-facebook me-1"></i>
-                  Facebook
+                <button @click="shareBook('facebook')" class="share-btn facebook">
+                  <i class="bi bi-facebook"></i>
                 </button>
-                <button
-                  @click="shareBook('twitter')"
-                  class="btn btn-outline-info btn-sm"
-                >
-                  <i class="bi bi-twitter me-1"></i>
-                  Twitter
+                <button @click="shareBook('twitter')" class="share-btn twitter">
+                  <i class="bi bi-twitter"></i>
                 </button>
-                <button
-                  @click="copyLink"
-                  class="btn btn-outline-secondary btn-sm"
-                >
-                  <i class="bi bi-link me-1"></i>
-                  Sao chép link
+                <button @click="copyLink" class="share-btn copy">
+                  <i class="bi bi-link-45deg"></i>
                 </button>
               </div>
             </div>
@@ -296,7 +242,9 @@ export default {
     const requesting = ref(false);
 
     const canBorrow = computed(() => {
-      return book.value.SoQuyen > 0 && authStore.isAuthenticated;
+      // Cho phép click nút để chuyển đến trang đăng nhập nếu chưa đăng nhập
+      // Hoặc cho phép mượn nếu đã đăng nhập và còn sách
+      return !authStore.isAuthenticated || book.value.SoQuyen > 0;
     });
 
     const availabilityClass = computed(() => {
@@ -318,7 +266,7 @@ export default {
     });
 
     const borrowButtonText = computed(() => {
-      if (!authStore.isAuthenticated) return "Đăng nhập để mượn";
+      if (!authStore.isAuthenticated) return "Mượn sách";
       if (book.value.SoQuyen === 0) return "Hết sách";
       if (requesting.value) return "Đang xử lý...";
       return "Mượn sách này";
@@ -336,8 +284,8 @@ export default {
           // Update page title
           document.title = `${book.value.TenSach} - Thư viện trực tuyến`;
 
-          // Fetch related books
-          fetchRelatedBooks(bookId);
+          // Fetch related books based on category
+          fetchRelatedBooks();
         }
       } catch (err) {
         console.error("Error fetching book:", err);
@@ -350,14 +298,40 @@ export default {
       }
     };
 
-    const fetchRelatedBooks = async (bookId) => {
+    const fetchRelatedBooks = async () => {
       try {
-        const response = await api.books.getRelated(bookId, 4);
-        if (response.success) {
-          relatedBooks.value = response.data;
+        const categoryId = getCategoryId(book.value);
+        if (categoryId) {
+          const response = await api.books.getByCategory(categoryId, {
+            limit: 8,
+          });
+          if (response.success && response.data) {
+            // Xử lý cấu trúc response khác nhau
+            let books = [];
+            
+            // Trường hợp response.data là array trực tiếp
+            if (Array.isArray(response.data)) {
+              books = response.data;
+            }
+            // Trường hợp response.data có property sach
+            else if (response.data.sach && Array.isArray(response.data.sach)) {
+              books = response.data.sach;
+            }
+            // Trường hợp response.data có property data
+            else if (response.data.data && Array.isArray(response.data.data)) {
+              books = response.data.data;
+            }
+
+            // Lọc bỏ sách hiện tại khỏi danh sách liên quan
+            relatedBooks.value = books
+              .filter((item) => item._id !== book.value._id)
+              .slice(0, 4);
+          }
         }
       } catch (error) {
         console.error("Error fetching related books:", error);
+        // Không hiển thị lỗi cho user, chỉ không hiện related books
+        relatedBooks.value = [];
       }
     };
 
@@ -381,7 +355,10 @@ export default {
         return;
       }
 
-      if (!canBorrow.value) return;
+      if (book.value.SoQuyen === 0) {
+        toast.warning("Sách đã hết, không thể mượn!");
+        return;
+      }
 
       requesting.value = true;
 
@@ -390,6 +367,7 @@ export default {
         toast.success("Yêu cầu mượn sách đã được gửi thành công!");
       } catch (error) {
         console.error("Error requesting borrow:", error);
+        toast.error(error.response?.data?.message || "Có lỗi xảy ra khi gửi yêu cầu mượn sách!");
       } finally {
         requesting.value = false;
       }
@@ -418,6 +396,7 @@ export default {
         }
       } catch (error) {
         console.error("Error toggling favorite:", error);
+        toast.error(error.response?.data?.message || "Có lỗi xảy ra khi cập nhật danh sách yêu thích!");
       } finally {
         togglingFavorite.value = false;
       }
@@ -462,6 +441,58 @@ export default {
       if (!imagePath) return "/src/assets/images/book-placeholder.jpg";
       if (imagePath.startsWith("http")) return imagePath;
       return `http://localhost:5000${imagePath}`;
+    };
+
+    const formatPrice = (price) => {
+      if (!price) return "Liên hệ";
+      return new Intl.NumberFormat("vi-VN").format(price) + " VND";
+    };
+
+    const getCategoryName = (book) => {
+      // Xử lý trường hợp populate thông thường (MaDM là object)
+      if (book.MaDM && typeof book.MaDM === 'object' && book.MaDM.TenDM) {
+        return book.MaDM.TenDM;
+      }
+      
+      // Xử lý trường hợp aggregation (danhmuc là array)
+      if (book.danhmuc && Array.isArray(book.danhmuc) && book.danhmuc.length > 0) {
+        return book.danhmuc[0].TenDM;
+      }
+
+      return null;
+    };
+
+    const getCategoryId = (book) => {
+      // Xử lý trường hợp populate thông thường
+      if (book.MaDM && typeof book.MaDM === 'object' && book.MaDM._id) {
+        return book.MaDM._id;
+      }
+      
+      // Xử lý trường hợp aggregation
+      if (book.danhmuc && Array.isArray(book.danhmuc) && book.danhmuc.length > 0) {
+        return book.danhmuc[0]._id;
+      }
+
+      // Xử lý trường hợp MaDM là string (chỉ có ID)
+      if (book.MaDM && typeof book.MaDM === 'string') {
+        return book.MaDM;
+      }
+
+      return null;
+    };
+
+    const getPublisherName = (book) => {
+      // Xử lý trường hợp populate thông thường
+      if (book.MaNXB && typeof book.MaNXB === 'object' && book.MaNXB.TenNXB) {
+        return book.MaNXB.TenNXB;
+      }
+      
+      // Xử lý trường hợp aggregation
+      if (book.nhaxuatban && Array.isArray(book.nhaxuatban) && book.nhaxuatban.length > 0) {
+        return book.nhaxuatban[0].TenNXB;
+      }
+
+      return null;
     };
 
     const handleImageError = (event) => {
@@ -516,6 +547,10 @@ export default {
       shareBook,
       copyLink,
       getBookImage,
+      formatPrice,
+      getCategoryName,
+      getCategoryId,
+      getPublisherName,
       handleImageError,
     };
   },
@@ -523,172 +558,447 @@ export default {
 </script>
 
 <style scoped>
-.book-image-section {
+/* Book Image */
+.book-image-wrapper {
   position: sticky;
-  top: 120px;
+  top: 100px;
 }
 
-.main-image {
+.book-image-container {
   position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-.main-image img {
-  max-width: 100%;
+.book-image {
+  width: 100%;
+  max-width: 300px;
   height: auto;
-  max-height: 500px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
 }
 
-.availability-badge-large {
+.book-image:hover {
+  transform: scale(1.02);
+}
+
+.status-badge {
   position: absolute;
   top: 1rem;
   right: 1rem;
   padding: 0.5rem 1rem;
-  border-radius: 25px;
-  font-size: 0.9rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
   font-weight: 600;
   color: white;
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
-.availability-badge-large.available {
-  background: var(--success-color);
+.status-badge.available {
+  background: linear-gradient(135deg, #10b981, #059669);
 }
 
-.availability-badge-large.limited {
-  background: var(--warning-color);
+.status-badge.limited {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
 }
 
-.availability-badge-large.unavailable {
-  background: var(--danger-color);
+.status-badge.unavailable {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
 }
 
-.book-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--dark-color);
+/* Book Price */
+.book-price {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
   margin-bottom: 1.5rem;
-  line-height: 1.2;
 }
 
-.book-meta {
+.price-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.price-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Action Buttons */
+.action-buttons {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
 }
 
-.book-meta > span {
-  display: flex;
-  align-items: center;
-  color: #6b7280;
-}
-
-.book-meta strong {
-  color: var(--dark-color);
-}
-
-.description-content {
-  background: #f8f9fa;
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  border-left: 4px solid var(--primary-color);
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: white;
-  padding: 1.5rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.2);
-}
-
-.stat-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: var(--gradient-primary);
+.btn-borrow {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
   color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-borrow:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+}
+
+.btn-borrow:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-favorite {
+  background: white;
+  color: #ef4444;
+  border: 2px solid #fee2e2;
+  padding: 0.875rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-favorite:hover:not(:disabled) {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+
+.btn-favorite.active {
+  background: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.btn-favorite:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Book Details */
+.book-details {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.book-header {
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.book-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+}
+
+.book-author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.book-author i {
+  color: #6366f1;
+  font-size: 1.25rem;
+}
+
+/* Info Grid */
+.book-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.value {
+  font-size: 1rem;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.value.link {
+  color: #6366f1;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.value.link:hover {
+  color: #4f46e5;
+}
+
+.value.code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  background: #f8fafc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+/* Description */
+.description-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.description-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #475569;
+  margin: 0;
+}
+
+/* Stats */
+.stats-section {
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: white;
+}
+
+.stat-icon.books {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.stat-icon.borrows {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.stat-icon.favorites {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.stat-content {
+  flex: 1;
 }
 
 .stat-number {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--dark-color);
+  color: #1e293b;
+  line-height: 1;
 }
 
 .stat-label {
-  color: #6b7280;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+/* Share */
+.share-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.share-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
 }
 
 .share-buttons {
   display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.share-btn:hover {
+  transform: translateY(-1px);
+}
+
+.share-btn.facebook {
+  background: #1877f2;
+}
+
+.share-btn.twitter {
+  background: #1da1f2;
+}
+
+.share-btn.copy {
+  background: #64748b;
+}
+
+/* Related Books */
+.related-books {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .section-title {
-  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: var(--dark-color);
+  color: #1e293b;
+  margin-bottom: 1.5rem;
 }
 
+.section-title i {
+  color: #6366f1;
+}
+
+/* Responsive */
 @media (max-width: 991px) {
-  .book-image-section {
+  .book-image-wrapper {
     position: static;
     margin-bottom: 2rem;
   }
-
-  .main-image {
-    text-align: center;
+  
+  .book-title {
+    font-size: 1.875rem;
   }
-
-  .quick-actions {
-    max-width: 400px;
-    margin: 1rem auto 0;
+  
+  .book-info-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
+  .book-details {
+    padding: 1.5rem;
+  }
+  
+  .book-image-container {
+    padding: 1.5rem;
+  }
+  
   .book-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
-
-  .book-meta {
-    font-size: 1rem;
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
-
-  .stat-item {
-    padding: 1rem;
-  }
-
-  .stat-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-
-  .stat-number {
-    font-size: 1.2rem;
-  }
-
-  .share-buttons {
-    justify-content: center;
+  
+  .share-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 }
 </style>

@@ -107,50 +107,23 @@
               </select>
             </div>
 
-            <!-- Year Range -->
+            <!-- Year Selection -->
             <div class="filter-section">
               <label class="form-label fw-bold">Năm xuất bản</label>
-              <div class="row g-2">
-                <div class="col-6">
-                  <input
-                    v-model.number="filters.yearFrom"
-                    type="number"
-                    class="form-control"
-                    placeholder="Từ năm"
-                    min="1900"
-                    :max="currentYear"
-                    @change="applyFilters"
-                  />
-                </div>
-                <div class="col-6">
-                  <input
-                    v-model.number="filters.yearTo"
-                    type="number"
-                    class="form-control"
-                    placeholder="Đến năm"
-                    min="1900"
-                    :max="currentYear"
-                    @change="applyFilters"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Availability -->
-            <div class="filter-section">
-              <label class="form-label fw-bold">Tình trạng</label>
-              <div class="form-check">
-                <input
-                  id="available-only"
-                  v-model="filters.availableOnly"
-                  type="checkbox"
-                  class="form-check-input"
-                  @change="applyFilters"
-                />
-                <label for="available-only" class="form-check-label">
-                  Chỉ sách còn trong kho
-                </label>
-              </div>
+              <select
+                v-model="filters.publishYear"
+                class="form-select"
+                @change="applyFilters"
+              >
+                <option value="">Tất cả năm</option>
+                <option
+                  v-for="year in yearOptions"
+                  :key="year"
+                  :value="year"
+                >
+                  {{ year }}
+                </option>
+              </select>
             </div>
 
             <!-- Reset Filters -->
@@ -172,9 +145,6 @@
               <div class="results-info">
                 <h5 class="mb-1">
                   {{ pagination.total }} cuốn sách
-                  <span v-if="hasActiveFilters" class="text-muted">
-                    (đã lọc)
-                  </span>
                 </h5>
                 <p class="text-muted mb-0">
                   Trang {{ pagination.current }} / {{ pagination.pages }}
@@ -215,8 +185,6 @@
                   <option value="oldest">Cũ nhất</option>
                   <option value="a-to-z">Tên A-Z</option>
                   <option value="z-to-a">Tên Z-A</option>
-                  <option value="year-desc">Năm XB mới nhất</option>
-                  <option value="year-asc">Năm XB cũ nhất</option>
                 </select>
               </div>
             </div>
@@ -268,29 +236,14 @@
               </span>
 
               <span
-                v-if="filters.yearFrom || filters.yearTo"
+                v-if="filters.publishYear"
                 class="filter-tag"
               >
                 <i class="bi bi-calendar me-1"></i>
-                {{ filters.yearFrom || "..." }} - {{ filters.yearTo || "..." }}
+                Năm {{ filters.publishYear }}
                 <button
                   @click="
-                    filters.yearFrom = null;
-                    filters.yearTo = null;
-                    applyFilters();
-                  "
-                  class="btn-close-filter"
-                >
-                  <i class="bi bi-x"></i>
-                </button>
-              </span>
-
-              <span v-if="filters.availableOnly" class="filter-tag">
-                <i class="bi bi-check-circle me-1"></i>
-                Còn trong kho
-                <button
-                  @click="
-                    filters.availableOnly = false;
+                    filters.publishYear = '';
                     applyFilters();
                   "
                   class="btn-close-filter"
@@ -427,14 +380,21 @@ export default {
     const viewMode = ref("grid");
 
     const currentYear = new Date().getFullYear();
+    
+    // Generate year options (last 30 years)
+    const yearOptions = computed(() => {
+      const years = [];
+      for (let year = currentYear; year >= currentYear - 30; year--) {
+        years.push(year);
+      }
+      return years;
+    });
 
     const filters = reactive({
       search: "",
       category: "",
       publisher: "",
-      yearFrom: null,
-      yearTo: null,
-      availableOnly: false,
+      publishYear: "",
       sort: "newest",
       page: 1,
       limit: 12,
@@ -453,9 +413,7 @@ export default {
         filters.search ||
         filters.category ||
         filters.publisher ||
-        filters.yearFrom ||
-        filters.yearTo ||
-        filters.availableOnly
+        filters.publishYear
       );
     });
 
@@ -522,10 +480,9 @@ export default {
       if (route.query.q) filters.search = route.query.q;
       if (route.query.category) filters.category = route.query.category;
       if (route.query.publisher) filters.publisher = route.query.publisher;
+      if (route.query.year) filters.publishYear = route.query.year;
       if (route.query.sort) filters.sort = route.query.sort;
       if (route.query.page) filters.page = parseInt(route.query.page);
-      if (route.query.available)
-        filters.availableOnly = route.query.available === "true";
     };
 
     const updateQuery = () => {
@@ -533,9 +490,9 @@ export default {
       if (filters.search) query.q = filters.search;
       if (filters.category) query.category = filters.category;
       if (filters.publisher) query.publisher = filters.publisher;
+      if (filters.publishYear) query.year = filters.publishYear;
       if (filters.sort !== "newest") query.sort = filters.sort;
       if (filters.page > 1) query.page = filters.page;
-      if (filters.availableOnly) query.available = "true";
 
       router.replace({ query });
     };
@@ -553,9 +510,7 @@ export default {
         if (filters.search) params.search = filters.search;
         if (filters.category) params.danhmuc = filters.category;
         if (filters.publisher) params.nhaxuatban = filters.publisher;
-        if (filters.yearFrom) params.namxb_from = filters.yearFrom;
-        if (filters.yearTo) params.namxb_to = filters.yearTo;
-        if (filters.availableOnly) params.available = true;
+        if (filters.publishYear) params.namxb = filters.publishYear;
 
         const response = await api.books.getPublic(params);
 
@@ -627,9 +582,7 @@ export default {
         search: "",
         category: "",
         publisher: "",
-        yearFrom: null,
-        yearTo: null,
-        availableOnly: false,
+        publishYear: "",
         sort: "newest",
         page: 1,
       });
@@ -690,6 +643,7 @@ export default {
       filters,
       pagination,
       currentYear,
+      yearOptions,
       hasActiveFilters,
       getVisiblePages,
       safeCategoryName,
@@ -746,7 +700,7 @@ export default {
 
 .filter-section:last-of-type {
   border-bottom: none;
-  padding-bottom: 0;
+  padding-bottom: 1.5rem;
 }
 
 .category-filters {
