@@ -6,6 +6,7 @@ export const useAuthStore = defineStore("auth", {
     user: null,
     token: localStorage.getItem("client_token"),
     isLoading: false,
+    initialized: false,
   }),
 
   getters: {
@@ -146,6 +147,8 @@ export const useAuthStore = defineStore("auth", {
 
     // Initialize store from localStorage
     initializeAuth() {
+      if (this.initialized) return;
+      
       const token = localStorage.getItem("client_token");
       const user = localStorage.getItem("client_user");
 
@@ -165,6 +168,8 @@ export const useAuthStore = defineStore("auth", {
           this.clearStorage();
         }
       }
+      
+      this.initialized = true;
     },
   },
 });

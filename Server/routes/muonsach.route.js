@@ -45,6 +45,7 @@ router.delete(
 );
 
 // Routes cho độc giả
+router.get("/my-borrows", authenticateToken, MuonSachController.getMyBorrows);
 router.get("/my-history", authenticateToken, MuonSachController.getMyHistory);
 router.post("/register", authenticateToken, MuonSachController.registerBorrow);
 router.delete(

@@ -16,7 +16,7 @@
         </h6>
 
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-7 mb-3">
             <label for="hoLot" class="form-label">Họ và tên đệm</label>
             <input
               id="hoLot"
@@ -32,7 +32,7 @@
             </div>
           </div>
 
-          <div class="col-md-6 mb-3">
+          <div class="col-md-5 mb-3">
             <label for="ten" class="form-label">Tên</label>
             <input
               id="ten"
@@ -50,7 +50,7 @@
         </div>
 
         <div class="row">
-          <div class="col-md-6 mb-3">
+          <div class="col-md-7 mb-3">
             <label for="ngaySinh" class="form-label">Ngày sinh</label>
             <input
               id="ngaySinh"
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <div class="col-md-6 mb-3">
+          <div class="col-md-5 mb-3">
             <label for="phai" class="form-label">Giới tính</label>
             <select
               id="phai"
@@ -75,7 +75,6 @@
               :class="{ 'is-invalid': errors.Phai }"
               required
             >
-              <option value="">Chọn giới tính</option>
               <option value="Nam">Nam</option>
               <option value="Nữ">Nữ</option>
             </select>
@@ -136,7 +135,7 @@
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="diaChi" class="form-label">Địa chỉ</label>
           <textarea
             id="diaChi"
@@ -249,10 +248,7 @@
             required
           />
           <label for="agreeTerms" class="form-check-label">
-            Tôi đồng ý với
-            <a href="#" class="text-decoration-none">Điều khoản sử dụng</a>
-            và
-            <a href="#" class="text-decoration-none">Chính sách bảo mật</a>
+            Tôi đồng ý với điều khoản sử dụng
           </label>
         </div>
         <div v-if="errors.agreeTerms" class="invalid-feedback">
@@ -273,11 +269,6 @@
         {{ isLoading ? "Đang đăng ký..." : "Đăng ký tài khoản" }}
       </button>
     </form>
-
-    <div class="auth-divider">
-      <span>hoặc</span>
-    </div>
-
     <div class="auth-links">
       <p class="text-center">
         Đã có tài khoản?
@@ -449,13 +440,13 @@ export default {
 
         await authStore.register(registrationData);
 
-        toast.success(
-          "Đăng ký tài khoản thành công! Chào mừng bạn đến với thư viện!"
-        );
+        // Note: Success message is automatically shown by API interceptor
+        // toast.success(
+        //   "Đăng ký tài khoản thành công! Chào mừng bạn đến với thư viện!"
+        // );
 
-        // Redirect to intended page or dashboard
-        const redirectTo = route.query.redirect || "/tai-khoan";
-        router.push(redirectTo);
+        // Redirect to login page after successful registration
+        router.push("/auth/dang-nhap");
       } catch (error) {
         console.error("Registration error:", error);
       } finally {

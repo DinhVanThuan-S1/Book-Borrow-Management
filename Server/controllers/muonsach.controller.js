@@ -43,6 +43,36 @@ class MuonSachController {
   }
 
   /**
+   * Lấy danh sách sách đang mượn của độc giả hiện tại
+   */
+  static async getMyBorrows(req, res) {
+    try {
+      // Chỉ cho phép độc giả xem sách mượn của chính mình
+      if (req.user.role !== USER_ROLES.DOC_GIA) {
+        return ApiResponse.forbidden(
+          res,
+          "Chỉ độc giả mới có thể xem danh sách sách mượn"
+        );
+      }
+
+      // Convert client query parameters to server format
+      const queryParams = { ...req.query };
+      if (queryParams.status) {
+        queryParams.trangthai = queryParams.status;
+        delete queryParams.status;
+      }
+
+      const result = await MuonSachService.getLichSuMuonSach(
+        req.user.id,
+        queryParams
+      );
+      return ApiResponse.paginated(res, result.lichSu, result.pagination);
+    } catch (error) {
+      return ApiResponse.error(res, error.message);
+    }
+  }
+
+  /**
    * Đăng ký mượn sách (cho độc giả)
    */
   static async registerBorrow(req, res) {

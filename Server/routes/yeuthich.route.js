@@ -7,7 +7,7 @@ const {
 const router = express.Router();
 
 // Routes công khai (có thể không cần đăng nhập)
-router.get("/my-favorites", YeuThichController.getMyFavorites);
+router.get("/my-favorites", authenticateToken, YeuThichController.getMyFavorites);
 router.get("/count", YeuThichController.getFavoriteCount);
 router.get("/check/:sachId", YeuThichController.checkIsFavorite);
 

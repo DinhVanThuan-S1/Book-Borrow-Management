@@ -149,6 +149,9 @@ export default {
 
     const handleLogin = async () => {
       if (!validateForm()) return;
+      
+      // Prevent multiple simultaneous login attempts
+      if (isLoading.value) return;
 
       isLoading.value = true;
 
@@ -158,7 +161,8 @@ export default {
           Password: form.password,
         });
 
-        toast.success("Đăng nhập thành công!");
+        // Note: Success message is automatically shown by API interceptor
+        // toast.success("Đăng nhập thành công!");
 
         // Redirect to intended page or home
         const redirectTo = route.query.redirect || "/";

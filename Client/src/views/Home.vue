@@ -19,6 +19,7 @@
                   Khám phá sách
                 </router-link>
                 <router-link
+                  v-if="!authStore.isAuthenticated"
                   to="/auth/dang-ky"
                   class="btn btn-primary-gradient btn-lg"
                 >
@@ -203,6 +204,7 @@
 <script>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import api from "@/services/api";
 import SearchForm from "@/components/common/SearchForm.vue";
 import FeaturedBooks from "@/components/sections/FeaturedBooks.vue";
@@ -219,6 +221,7 @@ export default {
   },
   setup() {
     const router = useRouter();
+    const authStore = useAuthStore();
 
     const stats = ref({});
     const featuredBooks = ref([]);
@@ -340,6 +343,7 @@ export default {
     });
 
     return {
+      authStore,
       stats,
       featuredBooks,
       newBooks,
