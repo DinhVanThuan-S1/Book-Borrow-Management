@@ -134,22 +134,6 @@
       </div>
     </section>
 
-    <!-- Categories -->
-    <section class="categories-section py-5">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-12 text-center">
-            <h2 class="section-title">
-              <i class="bi bi-grid-3x3-gap me-2"></i>
-              Danh mục sách
-            </h2>
-            <p class="section-subtitle">Khám phá theo chủ đề yêu thích</p>
-          </div>
-        </div>
-
-        <CategoriesGrid :categories="categories" :loading="loadingCategories" />
-      </div>
-    </section>
 
     <!-- Features -->
     <section class="features-section py-5 bg-light">
@@ -168,7 +152,7 @@
               </div>
               <h5>Mượn sách nhanh chóng</h5>
               <p>
-                Chỉ với vài click, bạn có thể mượn sách và nhận tại thư viện.
+                Chỉ với vài click, bạn có thể đăng ký mượn và nhận sách tại thư viện.
               </p>
             </div>
           </div>
@@ -186,12 +170,9 @@
           <div class="col-lg-4 col-md-6 mb-4">
             <div class="feature-card client-card h-100">
               <div class="feature-icon">
-                <i class="bi bi-clock-history"></i>
-              </div>
-              <div class="feature-icon">
                 <i class="bi bi-shield-check"></i>
               </div>
-              <h5>An toàn & tiện lợi</h5>
+              <h5>An toàn và tiện lợi</h5>
               <p>Hệ thống bảo mật cao và giao diện thân thiện.</p>
             </div>
           </div>

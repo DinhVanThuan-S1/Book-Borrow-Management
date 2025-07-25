@@ -1,356 +1,274 @@
 <template>
-  <header class="client-header">
-    <nav class="navbar navbar-expand-lg">
-      <div class="container">
-        <!-- Brand -->
-        <router-link to="/" class="navbar-brand">
-          <i class="bi bi-book me-2"></i>
-          Thư Viện Online
-        </router-link>
-
-        <!-- Mobile Toggle -->
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon">
-            <i class="bi bi-list text-white"></i>
-          </span>
-        </button>
-
-        <!-- Navigation -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <router-link
-                to="/"
-                class="nav-link"
-                :class="{ active: $route.name === 'Home' }"
-              >
-                <i class="bi bi-house me-1"></i>
+  <footer class="client-footer">
+    <div class="container">
+      <div class="row">
+        <!-- About Section -->
+        <div class="col-lg-4 col-md-6 mb-4">
+          <h5 class="text-white mb-3">
+            <i class="bi bi-book text-gradient me-2"></i>
+            Thư Viện Online
+          </h5>
+          <p class="text-light mb-3">
+            Hệ thống thư viện trực tuyến hiện đại, cung cấp kho sách phong phú 
+            và dịch vụ mượn sách tiện lợi cho mọi người.
+          </p>
+          <div class="social-links">
+            <a href="#" class="social-link me-3">
+              <i class="bi bi-facebook"></i>
+            </a>
+            <a href="#" class="social-link me-3">
+              <i class="bi bi-twitter"></i>
+            </a>
+            <a href="#" class="social-link me-3">
+              <i class="bi bi-instagram"></i>
+            </a>
+            <a href="#" class="social-link">
+              <i class="bi bi-youtube"></i>
+            </a>
+          </div>
+        </div>
+        
+        <!-- Quick Links -->
+        <div class="col-lg-2 col-md-6 mb-4">
+          <h5 class="text-white mb-3">Liên kết</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <router-link to="/" class="footer-link">
+                <i class="bi bi-house me-2"></i>
                 Trang chủ
               </router-link>
             </li>
-            <li class="nav-item">
-              <router-link
-                to="/sach"
-                class="nav-link"
-                :class="{ active: $route.name === 'BookCatalog' }"
-              >
-                <i class="bi bi-book me-1"></i>
+            <li class="mb-2">
+              <router-link to="/sach" class="footer-link">
+                <i class="bi bi-book me-2"></i>
                 Danh mục sách
               </router-link>
             </li>
+            <li class="mb-2">
+              <router-link to="#" class="footer-link">
+                <i class="bi bi-info-circle me-2"></i>
+                Giới thiệu
+              </router-link>
+            </li>
+            <li class="mb-2">
+              <router-link to="#" class="footer-link">
+                <i class="bi bi-envelope me-2"></i>
+                Liên hệ
+              </router-link>
+            </li>
           </ul>
-
-          <!-- User Actions -->
-          <div class="navbar-nav">
-            <!-- Search Button -->
-            <button
-              class="btn btn-outline-light me-2 d-lg-none"
-              @click="showSearchModal = true"
-            >
-              <i class="bi bi-search"></i>
-            </button>
-
-            <!-- Quick Search (Desktop) -->
-            <div class="nav-item me-3 d-none d-lg-block">
-              <form @submit.prevent="quickSearch" class="search-form">
-                <div class="input-group input-group-sm">
-                  <input
-                    v-model="searchQuery"
-                    type="text"
-                    class="form-control"
-                    placeholder="Tìm kiếm sách..."
-                    style="min-width: 200px"
-                  />
-                  <button class="btn btn-outline-light" type="submit">
-                    <i class="bi bi-search"></i>
-                  </button>
-                </div>
-              </form>
+        </div>
+        
+        <!-- Services -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <h5 class="text-white mb-3">Dịch vụ</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2">
+              <a href="#" class="footer-link">
+                <i class="bi bi-arrow-left-right me-2"></i>
+                Mượn sách online
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="#" class="footer-link">
+                <i class="bi bi-search me-2"></i>
+                Tìm kiếm nâng cao
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="#" class="footer-link">
+                <i class="bi bi-heart me-2"></i>
+                Danh sách yêu thích
+              </a>
+            </li>
+            <li class="mb-2">
+              <a href="#" class="footer-link">
+                <i class="bi bi-bell me-2"></i>
+                Thông báo mới
+              </a>
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Contact Info -->
+        <div class="col-lg-3 col-md-6 mb-4">
+          <h5 class="text-white mb-3">Thông tin liên hệ</h5>
+          <div class="contact-info">
+            <div class="contact-item mb-3">
+              <i class="bi bi-geo-alt text-primary me-2"></i>
+              <span>Khu 2, Xuân Khánh, Ninh Kiều, Cần Thơ</span>
             </div>
-
-            <!-- Authentication -->
-            <div v-if="!authStore.isAuthenticated" class="nav-item">
-              <div class="d-flex gap-2">
-                <router-link
-                  to="/auth/dang-nhap"
-                  class="btn btn-outline-light btn-sm"
-                >
-                  <i class="bi bi-box-arrow-in-right me-1"></i>
-                  Đăng nhập
-                </router-link>
-                <router-link to="/auth/dang-ky" class="btn btn-light btn-sm">
-                  <i class="bi bi-person-plus me-1"></i>
-                  Đăng ký
-                </router-link>
-              </div>
+            <div class="contact-item mb-3">
+              <i class="bi bi-telephone text-primary me-2"></i>
+              <a href="tel:+84123456789" class="footer-link">
+                0382906852
+              </a>
             </div>
-
-            <!-- User Menu -->
-            <div v-else class="nav-item dropdown">
-              <button
-                class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
-                data-bs-toggle="dropdown"
-              >
-                <div class="user-avatar me-2">
-                  <img
-                    v-if="authStore.userAvatar"
-                    :src="authStore.userAvatar"
-                    :alt="authStore.userName"
-                    class="avatar-img"
-                  />
-                  <div v-else class="avatar-placeholder">
-                    {{ authStore.userInitials }}
-                  </div>
-                </div>
-                <span class="d-none d-md-inline">{{ authStore.userName }}</span>
-              </button>
-
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <h6 class="dropdown-header">
-                    <i class="bi bi-person-circle me-2"></i>
-                    {{ authStore.userName }}
-                  </h6>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <router-link to="/tai-khoan" class="dropdown-item">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    Trang cá nhân
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/tai-khoan/sach-dang-muon"
-                    class="dropdown-item"
-                  >
-                    <i class="bi bi-book me-2"></i>
-                    Sách đang mượn
-                    <span
-                      v-if="borrowingCount > 0"
-                      class="badge bg-primary ms-2"
-                    >
-                      {{ borrowingCount }}
-                    </span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/tai-khoan/yeu-thich" class="dropdown-item">
-                    <i class="bi bi-heart me-2"></i>
-                    Yêu thích
-                    <span
-                      v-if="favoritesCount > 0"
-                      class="badge bg-danger ms-2"
-                    >
-                      {{ favoritesCount }}
-                    </span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/tai-khoan/lich-su-muon"
-                    class="dropdown-item"
-                  >
-                    <i class="bi bi-clock-history me-2"></i>
-                    Lịch sử mượn
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/tai-khoan/thong-tin" class="dropdown-item">
-                    <i class="bi bi-gear me-2"></i>
-                    Cài đặt
-                  </router-link>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <button @click="logout" class="dropdown-item text-danger">
-                    <i class="bi bi-box-arrow-right me-2"></i>
-                    Đăng xuất
-                  </button>
-                </li>
-              </ul>
+            <div class="contact-item mb-3">
+              <i class="bi bi-envelope text-primary me-2"></i>
+              <a href="mailto:dinhthuan836@gmail.com" class="footer-link">
+                dinhthuan836@gmail.com
+              </a>
+            </div>
+            <div class="contact-item">
+              <i class="bi bi-clock text-primary me-2"></i>
+              <span>Thứ 2 - Thứ 7 : 08:00 - 22:00</span>
             </div>
           </div>
         </div>
       </div>
-    </nav>
-
-    <!-- Mobile Search Modal -->
-    <SearchModal :show="showSearchModal" @close="showSearchModal = false" />
-  </header>
+    </div>
+    
+    <!-- Footer Bottom -->
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <p class="mb-0">
+              &copy; {{ currentYear }} Thư Viện online
+              Được phát triển bởi 
+              <a href="https://github.com/DinhVanThuan-S1" class="footer-link" target="_blank">
+                DinhVanThuan-S1
+              </a>
+            </p>
+          </div>
+          <div class="col-md-6 text-md-end">
+            <div class="footer-links">
+              <a href="#" class="footer-link me-3">Chính sách bảo mật</a>
+              <a href="#" class="footer-link me-3">Điều khoản sử dụng</a>
+              <a href="#" class="footer-link">Hỗ trợ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/auth";
-import { useToast } from "vue-toastification";
-import api from "@/services/api";
-import SearchModal from "@/components/modals/SearchModal.vue";
+import { ref, computed } from 'vue'
+import { useToast } from 'vue-toastification'
 
 export default {
-  name: "ClientHeader",
-  components: {
-    SearchModal,
-  },
+  name: 'ClientFooter',
   setup() {
-    const router = useRouter();
-    const authStore = useAuthStore();
-    const toast = useToast();
-
-    const searchQuery = ref("");
-    const showSearchModal = ref(false);
-    const borrowingCount = ref(0);
-    const favoritesCount = ref(0);
-
-    const quickSearch = () => {
-      if (searchQuery.value.trim()) {
-        router.push({
-          name: "BookCatalog",
-          query: { q: searchQuery.value.trim() },
-        });
-        searchQuery.value = "";
-      }
-    };
-
-    const logout = async () => {
+    const toast = useToast()
+    
+    const newsletterEmail = ref('')
+    const isSubscribing = ref(false)
+    
+    const currentYear = computed(() => new Date().getFullYear())
+    
+    const subscribeNewsletter = async () => {
+      if (!newsletterEmail.value.trim()) return
+      
+      isSubscribing.value = true
+      
       try {
-        await authStore.logout();
-        router.push("/");
-        toast.success("Đăng xuất thành công");
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        
+        toast.success('Đăng ký nhận thông tin thành công!')
+        newsletterEmail.value = ''
       } catch (error) {
-        console.error("Logout error:", error);
+        toast.error('Có lỗi xảy ra. Vui lòng thử lại.')
+      } finally {
+        isSubscribing.value = false
       }
-    };
-
-    const fetchUserStats = async () => {
-      if (!authStore.isAuthenticated) return;
-
-      try {
-        const [borrowsRes, favoritesRes] = await Promise.all([
-          api.borrowing.getMyBorrows({ limit: 1, status: "Đã mượn" }),
-          api.favorites.getMyFavorites({ limit: 1 }),
-        ]);
-
-        borrowingCount.value = borrowsRes.pagination?.total || 0;
-        favoritesCount.value = favoritesRes.pagination?.total || 0;
-      } catch (error) {
-        console.error("Error fetching user stats:", error);
-      }
-    };
-
-    onMounted(() => {
-      fetchUserStats();
-    });
-
+    }
+    
     return {
-      authStore,
-      searchQuery,
-      showSearchModal,
-      borrowingCount,
-      favoritesCount,
-      quickSearch,
-      logout,
-    };
-  },
-};
+      newsletterEmail,
+      isSubscribing,
+      currentYear,
+      subscribeNewsletter
+    }
+  }
+}
 </script>
 
 <style scoped>
-.client-header {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.client-footer {
+  background: var(--dark-color);
+  margin-top: auto;
 }
 
-.navbar-toggler {
-  border: none;
-  padding: 0.25rem;
+.social-links {
+  display: flex;
+  gap: 0.5rem;
 }
 
-.navbar-toggler:focus {
-  box-shadow: none;
-}
-
-.search-form .input-group {
-  transition: all 0.3s ease;
-}
-
-.search-form .form-control {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-}
-
-.search-form .form-control::placeholder {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.search-form .form-control:focus {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  color: white;
-  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
+.social-link {
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-}
-
-.dropdown-menu {
-  border: none;
-  box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: var(--border-radius);
-}
-
-.dropdown-item {
-  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.dropdown-item:hover {
-  background: var(--light-color);
+.social-link:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
 }
 
-.badge {
-  font-size: 0.7rem;
+.contact-item {
+  display: flex;
+  align-items: flex-start;
+  color: #d1d5db;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
-@media (max-width: 991px) {
-  .navbar-nav {
+.newsletter-form .form-control {
+  border: 1px solid #374151;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.newsletter-form .form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.newsletter-form .form-control:focus {
+  border-color: var(--primary-color);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  color: white;
+}
+
+.newsletter-form .btn {
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+}
+
+.footer-bottom {
+  border-top: 1px solid #374151;
+  padding: 1.5rem 0;
+  margin-top: 2rem;
+}
+
+.footer-links a {
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .newsletter-form {
+    margin-bottom: 1rem;
+  }
+  
+  .app-download {
     text-align: center;
   }
-
-  .nav-item {
-    margin: 0.25rem 0;
+  
+  .footer-links {
+    text-align: center;
+    margin-top: 1rem;
   }
 }
 </style>
