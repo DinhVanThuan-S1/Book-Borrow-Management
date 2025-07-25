@@ -10,29 +10,7 @@
       <!-- Overlay Actions -->
       <div class="book-overlay">
         <div class="overlay-actions">
-          <button
-            @click="viewDetails"
-            class="btn btn-light btn-sm me-2"
-            title="Xem chi tiết"
-          >
-            <i class="bi bi-eye"></i>
-          </button>
-          <button
-            @click="toggleFavorite"
-            class="btn btn-sm"
-            :class="isFavorite ? 'btn-danger' : 'btn-outline-light'"
-            title="Yêu thích"
-            :disabled="togglingFavorite"
-          >
-            <span
-              v-if="togglingFavorite"
-              class="spinner-border spinner-border-sm"
-            ></span>
-            <i
-              v-else
-              :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"
-            ></i>
-          </button>
+          <!-- Removed buttons - now in book-actions -->
         </div>
       </div>
 
@@ -61,15 +39,19 @@
       <div class="book-meta">
         <span class="book-category">
           <i class="bi bi-tag me-1"></i>
-          {{ book.MaDM?.TenDM || "Chưa phân loại" }}
+          {{ getCategoryName(book) || "Chưa phân loại" }}
         </span>
-        <span class="book-year">{{ book.NamXuatBan }}</span>
+        <div class="book-details">
+          <span class="book-price">
+            {{ formatPrice(book.DonGia) }}
+          </span>
+        </div>
       </div>
 
       <div class="book-actions">
         <button
           @click="requestBorrow"
-          class="btn btn-primary-gradient btn-sm flex-grow-1"
+          class="btn btn-primary-gradient btn-sm"
           :disabled="!canBorrow || requesting"
         >
           <span
@@ -82,9 +64,27 @@
 
         <button
           @click="viewDetails"
-          class="btn btn-outline-primary btn-sm ms-2"
+          class="btn btn-outline-primary btn-sm"
+          title="Xem chi tiết"
         >
           <i class="bi bi-info-circle"></i>
+        </button>
+
+        <button
+          @click="toggleFavorite"
+          class="btn btn-sm"
+          :class="isFavorite ? 'btn-danger' : 'btn-outline-danger'"
+          title="Yêu thích"
+          :disabled="togglingFavorite"
+        >
+          <span
+            v-if="togglingFavorite"
+            class="spinner-border spinner-border-sm"
+          ></span>
+          <i
+            v-else
+            :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"
+          ></i>
         </button>
       </div>
     </div>
@@ -120,7 +120,9 @@ export default {
     const requesting = ref(false);
 
     const canBorrow = computed(() => {
-      return props.book.SoQuyen > 0 && authStore.isAuthenticated;
+      // Cho phép click nút để chuyển đến trang đăng nhập nếu chưa đăng nhập
+      // Hoặc cho phép mượn nếu đã đăng nhập và còn sách
+      return !authStore.isAuthenticated || props.book.SoQuyen > 0;
     });
 
     const availabilityClass = computed(() => {
@@ -130,13 +132,12 @@ export default {
     });
 
     const availabilityText = computed(() => {
-      if (props.book.SoQuyen > 5) return "Còn nhiều";
-      if (props.book.SoQuyen > 0) return `Còn ${props.book.SoQuyen}`;
+      if (props.book.SoQuyen > 0) return `${props.book.SoQuyen} quyển`;
       return "Hết sách";
     });
 
     const borrowButtonText = computed(() => {
-      if (!authStore.isAuthenticated) return "Đăng nhập để mượn";
+      if (!authStore.isAuthenticated) return "Mượn sách";
       if (props.book.SoQuyen === 0) return "Hết sách";
       if (requesting.value) return "Đang xử lý...";
       return "Mượn sách";
@@ -146,6 +147,25 @@ export default {
       if (!imagePath) return "/src/assets/images/book-placeholder.jpg";
       if (imagePath.startsWith("http")) return imagePath;
       return `http://localhost:5000${imagePath}`;
+    };
+
+    const formatPrice = (price) => {
+      if (!price) return "Liên hệ";
+      return new Intl.NumberFormat("vi-VN").format(price) + " VND";
+    };
+
+    const getCategoryName = (book) => {
+      // Xử lý trường hợp populate thông thường (MaDM là object)
+      if (book.MaDM && typeof book.MaDM === 'object' && book.MaDM.TenDM) {
+        return book.MaDM.TenDM;
+      }
+      
+      // Xử lý trường hợp aggregation (danhmuc là array)
+      if (book.danhmuc && Array.isArray(book.danhmuc) && book.danhmuc.length > 0) {
+        return book.danhmuc[0].TenDM;
+      }
+
+      return null;
     };
 
     const handleImageError = (event) => {
@@ -231,6 +251,8 @@ export default {
       availabilityText,
       borrowButtonText,
       getBookImage,
+      formatPrice,
+      getCategoryName,
       handleImageError,
       viewDetails,
       requestBorrow,
@@ -284,10 +306,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: rgba(0, 0, 0, 0.1);
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -297,8 +316,7 @@ export default {
 }
 
 .overlay-actions {
-  display: flex;
-  gap: 0.5rem;
+  display: none;
 }
 
 .featured-badge {
@@ -375,6 +393,13 @@ export default {
   gap: 0.5rem;
 }
 
+.book-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
 .book-category {
   background: var(--gradient-secondary);
   color: white;
@@ -386,16 +411,46 @@ export default {
   align-items: center;
 }
 
-.book-year {
-  color: #9ca3af;
-  font-size: 0.85rem;
-  font-weight: 500;
+.book-price {
+  color: #dc3545;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
 }
 
 .book-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   margin-top: auto;
+  align-items: center;
+  width: 100%;
+}
+
+.book-actions .btn:first-child {
+  flex: 1;
+  min-width: 160px;
+  max-width: 280px;
+  color: white;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-actions .btn:first-child:disabled {
+  color: white;
+  opacity: 0.6;
+}
+
+.book-actions .btn:not(:first-child) {
+  flex-shrink: 0;
+  width: 45px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn:disabled {
@@ -403,19 +458,8 @@ export default {
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-  .book-image {
-    height: 200px;
-  }
-
-  .book-info {
-    padding: 1rem;
-  }
-
-  .book-meta {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
+.btn-sm {
+  height: 40px;
+  font-size: 0.875rem;
 }
 </style>
