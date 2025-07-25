@@ -1,7 +1,7 @@
 <template>
   <div class="book-catalog">
     <!-- Page Header -->
-    <section class="catalog-header py-5">
+    <section class="catalog-header py-4">
       <div class="container">
         <div class="row">
           <div class="col-12 text-center">
@@ -18,7 +18,7 @@
     </section>
 
     <!-- Search & Filters -->
-    <section class="container">
+    <section class="container mt-3">
       <div class="row">
         <!-- Sidebar Filters -->
         <div class="col-lg-3 mb-4">
@@ -48,44 +48,20 @@
             <!-- Categories -->
             <div class="filter-section">
               <label class="form-label fw-bold">Danh mục</label>
-              <div class="category-filters">
-                <div class="form-check">
-                  <input
-                    id="all-categories"
-                    v-model="filters.category"
-                    type="radio"
-                    value=""
-                    class="form-check-input"
-                    @change="applyFilters"
-                  />
-                  <label for="all-categories" class="form-check-label">
-                    Tất cả danh mục
-                  </label>
-                </div>
-                <div
+              <select
+                v-model="filters.category"
+                class="form-select"
+                @change="applyFilters"
+              >
+                <option value="">Tất cả danh mục</option>
+                <option
                   v-for="category in categories"
                   :key="category._id"
-                  class="form-check"
+                  :value="category._id"
                 >
-                  <input
-                    :id="`category-${category._id}`"
-                    v-model="filters.category"
-                    type="radio"
-                    :value="category._id"
-                    class="form-check-input"
-                    @change="applyFilters"
-                  />
-                  <label
-                    :for="`category-${category._id}`"
-                    class="form-check-label"
-                  >
-                    {{ category.TenDM }}
-                    <span class="text-muted small"
-                      >({{ category.soLuongSach || 0 }})</span
-                    >
-                  </label>
-                </div>
-              </div>
+                  {{ category.TenDM }}
+                </option>
+              </select>
             </div>
 
             <!-- Publishers -->
@@ -144,7 +120,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
               <div class="results-info">
                 <h5 class="mb-1">
-                  {{ pagination.total }} cuốn sách
+                  {{ pagination.total }} quyển sách
                 </h5>
                 <p class="text-muted mb-0">
                   Trang {{ pagination.current }} / {{ pagination.pages }}
@@ -512,13 +488,33 @@ export default {
         if (filters.publisher) params.nhaxuatban = filters.publisher;
         if (filters.publishYear) params.namxb = filters.publishYear;
 
+        console.log('Fetching books with params:', params);
         const response = await api.books.getPublic(params);
+        console.log('Books response:', response);
 
-        if (response.data) {
-          books.value = response.data.books || response.data;
-          if (response.data.pagination) {
-            Object.assign(pagination, response.data.pagination);
+        if (response.success && response.data) {
+          // Xử lý data - có thể là array sách hoặc object chứa books
+          if (Array.isArray(response.data)) {
+            books.value = response.data;
+          } else if (response.data.books) {
+            books.value = response.data.books;
+          } else {
+            books.value = response.data;
           }
+
+          // Xử lý pagination - từ response root level
+          if (response.pagination) {
+            console.log('Setting pagination from response:', response.pagination);
+            Object.assign(pagination, response.pagination);
+          } else {
+            // Fallback nếu không có pagination
+            pagination.current = 1;
+            pagination.pages = 1;
+            pagination.total = books.value.length;
+            pagination.limit = filters.limit;
+          }
+
+          console.log('Final pagination state:', pagination);
         }
       } catch (error) {
         console.error("Error fetching books:", error);
@@ -530,7 +526,9 @@ export default {
 
     const fetchCategories = async () => {
       try {
-        const response = await api.categories.getWithStats();
+        // Ưu tiên dùng API getAll để lấy tất cả categories
+        const response = await api.categories.getAll();
+        
         if (response.data && Array.isArray(response.data)) {
           categories.value = response.data;
         } else if (response && Array.isArray(response)) {
@@ -541,16 +539,16 @@ export default {
       } catch (error) {
         console.error("Error fetching categories:", error);
         categories.value = [];
-        // Fallback với danh sách danh mục cơ bản
+        
+        // Fallback với API stats nếu getAll fails
         try {
-          const basicResponse = await api.categories.getAll();
-          if (basicResponse.data && Array.isArray(basicResponse.data)) {
-            categories.value = basicResponse.data;
-          } else if (basicResponse && Array.isArray(basicResponse)) {
-            categories.value = basicResponse;
+          const statsResponse = await api.categories.getWithStats();
+          
+          if (statsResponse.data && statsResponse.data.topCategories && Array.isArray(statsResponse.data.topCategories)) {
+            categories.value = statsResponse.data.topCategories;
           }
-        } catch (basicError) {
-          console.error("Error fetching basic categories:", basicError);
+        } catch (statsError) {
+          console.error("Error fetching stats categories:", statsError);
         }
       }
     };
@@ -701,20 +699,6 @@ export default {
 .filter-section:last-of-type {
   border-bottom: none;
   padding-bottom: 1.5rem;
-}
-
-.category-filters {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.form-check {
-  margin-bottom: 0.5rem;
-}
-
-.form-check-label {
-  cursor: pointer;
-  width: 100%;
 }
 
 .results-header {
