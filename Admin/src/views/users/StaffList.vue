@@ -388,8 +388,6 @@ export default {
 
         const response = await api.get("/nhanvien", { params });
 
-        console.log("Response from server:", response); // Debug log
-
         if (response.success) {
           // For paginated response structure: { success: true, data: [], pagination: {} }
           staffs.value = response.data || [];

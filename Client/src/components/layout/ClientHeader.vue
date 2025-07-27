@@ -96,7 +96,7 @@
                 class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
                 data-bs-toggle="dropdown"
               >
-                <div class="user-avatar me-2">
+                <div class="user-avatar me-3">
                   <img
                     v-if="authStore.userAvatar"
                     :src="authStore.userAvatar"

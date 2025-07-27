@@ -169,10 +169,9 @@ export default {
   // Borrowing APIs
   borrowing: {
     requestBorrow: (bookId) =>
-      api.post("/muonsach/request", { MaSach: bookId }),
+      api.post("/muonsach/register", { MaSach: bookId }),
     getMyBorrows: (params) => api.get("/muonsach/my-borrows", { params }),
     getBorrowHistory: (params) => api.get("/muonsach/my-history", { params }),
-    extendBorrow: (borrowId) => api.put(`/muonsach/extend/${borrowId}`),
     cancelRequest: (borrowId) => api.delete(`/muonsach/cancel/${borrowId}`),
   },
 
