@@ -19,6 +19,7 @@ const TheoDoiMuonSachSchema = new mongoose.Schema(
       enum: ["Đã duyệt", "Từ chối", "Đang mượn", "Đã trả", "Quá hạn"],
       default: "Đã duyệt",
     },
+    LyDoTuChoi: { type: String },
     deleted: { type: Boolean, default: false },
   },
   {

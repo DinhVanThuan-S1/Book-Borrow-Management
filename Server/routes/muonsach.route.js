@@ -4,7 +4,11 @@ const {
   authenticateToken,
   requireEmployee,
 } = require("../middleware/auth.middleware");
+const { updateOverdueStatus } = require("../middleware/overdue.middleware");
 const router = express.Router();
+
+// Áp dụng middleware cập nhật trạng thái quá hạn cho tất cả routes
+router.use(updateOverdueStatus);
 
 // Routes cho admin
 router.get(
@@ -24,6 +28,12 @@ router.get(
   authenticateToken,
   requireEmployee,
   MuonSachController.getOverdueBooks
+);
+router.put(
+  "/update-overdue-status",
+  authenticateToken,
+  requireEmployee,
+  MuonSachController.updateOverdueStatus
 );
 router.get(
   "/sach/:id",

@@ -203,12 +203,12 @@
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 60px">#</th>
+                <th style="width: 60px">STT</th>
                 <th>Độc giả</th>
                 <th>Sách</th>
                 <th style="width: 120px">Trạng thái</th>
                 <th style="width: 120px">Ngày mượn</th>
-                <th style="width: 120px">Ngày trả dự kiến</th>
+                <th style="width: 120px">Ngày trả</th>
                 <th style="width: 100px">Còn lại</th>
                 <th style="width: 150px">Thao tác</th>
               </tr>

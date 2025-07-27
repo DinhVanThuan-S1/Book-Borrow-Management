@@ -96,7 +96,9 @@ class MuonSachController {
       return ApiResponse.created(
         res,
         phieuMuon,
-        "Đăng ký mượn sách thành công"
+        phieuMuon.TrangThai === "Đã duyệt" 
+          ? "Đăng ký mượn sách thành công và đã được duyệt tự động"
+          : `Yêu cầu mượn sách đã được gửi nhưng bị từ chối: ${phieuMuon.LyDoTuChoi}`
       );
     } catch (error) {
       return ApiResponse.badRequest(res, error.message);
@@ -211,6 +213,17 @@ class MuonSachController {
         req.query
       );
       return ApiResponse.paginated(res, result.lichSu, result.pagination);
+    } catch (error) {
+      return ApiResponse.error(res, error.message);
+    }
+  }
+  /**
+   * Cập nhật trạng thái quá hạn (có thể gọi định kỳ)
+   */
+  static async updateOverdueStatus(req, res) {
+    try {
+      await MuonSachService.updateOverdueStatus();
+      return ApiResponse.success(res, null, "Cập nhật trạng thái quá hạn thành công");
     } catch (error) {
       return ApiResponse.error(res, error.message);
     }

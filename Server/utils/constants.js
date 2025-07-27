@@ -8,8 +8,9 @@ module.exports = {
   MUON_SACH_STATUS: {
     DA_DUYET: "Đã duyệt",
     TU_CHOI: "Từ chối",
-    DA_MUON: "Đã mượn",
+    DANG_MUON: "Đang mượn",
     DA_TRA: "Đã trả",
+    QUA_HAN: "Quá hạn",
   },
 
   // Chức vụ nhân viên

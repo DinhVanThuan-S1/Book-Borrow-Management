@@ -127,45 +127,63 @@ class MuonSachService {
    * Đăng ký mượn sách
    */
   static async dangKyMuonSach(docGiaId, sachId) {
-    // Kiểm tra sách có tồn tại và còn trong kho
-    const sach = await SachService.checkBookAvailability(sachId);
+    // Kiểm tra sách có tồn tại
+    let sach;
+    let trangThai = MUON_SACH_STATUS.TU_CHOI; // Mặc định là từ chối
+    let lyDoTuChoi = "";
+
+    try {
+      sach = await SachService.checkBookAvailability(sachId);
+    } catch (error) {
+      lyDoTuChoi = "Sách không còn trong kho hoặc đã hết";
+    }
 
     // Kiểm tra độc giả đã mượn sách này chưa (và chưa trả)
-    const daMuon = await TheoDoiMuonSach.findOne({
-      MaDocGia: docGiaId,
-      MaSach: sachId,
-      TrangThai: { $in: [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DA_MUON] },
-      deleted: false,
-    });
+    if (sach) {
+      const daMuon = await TheoDoiMuonSach.findOne({
+        MaDocGia: docGiaId,
+        MaSach: sachId,
+        TrangThai: { $in: [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DANG_MUON] },
+        deleted: false,
+      });
 
-    if (daMuon) {
-      throw new Error("Bạn đã mượn sách này rồi");
+      if (daMuon) {
+        lyDoTuChoi = "Bạn đã mượn sách này rồi";
+      }
     }
 
     // Kiểm tra độc giả đã mượn quá giới hạn chưa
-    const soSachDangMuon = await TheoDoiMuonSach.countDocuments({
-      MaDocGia: docGiaId,
-      TrangThai: { $in: [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DA_MUON] },
-      deleted: false,
-    });
+    if (sach && !lyDoTuChoi) {
+      const soSachDangMuon = await TheoDoiMuonSach.countDocuments({
+        MaDocGia: docGiaId,
+        TrangThai: { $in: [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DANG_MUON] },
+        deleted: false,
+      });
 
-    if (soSachDangMuon >= MAX_BOOKS_PER_USER) {
-      throw new Error(
-        `Bạn đã mượn tối đa ${MAX_BOOKS_PER_USER} quyển sách. Vui lòng trả sách trước khi mượn tiếp.`
-      );
+      if (soSachDangMuon >= MAX_BOOKS_PER_USER) {
+        lyDoTuChoi = `Bạn đã mượn tối đa ${MAX_BOOKS_PER_USER} quyển sách. Vui lòng trả sách trước khi mượn tiếp.`;
+      }
+    }
+
+    // Nếu tất cả điều kiện đều OK thì tự động duyệt
+    if (sach && !lyDoTuChoi) {
+      trangThai = MUON_SACH_STATUS.DA_DUYET;
     }
 
     // Tạo phiếu mượn mới
     const phieuMuon = new TheoDoiMuonSach({
       MaDocGia: docGiaId,
       MaSach: sachId,
-      TrangThai: MUON_SACH_STATUS.DA_DUYET, // Tự động duyệt nếu đủ điều kiện
+      TrangThai: trangThai,
+      LyDoTuChoi: lyDoTuChoi || undefined,
     });
 
     await phieuMuon.save();
 
-    // Giảm số lượng sách trong kho
-    await SachService.updateBookQuantity(sachId, -1);
+    // Chỉ giảm số lượng sách nếu được duyệt
+    if (trangThai === MUON_SACH_STATUS.DA_DUYET) {
+      await SachService.updateBookQuantity(sachId, -1);
+    }
 
     await phieuMuon.populate("MaSach", "TenSach TacGia BiaSach DonGia");
 
@@ -184,14 +202,14 @@ class MuonSachService {
     });
 
     if (!phieuMuon) {
-      throw new Error("Không tìm thấy phiếu mượn hoặc không thể hủy");
+      throw new Error("Không tìm thấy phiếu mượn hoặc không thể hủy. Chỉ có thể hủy phiếu mượn đã được duyệt.");
     }
 
     // Xóa mềm phiếu mượn
     phieuMuon.deleted = true;
     await phieuMuon.save();
 
-    // Tăng lại số lượng sách trong kho
+    // Tăng lại số lượng sách trong kho (chỉ khi phiếu mượn đã duyệt)
     await SachService.updateBookQuantity(phieuMuon.MaSach, 1);
 
     return phieuMuon;
@@ -215,6 +233,9 @@ class MuonSachService {
     }
 
     const oldStatus = phieuMuon.TrangThai;
+
+    // Kiểm tra quy trình chuyển trạng thái hợp lệ
+    this.validateStatusTransition(oldStatus, newStatus);
 
     // Xử lý logic thay đổi số lượng sách
     await this.handleStatusChange(phieuMuon, oldStatus, newStatus);
@@ -241,12 +262,13 @@ class MuonSachService {
       throw new Error("Không tìm thấy phiếu mượn");
     }
 
-    // Nếu phiếu mượn đang ở trạng thái đã duyệt hoặc đã mượn, cần tăng lại số lượng sách
-    if (
-      [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DA_MUON].includes(
-        phieuMuon.TrangThai
-      )
-    ) {
+    // Chỉ cho phép xóa phiếu mượn ở trạng thái "Đã duyệt" hoặc "Từ chối"
+    if (![MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.TU_CHOI].includes(phieuMuon.TrangThai)) {
+      throw new Error("Chỉ có thể xóa phiếu mượn ở trạng thái 'Đã duyệt' hoặc 'Từ chối'");
+    }
+
+    // Nếu phiếu mượn đang ở trạng thái đã duyệt, cần tăng lại số lượng sách
+    if (phieuMuon.TrangThai === MUON_SACH_STATUS.DA_DUYET) {
       await SachService.updateBookQuantity(phieuMuon.MaSach, 1);
     }
 
@@ -263,24 +285,28 @@ class MuonSachService {
   static async handleStatusChange(phieuMuon, oldStatus, newStatus) {
     const sachId = phieuMuon.MaSach._id;
 
+    // Từ "Đang mượn" sang "Đã trả": tăng số lượng sách
     if (
-      oldStatus === MUON_SACH_STATUS.DA_MUON &&
+      oldStatus === MUON_SACH_STATUS.DANG_MUON &&
       newStatus === MUON_SACH_STATUS.DA_TRA
     ) {
-      // Trả sách: tăng số lượng
       await SachService.updateBookQuantity(sachId, 1);
-    } else if (
-      oldStatus === MUON_SACH_STATUS.TU_CHOI &&
-      newStatus === MUON_SACH_STATUS.DA_DUYET
-    ) {
-      // Duyệt lại sau khi từ chối: giảm số lượng
-      await SachService.updateBookQuantity(sachId, -1);
-    } else if (
-      oldStatus === MUON_SACH_STATUS.DA_DUYET &&
-      newStatus === MUON_SACH_STATUS.TU_CHOI
-    ) {
-      // Từ chối sau khi duyệt: tăng số lượng
-      await SachService.updateBookQuantity(sachId, 1);
+    }
+    // Không cần xử lý thay đổi số lượng cho các trường hợp khác
+    // vì số lượng đã được xử lý khi tạo phiếu mượn (tự động duyệt/từ chối)
+  }
+
+  /**
+   * Kiểm tra quy trình chuyển trạng thái hợp lệ
+   */
+  static validateStatusTransition(oldStatus, newStatus) {
+    const validTransitions = {
+      [MUON_SACH_STATUS.DA_DUYET]: [MUON_SACH_STATUS.DANG_MUON], // Đã duyệt -> Đang mượn
+      [MUON_SACH_STATUS.DANG_MUON]: [MUON_SACH_STATUS.DA_TRA, MUON_SACH_STATUS.QUA_HAN], // Đang mượn -> Đã trả hoặc Quá hạn
+    };
+
+    if (!validTransitions[oldStatus] || !validTransitions[oldStatus].includes(newStatus)) {
+      throw new Error(`Không thể chuyển từ trạng thái "${oldStatus}" sang "${newStatus}"`);
     }
   }
 
@@ -342,14 +368,34 @@ class MuonSachService {
   static async getOverdueBooks() {
     const now = new Date();
 
+    // Tự động cập nhật trạng thái quá hạn
+    await this.updateOverdueStatus();
+
     return await TheoDoiMuonSach.find({
-      TrangThai: { $in: [MUON_SACH_STATUS.DA_DUYET, MUON_SACH_STATUS.DA_MUON] },
-      NgayTra: { $lt: now },
+      TrangThai: MUON_SACH_STATUS.QUA_HAN,
       deleted: false,
     })
       .populate("MaDocGia", "HoLot Ten Email DienThoai")
       .populate("MaSach", "TenSach TacGia")
       .sort({ NgayTra: 1 });
+  }
+
+  /**
+   * Tự động cập nhật trạng thái quá hạn
+   */
+  static async updateOverdueStatus() {
+    const now = new Date();
+
+    await TheoDoiMuonSach.updateMany(
+      {
+        TrangThai: MUON_SACH_STATUS.DANG_MUON,
+        NgayTra: { $lt: now },
+        deleted: false,
+      },
+      {
+        TrangThai: MUON_SACH_STATUS.QUA_HAN,
+      }
+    );
   }
 
   /**
