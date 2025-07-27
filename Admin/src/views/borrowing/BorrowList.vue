@@ -125,10 +125,10 @@
           <div class="col-md-2 d-flex align-items-end">
             <button
               @click="resetFilters"
-              class="btn btn-outline-secondary w-100"
+              class="btn btn-outline-secondary rounded-circle reset-btn"
+              title="Reset bộ lọc"
             >
-              <i class="bi bi-arrow-clockwise me-1"></i>
-              Reset
+              <i class="bi bi-arrow-clockwise"></i>
             </button>
           </div>
         </div>
@@ -196,26 +196,26 @@
         </div>
 
         <!-- Borrows Table -->
-        <div v-else class="table-responsive">
+        <div v-else class="">
           <table class="table table-hover mb-0">
             <thead class="table-light">
               <tr>
-                <th style="width: 60px">STT</th>
-                <th>Độc giả</th>
-                <th>Sách</th>
-                <th style="width: 120px">Trạng thái</th>
-                <th style="width: 120px">Ngày mượn</th>
+                <th style="width: 60px; border-right: 1px solid #dee2e6; text-align: center;">STT</th>
+                <th style="width: 220px; border-right: 1px solid #dee2e6; text-align: center;">Độc giả</th>
+                <th style="width: 270px; border-right: 1px solid #dee2e6; text-align: center;">Sách</th>
+                <th style="width: 120px; border-right: 1px solid #dee2e6; text-align: center;">Trạng thái</th>
+                <th style="width: 120px; border-right: 1px solid #dee2e6; text-align: center;">Ngày mượn</th>
                 <!-- Cột Ngày trả - chỉ hiển thị khi không phải "Từ chối" -->
-                <th v-if="!isRejectStatusFilter" style="width: 120px">
+                <th v-if="!isRejectStatusFilter" style="width: 140px; border-right: 1px solid #dee2e6; text-align: center;">
                   {{ getDateColumnLabel() }}
                 </th>
                 <!-- Cột Lý do từ chối - chỉ hiển thị cho "Từ chối" -->
-                <th v-if="isRejectStatusFilter" style="width: 150px">Lý do từ chối</th>
+                <th v-if="isRejectStatusFilter" style="width: 200px; border-right: 1px solid #dee2e6; text-align: center;">Lý do từ chối</th>
                 <!-- Cột Còn lại - chỉ hiển thị cho "Đã duyệt" và "Đang mượn" -->
-                <th v-if="shouldShowRemainingDays" style="width: 100px">Còn lại</th>
+                <th v-if="shouldShowRemainingDays" style="width: 100px; border-right: 1px solid #dee2e6; text-align: center;">Còn lại</th>
                 <!-- Cột Quá hạn - chỉ hiển thị cho "Quá hạn" -->
-                <th v-if="shouldShowOverdueDays" style="width: 100px">Quá hạn</th>
-                <th style="width: 150px">Thao tác</th>
+                <th v-if="shouldShowOverdueDays" style="width: 100px; border-right: 1px solid #dee2e6; text-align: center;">Quá hạn</th>
+                <th style="width: 140px; text-align: center;">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -224,10 +224,10 @@
                 :key="borrow._id"
                 :class="{ 'table-warning': isOverdue(borrow) }"
               >
-                <td>
+                <td style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   {{ (pagination.current - 1) * pagination.limit + index + 1 }}
                 </td>
-                <td>
+                <td style="border-right: 1px solid #dee2e6; vertical-align: middle;">
                   <div class="d-flex align-items-center">
                     <div class="user-avatar me-2">
                       {{ getUserInitials(borrow.MaDocGia) }}
@@ -245,7 +245,7 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td style="border-right: 1px solid #dee2e6; vertical-align: middle;">
                   <div class="d-flex align-items-center">
                     <img
                       :src="getBookImage(borrow.MaSach?.BiaSach)"
@@ -263,7 +263,7 @@
                     </div>
                   </div>
                 </td>
-                <td>
+                <td style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   <span
                     class="badge"
                     :class="getStatusBadgeClass(borrow.TrangThai)"
@@ -279,42 +279,42 @@
                     Quá hạn {{ getDaysOverdue(borrow) }} ngày
                   </div>
                 </td>
-                <td>
+                <td style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   <small>{{
                     formatDate(borrow.NgayMuon || borrow.createdAt)
                   }}</small>
                 </td>
                 <!-- Cột Ngày trả/Ngày trả thực tế - không hiển thị cho "Từ chối" -->
-                <td v-if="!isRejectStatusFilter">
+                <td v-if="!isRejectStatusFilter" style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   <small :class="{ 'text-danger': isOverdue(borrow) }">
                     {{ getDateContent(borrow) }}
                   </small>
                 </td>
                 <!-- Cột Lý do từ chối - chỉ hiển thị cho "Từ chối" -->
-                <td v-if="isRejectStatusFilter">
-                  <small class="text-danger">
+                <td v-if="isRejectStatusFilter" style="border-right: 1px solid #dee2e6; vertical-align: middle;">
+                  <small class="text-danger text-truncate d-block" style="max-width: 230px;">
                     {{ borrow.LyDoTuChoi || 'Không có lý do' }}
                   </small>
                 </td>
                 <!-- Cột Còn lại - chỉ hiển thị cho "Đã duyệt" và "Đang mượn" -->
-                <td v-if="shouldShowRemainingDays">
+                <td v-if="shouldShowRemainingDays" style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   <span :class="getDaysLeftClass(borrow)">
                     {{ getDaysLeft(borrow) }}
                   </span>
                 </td>
                 <!-- Cột Quá hạn - chỉ hiển thị cho tab "Quá hạn" -->
-                <td v-if="shouldShowOverdueDays">
+                <td v-if="shouldShowOverdueDays" style="border-right: 1px solid #dee2e6; text-align: center; vertical-align: middle;">
                   <span class="text-danger fw-bold">
                     {{ getOverdueDaysCount(borrow) }} ngày
                   </span>
                 </td>
-                <td>
+                <td style="text-align: center; vertical-align: middle;">
                   <div class="btn-group" role="group">
                     <!-- Nút cho trạng thái "Đã duyệt" -->
                     <button
                       v-if="borrow.TrangThai === 'Đã duyệt'"
                       @click="lendBook(borrow)"
-                      class="btn btn-sm btn-success"
+                      class="btn btn-sm btn-outline-success"
                       title="Chuyển sang Đang mượn"
                     >
                       <i class="bi bi-arrow-right"></i>
@@ -322,7 +322,7 @@
                     <button
                       v-if="borrow.TrangThai === 'Đã duyệt'"
                       @click="deleteBorrow(borrow)"
-                      class="btn btn-sm btn-danger"
+                      class="btn btn-sm btn-outline-danger"
                       title="Xóa phiếu mượn"
                     >
                       <i class="bi bi-trash"></i>
@@ -332,7 +332,7 @@
                     <button
                       v-if="borrow.TrangThai === 'Đang mượn'"
                       @click="returnBook(borrow)"
-                      class="btn btn-sm btn-info"
+                      class="btn btn-sm btn-outline-info"
                       title="Trả sách"
                     >
                       <i class="bi bi-check-square"></i>
@@ -342,7 +342,7 @@
                     <button
                       v-if="borrow.TrangThai === 'Từ chối'"
                       @click="deleteBorrow(borrow)"
-                      class="btn btn-sm btn-danger"
+                      class="btn btn-sm btn-outline-danger"
                       title="Xóa phiếu mượn"
                     >
                       <i class="bi bi-trash"></i>
@@ -351,7 +351,7 @@
                     <!-- Nút xem chi tiết cho tất cả -->
                     <button
                       @click="viewBorrowDetail(borrow)"
-                      class="btn btn-sm btn-outline-secondary"
+                      class="btn btn-sm btn-outline-info"
                       title="Chi tiết"
                     >
                       <i class="bi bi-eye"></i>
@@ -443,7 +443,7 @@ export default {
 
     const filters = reactive({
       search: "",
-      status: "",
+      status: "Đã duyệt", // Set "Đã duyệt" as default tab
       timeRange: "",
       sort: "newest",
       page: 1,
@@ -496,7 +496,7 @@ export default {
     });
 
     const shouldShowRemainingDays = computed(() => {
-      return filters.status === "Đã duyệt" || filters.status === "Đang mượn" || filters.status === "";
+      return filters.status === "Đã duyệt" || filters.status === "Đang mượn";
     });
 
     const shouldShowOverdueDays = computed(() => {
@@ -615,7 +615,7 @@ export default {
 
     const resetFilters = () => {
       filters.search = "";
-      filters.status = "";
+      filters.status = "Đã duyệt"; // Reset to default tab "Đã duyệt"
       filters.timeRange = "";
       filters.sort = "newest";
       filters.page = 1;
@@ -956,8 +956,8 @@ export default {
 
 <style scoped>
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   background: linear-gradient(45deg, #007bff, #0056b3);
   color: white;
@@ -981,36 +981,59 @@ export default {
 }
 
 .btn-group .btn {
-  border-radius: 0.375rem !important;
-  margin-right: 2px;
+  border-radius: 0.5rem !important;
+  margin-right: 0.25rem;
+  font-weight: 500;
+  transition: all 0.3s ease-in-out;
+  border-width: 1.5px;
+}
+
+.btn-group .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-group .btn:last-child {
   margin-right: 0;
 }
 
+.btn-outline-success:hover {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  border-color: transparent;
+}
+
+.btn-outline-danger:hover {
+  background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+  border-color: transparent;
+}
+
+.btn-outline-info:hover {
+  background: linear-gradient(135deg, #17a2b8 0%, #3498db 100%);
+  border-color: transparent;
+}
+
 /* Pagination styling */
 .pagination {
-  --bs-pagination-padding-x: 0.75rem;
-  --bs-pagination-padding-y: 0.5rem;
+  --bs-pagination-padding-x: 0.875rem;
+  --bs-pagination-padding-y: 0.625rem;
   --bs-pagination-font-size: 0.875rem;
-  --bs-pagination-color: #6c757d;
+  --bs-pagination-color: #495057;
   --bs-pagination-bg: #fff;
   --bs-pagination-border-width: 1px;
-  --bs-pagination-border-color: #dee2e6;
-  --bs-pagination-border-radius: 0.375rem;
-  --bs-pagination-hover-color: #0056b3;
-  --bs-pagination-hover-bg: #e9ecef;
-  --bs-pagination-hover-border-color: #dee2e6;
-  --bs-pagination-focus-color: #0056b3;
-  --bs-pagination-focus-bg: #e9ecef;
+  --bs-pagination-border-color: #e0e6ed;
+  --bs-pagination-border-radius: 0.5rem;
+  --bs-pagination-hover-color: #fff;
+  --bs-pagination-hover-bg: #0d6efd;
+  --bs-pagination-hover-border-color: #0d6efd;
+  --bs-pagination-focus-color: #fff;
+  --bs-pagination-focus-bg: #0d6efd;
   --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
   --bs-pagination-active-color: #fff;
   --bs-pagination-active-bg: #0d6efd;
   --bs-pagination-active-border-color: #0d6efd;
-  --bs-pagination-disabled-color: #6c757d;
-  --bs-pagination-disabled-bg: #fff;
-  --bs-pagination-disabled-border-color: #dee2e6;
+  --bs-pagination-disabled-color: #adb5bd;
+  --bs-pagination-disabled-bg: #f8f9fa;
+  --bs-pagination-disabled-border-color: #e0e6ed;
 }
 
 .pagination .page-link {
@@ -1020,14 +1043,24 @@ export default {
   text-decoration: none;
   background-color: var(--bs-pagination-bg);
   border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition: all 0.3s ease-in-out;
+  font-weight: 500;
+  border-radius: var(--bs-pagination-border-radius) !important;
+  margin: 0 0.125rem;
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pagination .page-link:hover {
   z-index: 2;
   color: var(--bs-pagination-hover-color);
-  background-color: var(--bs-pagination-hover-bg);
-  border-color: var(--bs-pagination-hover-border-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .pagination .page-link:focus {
@@ -1036,13 +1069,16 @@ export default {
   background-color: var(--bs-pagination-focus-bg);
   outline: 0;
   box-shadow: var(--bs-pagination-focus-box-shadow);
+  border-color: var(--bs-pagination-focus-bg);
 }
 
 .pagination .page-item.active .page-link {
   z-index: 3;
   color: var(--bs-pagination-active-color);
-  background-color: var(--bs-pagination-active-bg);
-  border-color: var(--bs-pagination-active-border-color);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
 }
 
 .pagination .page-item.disabled .page-link {
@@ -1050,5 +1086,62 @@ export default {
   pointer-events: none;
   background-color: var(--bs-pagination-disabled-bg);
   border-color: var(--bs-pagination-disabled-border-color);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  background-color: var(--bs-pagination-disabled-bg);
+  border-color: var(--bs-pagination-disabled-border-color);
+  color: var(--bs-pagination-disabled-color);
+  transform: none;
+  box-shadow: none;
+}
+
+/* Navigation arrows styling */
+.pagination .page-link i {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Card footer styling for pagination */
+.card-footer {
+  background: linear-gradient(to right, #f8f9fa 0%, #e9ecef 100%);
+  border-top: 1px solid #dee2e6;
+  padding: 1.25rem 1.5rem;
+}
+
+/* Pagination container styling */
+.pagination {
+  margin: 0;
+  gap: 0.25rem;
+}
+
+/* Reset button styling */
+.reset-btn {
+  width: 38px;
+  height: 35px; /* Match form-control height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.2s ease-in-out;
+}
+
+.reset-btn:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  color: white;
+  transform: rotate(180deg);
+}
+
+.reset-btn:focus {
+  box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25);
+}
+
+.reset-btn i {
+  font-size: 1rem;
 }
 </style>
