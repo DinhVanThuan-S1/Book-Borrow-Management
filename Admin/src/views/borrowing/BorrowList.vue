@@ -102,7 +102,6 @@
                 <option value="today">Hôm nay</option>
                 <option value="week">Tuần này</option>
                 <option value="month">Tháng này</option>
-                <option value="quarter">Quý này</option>
               </select>
             </div>
           </div>
@@ -119,8 +118,6 @@
               >
                 <option value="newest">Mới nhất</option>
                 <option value="oldest">Cũ nhất</option>
-                <option value="due-date">Gần đến hạn</option>
-                <option value="overdue">Quá hạn trước</option>
               </select>
             </div>
           </div>
@@ -145,7 +142,7 @@
       >
         <h5 class="mb-0">
           <i class="bi bi-arrow-left-right me-2"></i>
-          Danh sách phiếu mượn ({{ pagination.total }})
+          Danh sách phiếu mượn ( {{ pagination.total }} )
         </h5>
         <div class="d-flex gap-2">
           <div class="btn-group" role="group">
@@ -208,8 +205,16 @@
                 <th>Sách</th>
                 <th style="width: 120px">Trạng thái</th>
                 <th style="width: 120px">Ngày mượn</th>
-                <th style="width: 120px">Ngày trả</th>
-                <th style="width: 100px">Còn lại</th>
+                <!-- Cột Ngày trả - chỉ hiển thị khi không phải "Từ chối" -->
+                <th v-if="!isRejectStatusFilter" style="width: 120px">
+                  {{ getDateColumnLabel() }}
+                </th>
+                <!-- Cột Lý do từ chối - chỉ hiển thị cho "Từ chối" -->
+                <th v-if="isRejectStatusFilter" style="width: 150px">Lý do từ chối</th>
+                <!-- Cột Còn lại - chỉ hiển thị cho "Đã duyệt" và "Đang mượn" -->
+                <th v-if="shouldShowRemainingDays" style="width: 100px">Còn lại</th>
+                <!-- Cột Quá hạn - chỉ hiển thị cho "Quá hạn" -->
+                <th v-if="shouldShowOverdueDays" style="width: 100px">Quá hạn</th>
                 <th style="width: 150px">Thao tác</th>
               </tr>
             </thead>
@@ -279,34 +284,71 @@
                     formatDate(borrow.NgayMuon || borrow.createdAt)
                   }}</small>
                 </td>
-                <td>
+                <!-- Cột Ngày trả/Ngày trả thực tế - không hiển thị cho "Từ chối" -->
+                <td v-if="!isRejectStatusFilter">
                   <small :class="{ 'text-danger': isOverdue(borrow) }">
-                    {{ formatDate(borrow.NgayTraDuKien) }}
+                    {{ getDateContent(borrow) }}
                   </small>
                 </td>
-                <td>
+                <!-- Cột Lý do từ chối - chỉ hiển thị cho "Từ chối" -->
+                <td v-if="isRejectStatusFilter">
+                  <small class="text-danger">
+                    {{ borrow.LyDoTuChoi || 'Không có lý do' }}
+                  </small>
+                </td>
+                <!-- Cột Còn lại - chỉ hiển thị cho "Đã duyệt" và "Đang mượn" -->
+                <td v-if="shouldShowRemainingDays">
                   <span :class="getDaysLeftClass(borrow)">
                     {{ getDaysLeft(borrow) }}
                   </span>
                 </td>
+                <!-- Cột Quá hạn - chỉ hiển thị cho tab "Quá hạn" -->
+                <td v-if="shouldShowOverdueDays">
+                  <span class="text-danger fw-bold">
+                    {{ getOverdueDaysCount(borrow) }} ngày
+                  </span>
+                </td>
                 <td>
                   <div class="btn-group" role="group">
+                    <!-- Nút cho trạng thái "Đã duyệt" -->
                     <button
                       v-if="borrow.TrangThai === 'Đã duyệt'"
+                      @click="lendBook(borrow)"
+                      class="btn btn-sm btn-success"
+                      title="Chuyển sang Đang mượn"
+                    >
+                      <i class="bi bi-arrow-right"></i>
+                    </button>
+                    <button
+                      v-if="borrow.TrangThai === 'Đã duyệt'"
+                      @click="deleteBorrow(borrow)"
+                      class="btn btn-sm btn-danger"
+                      title="Xóa phiếu mượn"
+                    >
+                      <i class="bi bi-trash"></i>
+                    </button>
+                    
+                    <!-- Nút cho trạng thái "Đang mượn" -->
+                    <button
+                      v-if="borrow.TrangThai === 'Đang mượn'"
                       @click="returnBook(borrow)"
                       class="btn btn-sm btn-info"
                       title="Trả sách"
                     >
-                      <i class="bi bi-arrow-left"></i>
+                      <i class="bi bi-check-square"></i>
                     </button>
+                    
+                    <!-- Nút cho trạng thái "Từ chối" -->
                     <button
-                      v-if="borrow.TrangThai === 'Đã duyệt'"
-                      @click="rejectBorrow(borrow)"
+                      v-if="borrow.TrangThai === 'Từ chối'"
+                      @click="deleteBorrow(borrow)"
                       class="btn btn-sm btn-danger"
-                      title="Từ chối"
+                      title="Xóa phiếu mượn"
                     >
-                      <i class="bi bi-x"></i>
+                      <i class="bi bi-trash"></i>
                     </button>
+                    
+                    <!-- Nút xem chi tiết cho tất cả -->
                     <button
                       @click="viewBorrowDetail(borrow)"
                       class="btn btn-sm btn-outline-secondary"
@@ -441,7 +483,7 @@ export default {
         key: "returned",
       },
       {
-        value: "overdue",
+        value: "Quá hạn",
         label: "Quá hạn",
         icon: "bi bi-exclamation-triangle",
         key: "overdue",
@@ -449,6 +491,18 @@ export default {
     ];
 
     // Computed
+    const isRejectStatusFilter = computed(() => {
+      return filters.status === "Từ chối";
+    });
+
+    const shouldShowRemainingDays = computed(() => {
+      return filters.status === "Đã duyệt" || filters.status === "Đang mượn" || filters.status === "";
+    });
+
+    const shouldShowOverdueDays = computed(() => {
+      return filters.status === "Quá hạn";
+    });
+
     const getVisiblePages = computed(() => {
       const pages = [];
       const total = pagination.pages;
@@ -532,7 +586,9 @@ export default {
               switch (stat._id) {
                 case "Đã duyệt":
                   processedStats.approved = stat.count;
-                  processedStats.borrowed = stat.count; // Đã duyệt = Đang mượn
+                  break;
+                case "Đang mượn":
+                  processedStats.borrowed = stat.count;
                   break;
                 case "Đã trả":
                   processedStats.returned = stat.count;
@@ -597,14 +653,49 @@ export default {
     };
 
     const lendBook = async (borrow) => {
-      try {
-        await api.put(`/muonsach/status/${borrow._id}`, {
-          TrangThai: "Đã mượn",
-        });
-        toast.success("Cho mượn sách thành công");
-        refreshData();
-      } catch (error) {
-        console.error("Error lending book:", error);
+      const result = await Swal.fire({
+        title: "Xác nhận cho mượn sách",
+        text: `Xác nhận chuyển trạng thái sang "Đang mượn" cho "${borrow.MaSach?.TenSach}"?`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Xác nhận",
+        cancelButtonText: "Hủy",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await api.put(`/muonsach/status/${borrow._id}`, {
+            TrangThai: "Đang mượn",
+          });
+          toast.success("Chuyển trạng thái thành công");
+          refreshData();
+        } catch (error) {
+          console.error("Error lending book:", error);
+          toast.error("Có lỗi xảy ra khi chuyển trạng thái");
+        }
+      }
+    };
+
+    const deleteBorrow = async (borrow) => {
+      const result = await Swal.fire({
+        title: "Xác nhận xóa phiếu mượn",
+        text: `Bạn có chắc chắn muốn xóa phiếu mượn cho "${borrow.MaSach?.TenSach}"?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#dc3545",
+        confirmButtonText: "Xóa",
+        cancelButtonText: "Hủy",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/muonsach/${borrow._id}`);
+          toast.success("Xóa phiếu mượn thành công");
+          refreshData();
+        } catch (error) {
+          console.error("Error deleting borrow:", error);
+          toast.error("Có lỗi xảy ra khi xóa phiếu mượn");
+        }
       }
     };
 
@@ -696,51 +787,64 @@ export default {
         "Đã duyệt": "bg-primary",
         "Đã trả": "bg-success",
         "Từ chối": "bg-danger",
-        "Quá hạn": "bg-warning",
+        "Đang mượn": "bg-warning",
+        "Quá hạn": "bg-danger",
       };
       return classes[status] || "bg-secondary";
     };
 
     const getStatusIcon = (status) => {
       const icons = {
-        "Đã duyệt": "bi bi-book",
+        "Đã duyệt": "bi bi-check-circle",
         "Đã trả": "bi bi-check-square",
         "Từ chối": "bi bi-x-circle",
+        "Đang mượn": "bi bi-arrow-left-right",
         "Quá hạn": "bi bi-exclamation-triangle",
       };
       return icons[status] || "bi bi-question-circle";
     };
 
     const isOverdue = (borrow) => {
-      if (borrow.TrangThai !== "Đã duyệt") return false;
-      const dueDate = new Date(borrow.NgayTraDuKien);
+      if (borrow.TrangThai !== "Đang mượn") return false;
+      const dueDate = new Date(borrow.NgayTra);
       const now = new Date();
       return now > dueDate;
     };
 
     const getDaysOverdue = (borrow) => {
       if (!isOverdue(borrow)) return 0;
-      const dueDate = new Date(borrow.NgayTraDuKien);
+      const dueDate = new Date(borrow.NgayTra);
       const now = new Date();
       const diffTime = now - dueDate;
       return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     };
 
     const getDaysLeft = (borrow) => {
-      if (borrow.TrangThai !== "Đã duyệt") return "-";
-      const dueDate = new Date(borrow.NgayTraDuKien);
-      const now = new Date();
-      const diffTime = dueDate - now;
-      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (borrow.TrangThai === "Đã duyệt") {
+        const dueDate = new Date(borrow.NgayTra);
+        const now = new Date();
+        const diffTime = dueDate - now;
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (days < 0) return `Quá ${Math.abs(days)} ngày`;
+        if (days === 0) return "Hôm nay";
+        return `${days} ngày`;
+      } else if (borrow.TrangThai === "Đang mượn") {
+        const dueDate = new Date(borrow.NgayTra);
+        const now = new Date();
+        const diffTime = dueDate - now;
+        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-      if (days < 0) return `Quá ${Math.abs(days)} ngày`;
-      if (days === 0) return "Hôm nay";
-      return `${days} ngày`;
+        if (days < 0) return `Quá ${Math.abs(days)} ngày`;
+        if (days === 0) return "Hôm nay";
+        return `${days} ngày`;
+      }
+      return "-";
     };
 
     const getDaysLeftClass = (borrow) => {
-      if (borrow.TrangThai !== "Đã duyệt") return "";
-      const dueDate = new Date(borrow.NgayTraDuKien);
+      if (borrow.TrangThai !== "Đang mượn" && borrow.TrangThai !== "Đã duyệt") return "";
+      const dueDate = new Date(borrow.NgayTra);
       const now = new Date();
       const diffTime = dueDate - now;
       const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -750,6 +854,15 @@ export default {
       return "text-muted";
     };
 
+    const getOverdueDaysCount = (borrow) => {
+      if (borrow.TrangThai !== "Quá hạn") return "-";
+      const dueDate = new Date(borrow.NgayTra);
+      const now = new Date();
+      const diffTime = now - dueDate;
+      const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) - 1;
+      return days > 0 ? days : 0;
+    };
+
     const formatDate = (date) => {
       if (!date) return "";
       return new Date(date).toLocaleDateString("vi-VN", {
@@ -757,6 +870,24 @@ export default {
         month: "2-digit",
         year: "numeric",
       });
+    };
+
+    const getDateColumnLabel = () => {
+      if (filters.status === "Đã trả") {
+        return "Ngày trả thực tế";
+      }
+      return "Ngày trả dự kiến";
+    };
+
+    const getDateContent = (borrow) => {
+      if (borrow.TrangThai === "Đã trả") {
+        // Hiển thị ngày cập nhật cuối (khi admin chuyển trạng thái)
+        return formatDate(borrow.updatedAt);
+      } else if (borrow.TrangThai === "Đã duyệt" || borrow.TrangThai === "Đang mượn" || borrow.TrangThai === "Quá hạn") {
+        // Hiển thị ngày trả dự kiến
+        return formatDate(borrow.NgayTra);
+      }
+      return "-";
     };
 
     // Debounce function
@@ -788,6 +919,9 @@ export default {
       filters,
       pagination,
       quickFilters,
+      isRejectStatusFilter,
+      shouldShowRemainingDays,
+      shouldShowOverdueDays,
       getVisiblePages,
       fetchBorrows,
       debouncedSearch,
@@ -799,6 +933,7 @@ export default {
       lendBook,
       returnBook,
       rejectBorrow,
+      deleteBorrow,
       viewBorrowDetail,
       handleBorrowSaved,
       getFullName,
@@ -810,7 +945,10 @@ export default {
       getDaysOverdue,
       getDaysLeft,
       getDaysLeftClass,
+      getOverdueDaysCount,
       formatDate,
+      getDateColumnLabel,
+      getDateContent,
     };
   },
 };
@@ -849,5 +987,68 @@ export default {
 
 .btn-group .btn:last-child {
   margin-right: 0;
+}
+
+/* Pagination styling */
+.pagination {
+  --bs-pagination-padding-x: 0.75rem;
+  --bs-pagination-padding-y: 0.5rem;
+  --bs-pagination-font-size: 0.875rem;
+  --bs-pagination-color: #6c757d;
+  --bs-pagination-bg: #fff;
+  --bs-pagination-border-width: 1px;
+  --bs-pagination-border-color: #dee2e6;
+  --bs-pagination-border-radius: 0.375rem;
+  --bs-pagination-hover-color: #0056b3;
+  --bs-pagination-hover-bg: #e9ecef;
+  --bs-pagination-hover-border-color: #dee2e6;
+  --bs-pagination-focus-color: #0056b3;
+  --bs-pagination-focus-bg: #e9ecef;
+  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  --bs-pagination-active-color: #fff;
+  --bs-pagination-active-bg: #0d6efd;
+  --bs-pagination-active-border-color: #0d6efd;
+  --bs-pagination-disabled-color: #6c757d;
+  --bs-pagination-disabled-bg: #fff;
+  --bs-pagination-disabled-border-color: #dee2e6;
+}
+
+.pagination .page-link {
+  position: relative;
+  display: block;
+  color: var(--bs-pagination-color);
+  text-decoration: none;
+  background-color: var(--bs-pagination-bg);
+  border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.pagination .page-link:hover {
+  z-index: 2;
+  color: var(--bs-pagination-hover-color);
+  background-color: var(--bs-pagination-hover-bg);
+  border-color: var(--bs-pagination-hover-border-color);
+}
+
+.pagination .page-link:focus {
+  z-index: 3;
+  color: var(--bs-pagination-focus-color);
+  background-color: var(--bs-pagination-focus-bg);
+  outline: 0;
+  box-shadow: var(--bs-pagination-focus-box-shadow);
+}
+
+.pagination .page-item.active .page-link {
+  z-index: 3;
+  color: var(--bs-pagination-active-color);
+  background-color: var(--bs-pagination-active-bg);
+  border-color: var(--bs-pagination-active-border-color);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: var(--bs-pagination-disabled-color);
+  pointer-events: none;
+  background-color: var(--bs-pagination-disabled-bg);
+  border-color: var(--bs-pagination-disabled-border-color);
 }
 </style>

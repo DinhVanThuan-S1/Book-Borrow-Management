@@ -1,10 +1,12 @@
 <template>
   <div
-    class="modal fade"
+    v-if="show"
+    class="modal fade show"
     id="borrowDetailModal"
     tabindex="-1"
     aria-labelledby="borrowDetailModalLabel"
-    aria-hidden="true"
+    aria-hidden="false"
+    style="display: block"
   >
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -15,7 +17,7 @@
           <button
             type="button"
             class="btn-close"
-            data-bs-dismiss="modal"
+            @click="closeModal"
             aria-label="Close"
           ></button>
         </div>
@@ -153,18 +155,26 @@
       </div>
     </div>
   </div>
+  <div v-if="show" class="modal-backdrop fade show" @click="closeModal"></div>
 </template>
 
 <script>
 export default {
   name: "BorrowDetailModal",
   props: {
+    show: {
+      type: Boolean,
+      default: false,
+    },
     borrow: {
       type: Object,
       default: null,
     },
   },
   methods: {
+    closeModal() {
+      this.$emit("close");
+    },
     formatDate(date) {
       if (!date) return "-";
       return new Date(date).toLocaleDateString("vi-VN");
