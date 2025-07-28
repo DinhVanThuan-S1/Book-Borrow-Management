@@ -129,7 +129,7 @@ export default {
 
       try {
         isLoading.value = true;
-        console.log("Fetching books for publisher:", props.publisher);
+        // console.log("Fetching books for publisher:", props.publisher);
 
         const response = await api.get("/sach", {
           params: {
@@ -138,11 +138,11 @@ export default {
           },
         });
 
-        console.log("API response:", response);
+        // console.log("API response:", response);
 
         if (response.success) {
           books.value = response.data || [];
-          console.log("Books found:", books.value.length);
+          // console.log("Books found:", books.value.length);
         }
       } catch (error) {
         console.error("Error fetching books:", error);

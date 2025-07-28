@@ -423,12 +423,24 @@ class DocGiaService {
   static async getDocGiaActivity(id) {
     const TheoDoiMuonSach = require("../models/TheoDoiMuonSach.model");
     const YeuThich = require("../models/YeuThich.model");
+    const mongoose = require("mongoose");
 
-    const [borrowHistory, favorites] = await Promise.all([
-      TheoDoiMuonSach.find({ MaDocGia: id, deleted: false })
-        .populate("MaSach", "TenSach TacGia BiaSach")
-        .sort({ createdAt: -1 })
-        .limit(10),
+    // Lấy thống kê theo trạng thái
+    const [borrowStats, favorites] = await Promise.all([
+      TheoDoiMuonSach.aggregate([
+        {
+          $match: { 
+            MaDocGia: new mongoose.Types.ObjectId(id), 
+            deleted: false 
+          }
+        },
+        {
+          $group: {
+            _id: "$TrangThai",
+            count: { $sum: 1 }
+          }
+        }
+      ]),
 
       YeuThich.findOne({ MaDocGia: id, deleted: false }).populate(
         "DanhSachSach",
@@ -436,9 +448,41 @@ class DocGiaService {
       ),
     ]);
 
+    // Chuyển đổi kết quả aggregate thành object với các key cụ thể
+    const stats = {
+      totalBorrows: 0,
+      returned: 0,
+      borrowing: 0,
+      overdue: 0,
+      approved: 0,
+      rejected: 0
+    };
+
+    borrowStats.forEach(stat => {
+      stats.totalBorrows += stat.count;
+      
+      switch (stat._id) {
+        case "Đã trả":
+          stats.returned = stat.count;
+          break;
+        case "Đang mượn":
+          stats.borrowing = stat.count;
+          break;
+        case "Quá hạn":
+          stats.overdue = stat.count;
+          break;
+        case "Đã duyệt":
+          stats.approved = stat.count;
+          break;
+        case "Từ chối":
+          stats.rejected = stat.count;
+          break;
+      }
+    });
+
     return {
-      borrowHistory,
-      favorites: favorites ? favorites.DanhSachSach : [],
+      ...stats,
+      favorites: favorites ? favorites.DanhSachSach.length : 0,
     };
   }
 }

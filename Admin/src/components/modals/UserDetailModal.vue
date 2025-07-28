@@ -100,7 +100,7 @@
                           </td>
                         </tr>
                         <tr>
-                          <td><strong>Ngày đăng ký:</strong></td>
+                          <td><strong>Đăng ký:</strong></td>
                           <td>{{ formatDate(user.createdAt) }}</td>
                         </tr>
                       </tbody>

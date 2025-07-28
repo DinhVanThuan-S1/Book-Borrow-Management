@@ -200,6 +200,23 @@ class DocGiaController {
       return ApiResponse.error(res, error.message);
     }
   }
+
+  /**
+   * Lấy thống kê hoạt động của độc giả
+   */
+  static async getDocGiaActivity(req, res) {
+    try {
+      const activity = await DocGiaService.getDocGiaActivity(req.params.id);
+      return ApiResponse.success(
+        res,
+        activity,
+        "Lấy thống kê hoạt động thành công"
+      );
+    } catch (error) {
+      console.error("Error in getDocGiaActivity:", error);
+      return ApiResponse.error(res, error.message);
+    }
+  }
 }
 
 module.exports = DocGiaController;
