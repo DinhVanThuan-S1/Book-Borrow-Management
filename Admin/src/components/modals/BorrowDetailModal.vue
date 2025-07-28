@@ -21,9 +21,9 @@
             aria-label="Close"
           ></button>
         </div>
-        <div class="modal-body">
+        <div class="">
           <div v-if="borrow" class="">
-              <div class="card border-0 shadow-sm">
+              <div class="border-0 shadow-sm">
                 <div class="card-body">
                   <table class="table table-borderless mb-0">
                     <tbody>
@@ -162,22 +162,6 @@
               </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <div v-if="borrow?.TrangThai === 'Chờ duyệt'">
-            <button
-              type="button"
-              class="btn btn-success me-2"
-              @click="approveBorrow"
-            >
-              <i class="fas fa-check me-1"></i>
-              Duyệt
-            </button>
-            <button type="button" class="btn btn-danger" @click="rejectBorrow">
-              <i class="fas fa-times me-1"></i>
-              Từ chối
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -187,6 +171,7 @@
 <script>
 export default {
   name: "BorrowDetailModal",
+  emits: ["close", "approve", "reject", "return", "statusChanged"],
   props: {
     show: {
       type: Boolean,
@@ -332,11 +317,6 @@ export default {
   opacity: 1;
 }
 
-.modal-body {
-  padding: 1rem;
-  background-color: #f8f9fa;
-}
-
 .card {
   border-radius: 10px;
   transition: transform 0.2s ease-in-out;
@@ -404,13 +384,6 @@ export default {
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   font-weight: 500;
-}
-
-.modal-footer {
-  border: none;
-  padding: 1rem 1.5rem 1.5rem;
-  background-color: #f8f9fa;
-  border-radius: 0 0 15px 15px;
 }
 
 .btn {

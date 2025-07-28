@@ -49,8 +49,15 @@ class MuonSachService {
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
     let phieuMuons = await TheoDoiMuonSach.find(query)
-      .populate("MaDocGia", "HoLot Ten Email DienThoai")
-      .populate("MaSach", "TenSach TacGia BiaSach DonGia")
+      .populate("MaDocGia", "MaDocGia HoLot Ten Email DienThoai")
+      .populate({
+        path: "MaSach",
+        select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
+        populate: {
+          path: "MaNXB",
+          select: "TenNXB"
+        }
+      })
       .sort(sortOption)
       .skip(skip)
       .limit(limitNum);
@@ -105,7 +112,14 @@ class MuonSachService {
 
     const [lichSu, total] = await Promise.all([
       TheoDoiMuonSach.find(query)
-        .populate("MaSach", "TenSach TacGia BiaSach DonGia")
+        .populate({
+          path: "MaSach",
+          select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
+          populate: {
+            path: "MaNXB",
+            select: "TenNXB"
+          }
+        })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limitNum),
@@ -185,7 +199,14 @@ class MuonSachService {
       await SachService.updateBookQuantity(sachId, -1);
     }
 
-    await phieuMuon.populate("MaSach", "TenSach TacGia BiaSach DonGia");
+    await phieuMuon.populate({
+      path: "MaSach",
+      select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
+      populate: {
+        path: "MaNXB",
+        select: "TenNXB"
+      }
+    });
 
     return phieuMuon;
   }
@@ -244,7 +265,7 @@ class MuonSachService {
     phieuMuon.TrangThai = newStatus;
     await phieuMuon.save();
 
-    await phieuMuon.populate("MaDocGia", "HoLot Ten Email");
+    await phieuMuon.populate("MaDocGia", "MaDocGia HoLot Ten Email DienThoai");
 
     return phieuMuon;
   }
@@ -375,8 +396,15 @@ class MuonSachService {
       TrangThai: MUON_SACH_STATUS.QUA_HAN,
       deleted: false,
     })
-      .populate("MaDocGia", "HoLot Ten Email DienThoai")
-      .populate("MaSach", "TenSach TacGia")
+      .populate("MaDocGia", "MaDocGia HoLot Ten Email DienThoai")
+      .populate({
+        path: "MaSach",
+        select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
+        populate: {
+          path: "MaNXB",
+          select: "TenNXB"
+        }
+      })
       .sort({ NgayTra: 1 });
   }
 
@@ -422,8 +450,15 @@ class MuonSachService {
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
     const lichSu = await TheoDoiMuonSach.find(query)
-      .populate("MaDocGia", "HoLot Ten Email DienThoai")
-      .populate("MaSach", "TenSach TacGia BiaSach DonGia")
+      .populate("MaDocGia", "MaDocGia HoLot Ten Email DienThoai")
+      .populate({
+        path: "MaSach",
+        select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
+        populate: {
+          path: "MaNXB",
+          select: "TenNXB"
+        }
+      })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limitNum);
