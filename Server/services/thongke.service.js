@@ -38,9 +38,9 @@ class ThongKeService {
         { $group: { _id: null, total: { $sum: "$SoQuyen" } } },
       ]),
 
-      // Số sách đang được mượn
+      // Số sách đang được mượn (chỉ đếm trạng thái "Đang mượn")
       TheoDoiMuonSach.countDocuments({
-        TrangThai: { $in: ["Đã duyệt", "Đã mượn"] },
+        TrangThai: "Đang mượn",
         deleted: false,
       }),
 
@@ -331,6 +331,60 @@ class ThongKeService {
       lowStock,
       outOfStock,
       recentBorrows,
+    };
+  }
+
+  /**
+   * Lấy dữ liệu dashboard tổng hợp
+   */
+  static async getDashboardData() {
+    // Debug: Đếm chính xác số "Đang mượn"
+    const dangMuonCount = await TheoDoiMuonSach.countDocuments({
+      TrangThai: "Đang mượn",
+      deleted: false,
+    });
+    
+    console.log("=== DEBUG DASHBOARD ===");
+    console.log("Số bản ghi TrangThai 'Đang mượn':", dangMuonCount);
+
+    const [overview, recentBorrows, topBooks, overdueCount, statusBreakdown] = await Promise.all([
+      // Thống kê tổng quan
+      this.getOverviewStats(),
+      
+      // 10 phiếu mượn gần đây
+      TheoDoiMuonSach.find({ deleted: false })
+        .populate("MaDocGia", "MaDocGia HoLot Ten Email")
+        .populate("MaSach", "MaSach TenSach TacGia")
+        .sort({ createdAt: -1 })
+        .limit(10),
+      
+      // Top 5 sách phổ biến
+      this.getTopBorrowedBooks(5),
+      
+      // Số sách quá hạn
+      TheoDoiMuonSach.countDocuments({
+        TrangThai: "Quá hạn",
+        deleted: false,
+      }),
+
+      // Thống kê chi tiết theo trạng thái để debug
+      TheoDoiMuonSach.aggregate([
+        { $match: { deleted: false } },
+        { $group: { _id: "$TrangThai", count: { $sum: 1 } } },
+      ])
+    ]);
+
+    // Log để debug
+    console.log("Thống kê trạng thái phiếu mượn:", statusBreakdown);
+    console.log("sachDangMuon từ overview:", overview.sachDangMuon);
+    console.log("=======================");
+
+    return {
+      overview,
+      recentBorrows,
+      topBooks,
+      overdueBooks: overdueCount,
+      statusBreakdown, // Thêm để debug
     };
   }
 

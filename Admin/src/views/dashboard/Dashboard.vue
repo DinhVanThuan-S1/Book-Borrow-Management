@@ -37,6 +37,20 @@
       </div>
 
       <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card danger">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <div class="stats-number text-danger">
+                {{ stats.totalStaff || 0 }}
+              </div>
+              <p class="stats-label">Tổng nhân viên</p>
+            </div>
+            <i class="bi bi-person-badge stats-icon text-danger"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-xl-3 col-md-6 mb-3">
         <div class="stats-card warning">
           <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -50,34 +64,22 @@
         </div>
       </div>
 
-      <div class="col-xl-3 col-md-6 mb-3">
-        <div class="stats-card danger">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <div class="stats-number text-danger">
-                {{ stats.overdueBooks || 0 }}
-              </div>
-              <p class="stats-label">Quá hạn</p>
-            </div>
-            <i class="bi bi-exclamation-triangle stats-icon text-danger"></i>
-          </div>
-        </div>
-      </div>
+
     </div>
 
     <!-- Main Content -->
     <div class="row">
       <!-- Recent Borrows -->
-      <div class="col-lg-8 mb-4">
-        <div class="admin-card">
+      <div class="col-lg-8 mb-4 d-flex">
+        <div class="admin-card flex-fill">
           <div
-            class="card-header-custom d-flex justify-content-between align-items-center"
+            class="card-header-custom d-flex justify-content-between align-items-center text-center"
           >
-            <h5 class="mb-0">
+            <h5 class="mb-0 w-100">
               <i class="bi bi-clock-history me-2"></i>
               Phiếu mượn gần đây
             </h5>
-            <router-link to="/borrowing" class="btn btn-sm btn-outline-primary">
+            <router-link to="/borrowing" class="btn btn-sm btn-outline-primary position-absolute end-0 me-3">
               Xem tất cả
             </router-link>
           </div>
@@ -89,10 +91,10 @@
               <i class="bi bi-inbox display-4 d-block mb-2"></i>
               Chưa có phiếu mượn nào
             </div>
-            <div v-else class="table-responsive">
-              <table class="table table-hover mb-0">
+            <div v-else class="table">
+              <table class="table table-hover table-bordered mb-0">
                 <thead class="table-light">
-                  <tr>
+                  <tr class="text-center">
                     <th>Độc giả</th>
                     <th>Sách</th>
                     <th>Trạng thái</th>
@@ -101,7 +103,7 @@
                 </thead>
                 <tbody>
                   <tr v-for="borrow in recentBorrows" :key="borrow._id">
-                    <td>
+                    <td class="border-end">
                       <div class="d-flex align-items-center">
                         <div
                           class="user-avatar me-2"
@@ -119,13 +121,13 @@
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td class="border-end">
                       <div class="fw-medium">{{ borrow.MaSach?.TenSach }}</div>
                       <small class="text-muted">{{
                         borrow.MaSach?.TacGia
                       }}</small>
                     </td>
-                    <td>
+                    <td class="text-center border-end">
                       <span
                         class="badge"
                         :class="getStatusBadgeClass(borrow.TrangThai)"
@@ -133,7 +135,7 @@
                         {{ borrow.TrangThai }}
                       </span>
                     </td>
-                    <td>
+                    <td class="text-center">
                       <small>{{ formatDate(borrow.createdAt) }}</small>
                     </td>
                   </tr>
@@ -145,24 +147,26 @@
       </div>
 
       <!-- Top Books -->
-      <div class="col-lg-4 mb-4">
-        <div class="admin-card">
-          <div class="card-header-custom">
+      <div class="col-lg-4 mb-4 d-flex">
+        <div class="admin-card flex-fill">
+          <div class="card-header-custom text-center">
             <h5 class="mb-0">
               <i class="bi bi-star me-2"></i>
               Sách phổ biến
             </h5>
           </div>
-          <div class="card-body">
-            <div v-if="topBooks.length === 0" class="text-center text-muted">
-              <i class="bi bi-book display-4 d-block mb-2"></i>
-              Chưa có dữ liệu
+          <div class="card-body d-flex flex-column">
+            <div v-if="topBooks.length === 0" class="text-center text-muted flex-fill d-flex align-items-center justify-content-center">
+              <div>
+                <i class="bi bi-book display-4 d-block mb-2"></i>
+                Chưa có dữ liệu
+              </div>
             </div>
-            <div v-else>
+            <div v-else class="flex-fill d-flex flex-column justify-content-between">
               <div
                 v-for="(book, index) in topBooks"
                 :key="book._id"
-                class="d-flex align-items-center mb-3"
+                class="d-flex align-items-center mb-3 p-2 border rounded bg-light"
               >
                 <div class="ranking-number me-3">
                   {{ index + 1 }}
@@ -200,24 +204,37 @@ export default {
       try {
         isLoading.value = true;
 
-        // Fetch dashboard stats
+        // Lấy dữ liệu dashboard
         const dashboardResponse = await api.get("/thongke/dashboard");
 
-        if (dashboardResponse.data) {
+        if (dashboardResponse.success && dashboardResponse.data) {
           const data = dashboardResponse.data;
 
+          // Cập nhật thống kê tổng quan
           stats.value = {
             totalBooks: data.overview?.tongSach || 0,
             totalUsers: data.overview?.tongDocGia || 0,
+            totalStaff: data.overview?.tongNhanVien || 0,
             activeBorrows: data.overview?.sachDangMuon || 0,
-            overdueBooks: data.overdueBooks || 0,
           };
 
+          // Cập nhật danh sách phiếu mượn gần đây
           recentBorrows.value = data.recentBorrows || [];
+          
+          // Cập nhật sách phổ biến
           topBooks.value = (data.topBooks || []).slice(0, 5);
         }
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
+        console.error("Lỗi khi lấy dữ liệu dashboard:", error);
+        // Đặt giá trị mặc định khi có lỗi
+        stats.value = {
+          totalBooks: 0,
+          totalUsers: 0,
+          totalStaff: 0,
+          activeBorrows: 0,
+        };
+        recentBorrows.value = [];
+        topBooks.value = [];
       } finally {
         isLoading.value = false;
       }
@@ -240,9 +257,11 @@ export default {
 
     const getStatusBadgeClass = (status) => {
       const classes = {
-        "Đã duyệt": "bg-info",
-        "Đã mượn": "bg-warning",
+        "Chờ duyệt": "bg-warning text-dark",
+        "Đã duyệt": "bg-primary",
+        "Đang mượn": "bg-warning",
         "Đã trả": "bg-success",
+        "Quá hạn": "bg-danger",
         "Từ chối": "bg-danger",
       };
       return classes[status] || "bg-secondary";
@@ -287,5 +306,50 @@ export default {
   justify-content: center;
   font-weight: 600;
   font-size: 0.9rem;
+}
+
+.card-header-custom {
+  position: relative;
+}
+
+.table-bordered th,
+.table-bordered td {
+  border: 1px solid #dee2e6;
+}
+
+.table-bordered thead th {
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+}
+
+.flex-fill {
+  flex: 1;
+}
+
+.d-flex.flex-column {
+  min-height: 100%;
+}
+
+/* Đảm bảo các card có chiều cao bằng nhau */
+.admin-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-card .card-body {
+  flex: 1;
+}
+
+/* Cải thiện hiển thị sách phổ biến */
+.bg-light {
+  background-color: #f8f9fa !important;
+  transition: all 0.3s ease;
+}
+
+.bg-light:hover {
+  background-color: #e9ecef !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 </style>

@@ -7,6 +7,23 @@ const ApiResponse = require("../utils/response");
  */
 class ThongKeController {
   /**
+   * Lấy dữ liệu dashboard tổng hợp
+   */
+  static async getDashboard(req, res) {
+    try {
+      const dashboard = await ThongKeService.getDashboardData();
+      return ApiResponse.success(
+        res,
+        dashboard,
+        "Lấy dữ liệu dashboard thành công"
+      );
+    } catch (error) {
+      console.error("Lỗi getDashboard:", error);
+      return ApiResponse.error(res, error.message);
+    }
+  }
+
+  /**
    * Lấy thống kê tổng quan
    */
   static async getOverview(req, res) {

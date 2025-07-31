@@ -12,6 +12,16 @@ router.use(authenticateToken, requireEmployee);
 // Dashboard tổng hợp
 router.get("/dashboard", ThongKeController.getDashboard);
 
+// Debug endpoint - sẽ xóa sau
+router.get("/debug-status", async (req, res) => {
+  const TheoDoiMuonSach = require("../models/TheoDoiMuonSach.model");
+  const statusBreakdown = await TheoDoiMuonSach.aggregate([
+    { $match: { deleted: false } },
+    { $group: { _id: "$TrangThai", count: { $sum: 1 } } },
+  ]);
+  res.json({ statusBreakdown });
+});
+
 // Thống kê tổng quan
 router.get("/overview", ThongKeController.getOverview);
 
