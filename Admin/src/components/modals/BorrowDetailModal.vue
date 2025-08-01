@@ -132,12 +132,6 @@
                         <td class="fw-medium text-muted">Tên sách:</td>
                         <td>
                           <div class="d-flex align-items-center">
-                            <img
-                              :src="getBookImage(borrow.MaSach?.BiaSach)"
-                              :alt="borrow.MaSach?.TenSach"
-                              class="book-thumbnail me-2"
-                              style="width: 40px; height: 50px; object-fit: cover; border-radius: 4px;"
-                            />
                             <div>
                               <span class="fw-medium">{{ borrow.MaSach?.TenSach || "-" }}</span>
                             </div>

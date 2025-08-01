@@ -73,7 +73,7 @@
     <div class="admin-card mb-4">
       <div class="card-body">
         <div class="row g-3">
-          <div class="col-md-3">
+          <div class="col-md-6">
             <div class="input-group">
               <span class="input-group-text">
                 <i class="bi bi-search"></i>
@@ -85,24 +85,6 @@
                 placeholder="Tên độc giả, tên sách..."
                 @input="debouncedSearch"
               />
-            </div>
-          </div>
-
-          <div class="col-md-3">
-            <div class="input-group">
-              <span class="input-group-text">
-                <i class="bi bi-funnel"></i>
-              </span>
-              <select
-                v-model="filters.timeRange"
-                class="form-select"
-                @change="fetchBorrows"
-              >
-                <option value="">Tất cả</option>
-                <option value="today">Hôm nay</option>
-                <option value="week">Tuần này</option>
-                <option value="month">Tháng này</option>
-              </select>
             </div>
           </div>
 
@@ -903,6 +885,19 @@ export default {
       };
     }
 
+    // Debounce function
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
     // Lifecycle
     onMounted(() => {
       fetchBorrows();
@@ -922,8 +917,15 @@ export default {
       isRejectStatusFilter,
       shouldShowRemainingDays,
       shouldShowOverdueDays,
+      quickFilters,
+      isRejectStatusFilter,
+      shouldShowRemainingDays,
+      shouldShowOverdueDays,
       getVisiblePages,
       fetchBorrows,
+      debouncedSearch,
+      resetFilters,
+      quickFilter,
       debouncedSearch,
       resetFilters,
       quickFilter,

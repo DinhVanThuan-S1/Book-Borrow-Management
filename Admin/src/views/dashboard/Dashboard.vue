@@ -73,11 +73,11 @@
       <div class="col-lg-8 mb-4 d-flex">
         <div class="admin-card flex-fill">
           <div
-            class="card-header-custom d-flex justify-content-between align-items-center text-center"
+            class="card-header-custom d-flex justify-content-between align-items-center"
           >
             <h5 class="mb-0 w-100">
               <i class="bi bi-clock-history me-2"></i>
-              Phiếu mượn gần đây
+              Phiếu mượn đã duyệt gần đây
             </h5>
             <router-link to="/borrowing" class="btn btn-sm btn-outline-primary position-absolute end-0 me-3">
               Xem tất cả
@@ -89,7 +89,7 @@
               class="text-center p-4 text-muted"
             >
               <i class="bi bi-inbox display-4 d-block mb-2"></i>
-              Chưa có phiếu mượn nào
+              Chưa có phiếu mượn đã duyệt nào
             </div>
             <div v-else class="table">
               <table class="table table-hover table-bordered mb-0">
@@ -127,7 +127,7 @@
                         borrow.MaSach?.TacGia
                       }}</small>
                     </td>
-                    <td class="text-center border-end">
+                    <td class="border-end">
                       <span
                         class="badge"
                         :class="getStatusBadgeClass(borrow.TrangThai)"
@@ -149,7 +149,7 @@
       <!-- Top Books -->
       <div class="col-lg-4 mb-4 d-flex">
         <div class="admin-card flex-fill">
-          <div class="card-header-custom text-center">
+          <div class="card-header-custom">
             <h5 class="mb-0">
               <i class="bi bi-star me-2"></i>
               Sách phổ biến
@@ -162,11 +162,12 @@
                 Chưa có dữ liệu
               </div>
             </div>
-            <div v-else class="flex-fill d-flex flex-column justify-content-between">
+            <div v-else class="flex-fill d-flex flex-column">
               <div
                 v-for="(book, index) in topBooks"
                 :key="book._id"
-                class="d-flex align-items-center mb-3 p-2 border rounded bg-light"
+                class="d-flex align-items-center p-2 border rounded bg-light"
+                :class="{ 'mb-3': index < topBooks.length - 1 }"
               >
                 <div class="ranking-number me-3">
                   {{ index + 1 }}
@@ -257,7 +258,6 @@ export default {
 
     const getStatusBadgeClass = (status) => {
       const classes = {
-        "Chờ duyệt": "bg-warning text-dark",
         "Đã duyệt": "bg-primary",
         "Đang mượn": "bg-warning",
         "Đã trả": "bg-success",
@@ -318,8 +318,8 @@ export default {
 }
 
 .table-bordered thead th {
-  border-bottom: 2px solid #dee2e6;
-  font-weight: 600;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 700;
 }
 
 .flex-fill {
@@ -351,5 +351,14 @@ export default {
   background-color: #e9ecef !important;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Đảm bảo khung sách cuối cùng không bị văng ra ngoài */
+.flex-fill.d-flex.flex-column {
+  gap: 0;
+}
+
+.flex-fill.d-flex.flex-column > div:last-child {
+  margin-bottom: 0 !important;
 }
 </style>

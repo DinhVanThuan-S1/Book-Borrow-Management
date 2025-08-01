@@ -622,8 +622,8 @@ export default {
 }
 
 .table th {
-  border-bottom: 2px solid #dee2e6;
-  font-weight: 600;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: 700;
   font-size: 1rem;
   letter-spacing: 0.5px;
   background-color: #f8f9fa;

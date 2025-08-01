@@ -520,9 +520,8 @@ export default {
 
 .table thead th {
   background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid #dee2e6;
   font-weight: 700 !important;
-  color: #495057;
   text-align: center;
   vertical-align: middle;
   padding: 10px 6px 10px 12px; /* Thêm padding-left 12px */
