@@ -389,42 +389,6 @@ class ThongKeService {
   }
 
   /**
-   * Lấy dữ liệu dashboard tổng hợp
-   */
-  static async getDashboardData() {
-    const [overview, recentBorrows, topBooks, overdueCount] = await Promise.all([
-      // Thống kê tổng quan
-      this.getOverviewStats(),
-      
-      // 10 phiếu mượn "Đã duyệt" gần nhất
-      TheoDoiMuonSach.find({ 
-        deleted: false,
-        TrangThai: "Đã duyệt"
-      })
-        .populate("MaDocGia", "MaDocGia HoLot Ten Email")
-        .populate("MaSach", "MaSach TenSach TacGia")
-        .sort({ createdAt: -1 })
-        .limit(10),
-      
-      // Top 5 sách phổ biến
-      this.getTopBorrowedBooks(5),
-      
-      // Số sách quá hạn
-      TheoDoiMuonSach.countDocuments({
-        TrangThai: "Quá hạn",
-        deleted: false,
-      })
-    ]);
-
-    return {
-      overview,
-      recentBorrows,
-      topBooks,
-      overdueBooks: overdueCount,
-    };
-  }
-
-  /**
    * Lấy phiếu mượn gần đây
    */
   static async getRecentBorrows(limit = 10) {
