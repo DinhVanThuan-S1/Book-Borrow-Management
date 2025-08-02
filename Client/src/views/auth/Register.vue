@@ -186,20 +186,6 @@
           <div v-if="errors.Password" class="invalid-feedback">
             {{ errors.Password }}
           </div>
-
-          <!-- Password Strength -->
-          <div v-if="form.Password" class="password-strength mt-2">
-            <div class="strength-bar">
-              <div
-                class="strength-fill"
-                :class="passwordStrengthClass"
-                :style="{ width: passwordStrengthWidth + '%' }"
-              ></div>
-            </div>
-            <small class="strength-text" :class="passwordStrengthClass">
-              {{ passwordStrengthText }}
-            </small>
-          </div>
         </div>
 
         <div class="mb-3">
@@ -323,35 +309,6 @@ export default {
       return minAge.toISOString().split("T")[0];
     });
 
-    const passwordStrength = computed(() => {
-      const password = form.Password;
-      if (!password) return 0;
-
-      let score = 0;
-      if (password.length >= 8) score += 25;
-      if (/[a-z]/.test(password)) score += 25;
-      if (/[A-Z]/.test(password)) score += 25;
-      if (/[0-9]/.test(password)) score += 25;
-
-      return score;
-    });
-
-    const passwordStrengthWidth = computed(() => passwordStrength.value);
-
-    const passwordStrengthClass = computed(() => {
-      const score = passwordStrength.value;
-      if (score < 50) return "weak";
-      if (score < 75) return "medium";
-      return "strong";
-    });
-
-    const passwordStrengthText = computed(() => {
-      const score = passwordStrength.value;
-      if (score < 50) return "Mật khẩu yếu";
-      if (score < 75) return "Mật khẩu trung bình";
-      return "Mật khẩu mạnh";
-    });
-
     // Methods
     const validateForm = () => {
       Object.keys(errors).forEach((key) => delete errors[key]);
@@ -461,9 +418,6 @@ export default {
       showConfirmPassword,
       isLoading,
       maxDate,
-      passwordStrengthWidth,
-      passwordStrengthClass,
-      passwordStrengthText,
       handleRegister,
     };
   },
@@ -516,47 +470,6 @@ export default {
 .register-form .form-control:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-}
-
-.password-strength {
-  margin-top: 0.5rem;
-}
-
-.strength-bar {
-  height: 4px;
-  background: #e5e7eb;
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 0.25rem;
-}
-
-.strength-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.strength-fill.weak {
-  background: var(--danger-color);
-}
-
-.strength-fill.medium {
-  background: var(--warning-color);
-}
-
-.strength-fill.strong {
-  background: var(--success-color);
-}
-
-.strength-text.weak {
-  color: var(--danger-color);
-}
-
-.strength-text.medium {
-  color: var(--warning-color);
-}
-
-.strength-text.strong {
-  color: var(--success-color);
 }
 
 .register-btn {

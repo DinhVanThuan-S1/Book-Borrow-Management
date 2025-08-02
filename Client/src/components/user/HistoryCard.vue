@@ -1,5 +1,5 @@
 <template>
-  <div class="history-card client-card" :class="getCardClass()">
+  <div class="client-card" :class="getCardClass()">
     <div class="row g-0">
       <!-- Book Image -->
       <div class="col-md-2">
@@ -31,42 +31,6 @@
               </span>
             </div>
           </div>
-
-          <div class="history-timeline">
-            <div class="timeline-row">
-              <div class="timeline-label">Ngày mượn:</div>
-              <div class="timeline-value">
-                <i class="bi bi-calendar me-1"></i>
-                {{ formatDateTime(history.NgayMuon || history.createdAt) }}
-              </div>
-            </div>
-
-            <div v-if="history.NgayTraDuKien" class="timeline-row">
-              <div class="timeline-label">Hạn trả:</div>
-              <div class="timeline-value" :class="getDueDateClass()">
-                <i class="bi bi-calendar-event me-1"></i>
-                {{ formatDateTime(history.NgayTraDuKien) }}
-                {{ getDueDateStatus() }}
-              </div>
-            </div>
-
-            <div v-if="history.NgayTraThucTe" class="timeline-row">
-              <div class="timeline-label">Ngày trả:</div>
-              <div class="timeline-value" :class="getReturnDateClass()">
-                <i class="bi bi-calendar-check me-1"></i>
-                {{ formatDateTime(history.NgayTraThucTe) }}
-                {{ getReturnStatus() }}
-              </div>
-            </div>
-
-            <div v-if="history.LyDoTuChoi" class="timeline-row">
-              <div class="timeline-label">Lý do từ chối:</div>
-              <div class="timeline-value text-danger">
-                <i class="bi bi-x-circle me-1"></i>
-                {{ history.LyDoTuChoi }}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -76,15 +40,6 @@
           <div class="status-badge" :class="getStatusClass()">
             <i :class="getStatusIcon()" class="me-2"></i>
             {{ getStatusText() }}
-          </div>
-
-          <div
-            v-if="showDaysInfo()"
-            class="days-info"
-            :class="getDaysInfoClass()"
-          >
-            <i class="bi bi-hourglass me-1"></i>
-            {{ getDaysInfo() }}
           </div>
 
           <div v-if="showFineInfo()" class="fine-info">
@@ -97,24 +52,10 @@
           <div class="history-actions">
             <button
               @click="viewBookDetail"
-              class="btn btn-outline-primary btn-sm w-100 mb-2"
+              class="btn btn-outline-primary btn-sm w-100"
             >
               <i class="bi bi-info-circle me-2"></i>
               Chi tiết sách
-            </button>
-
-            <button
-              v-if="canBorrowAgain()"
-              @click="borrowAgain"
-              class="btn btn-primary-gradient btn-sm w-100"
-              :disabled="borrowingAgain"
-            >
-              <span
-                v-if="borrowingAgain"
-                class="spinner-border spinner-border-sm me-2"
-              ></span>
-              <i v-else class="bi bi-arrow-repeat me-2"></i>
-              {{ borrowingAgain ? "Đang xử lý..." : "Mượn lại" }}
             </button>
           </div>
         </div>
@@ -126,8 +67,6 @@
 <script>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { useToast } from "vue-toastification";
-import api from "@/services/api";
 
 export default {
   name: "HistoryCard",
@@ -139,13 +78,10 @@ export default {
   },
   setup(props) {
     const router = useRouter();
-    const toast = useToast();
-
-    const borrowingAgain = ref(false);
 
     // Computed
     const isOverdue = computed(() => {
-      if (props.history.TrangThai !== "Đã mượn") return false;
+      if (props.history.TrangThai !== "Đang mượn") return false;
       const dueDate = new Date(props.history.NgayTraDuKien);
       const now = new Date();
       return now > dueDate;
@@ -163,7 +99,11 @@ export default {
     const getBookImage = (imagePath) => {
       if (!imagePath) return "/src/assets/images/book-placeholder.jpg";
       if (imagePath.startsWith("http")) return imagePath;
-      return `http://localhost:5000${imagePath}`;
+      // Ensure the path starts with /uploads if it doesn't already have a protocol
+      if (imagePath.startsWith("/uploads")) {
+        return `http://localhost:5000${imagePath}`;
+      }
+      return `http://localhost:5000/uploads/books/${imagePath}`;
     };
 
     const handleImageError = (event) => {
@@ -184,7 +124,7 @@ export default {
       const classes = {
         "Chờ duyệt": "warning",
         "Đã duyệt": "info",
-        "Đã mượn": "primary",
+        "Đang mượn": "primary",
         "Đã trả": "success",
         "Từ chối": "danger",
       };
@@ -198,7 +138,7 @@ export default {
       const icons = {
         "Chờ duyệt": "bi bi-clock",
         "Đã duyệt": "bi bi-check-circle",
-        "Đã mượn": "bi bi-book",
+        "Đang mượn": "bi bi-book",
         "Đã trả": "bi bi-check-square",
         "Từ chối": "bi bi-x-circle",
       };
@@ -211,106 +151,8 @@ export default {
       return props.history.TrangThai;
     };
 
-    const getDueDateClass = () => {
-      if (props.history.TrangThai !== "Đã mượn") return "";
-      if (isOverdue.value) return "text-danger fw-bold";
-
-      const dueDate = new Date(props.history.NgayTraDuKien);
-      const now = new Date();
-      const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-
-      if (diffDays <= 2) return "text-warning fw-bold";
-      return "";
-    };
-
-    const getDueDateStatus = () => {
-      if (props.history.TrangThai !== "Đã mượn") return "";
-      if (isOverdue.value) return "(Quá hạn)";
-
-      const dueDate = new Date(props.history.NgayTraDuKien);
-      const now = new Date();
-      const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-
-      if (diffDays === 0) return "(Hôm nay)";
-      if (diffDays === 1) return "(Ngày mai)";
-      if (diffDays <= 2) return `(Còn ${diffDays} ngày)`;
-      return "";
-    };
-
-    const getReturnDateClass = () => {
-      return isReturnedLate.value ? "text-warning" : "text-success";
-    };
-
-    const getReturnStatus = () => {
-      return isReturnedLate.value ? "(Trả muộn)" : "(Đúng hạn)";
-    };
-
-    const showDaysInfo = () => {
-      return (
-        props.history.TrangThai === "Đã mượn" ||
-        props.history.TrangThai === "Đã trả"
-      );
-    };
-
-    const getDaysInfo = () => {
-      if (props.history.TrangThai === "Đã mượn") {
-        if (isOverdue.value) {
-          const dueDate = new Date(props.history.NgayTraDuKien);
-          const now = new Date();
-          const diffDays = Math.ceil((now - dueDate) / (1000 * 60 * 60 * 24));
-          return `Quá hạn ${diffDays} ngày`;
-        } else {
-          const dueDate = new Date(props.history.NgayTraDuKien);
-          const now = new Date();
-          const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-          return `Còn ${diffDays} ngày`;
-        }
-      } else if (props.history.TrangThai === "Đã trả") {
-        const borrowDate = new Date(
-          props.history.NgayMuon || props.history.createdAt
-        );
-        const returnDate = new Date(props.history.NgayTraThucTe);
-        const diffDays = Math.ceil(
-          (returnDate - borrowDate) / (1000 * 60 * 60 * 24)
-        );
-        return `Mượn ${diffDays} ngày`;
-      }
-      return "";
-    };
-
-    const getDaysInfoClass = () => {
-      if (isOverdue.value) return "text-danger";
-      if (props.history.TrangThai === "Đã mượn") {
-        const dueDate = new Date(props.history.NgayTraDuKien);
-        const now = new Date();
-        const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
-        if (diffDays <= 2) return "text-warning";
-      }
-      return "text-muted";
-    };
-
     const showFineInfo = () => {
       return props.history.PhiPhat && props.history.PhiPhat > 0;
-    };
-
-    const canBorrowAgain = () => {
-      return (
-        props.history.TrangThai === "Đã trả" &&
-        props.history.MaSach?.SoQuyen > 0
-      );
-    };
-
-    const borrowAgain = async () => {
-      borrowingAgain.value = true;
-
-      try {
-        await api.borrowing.requestBorrow(props.history.MaSach._id);
-        toast.success("Yêu cầu mượn lại đã được gửi thành công!");
-      } catch (error) {
-        console.error("Error borrowing again:", error);
-      } finally {
-        borrowingAgain.value = false;
-      }
     };
 
     const viewBookDetail = () => {
@@ -339,7 +181,6 @@ export default {
     };
 
     return {
-      borrowingAgain,
       isOverdue,
       isReturnedLate,
       getBookImage,
@@ -348,18 +189,8 @@ export default {
       getStatusClass,
       getStatusIcon,
       getStatusText,
-      getDueDateClass,
-      getDueDateStatus,
-      getReturnDateClass,
-      getReturnStatus,
-      showDaysInfo,
-      getDaysInfo,
-      getDaysInfoClass,
       showFineInfo,
-      canBorrowAgain,
-      borrowAgain,
       viewBookDetail,
-      formatDateTime,
       formatCurrency,
     };
   },
@@ -393,14 +224,23 @@ export default {
 }
 
 .book-image-container {
-  height: 120px;
+  height: 140px;
   overflow: hidden;
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 }
 
 .book-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.book-image:hover {
+  transform: scale(1.05);
 }
 
 .history-content {
@@ -425,31 +265,6 @@ export default {
   font-size: 0.9rem;
   color: #6b7280;
   margin-bottom: 1rem;
-}
-
-.history-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.timeline-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-}
-
-.timeline-label {
-  font-weight: 500;
-  color: var(--dark-color);
-  min-width: 80px;
-}
-
-.timeline-value {
-  color: #6b7280;
-  display: flex;
-  align-items: center;
 }
 
 .history-status {
@@ -530,14 +345,24 @@ export default {
     gap: 0.5rem;
   }
 
-  .timeline-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
+  .book-image-container {
+    height: 120px;
   }
 
-  .timeline-label {
-    min-width: auto;
+  .history-card .row.g-0 > .col-md-2 {
+    flex: 0 0 auto;
+    width: 25%;
+  }
+
+  .history-card .row.g-0 > .col-md-7 {
+    flex: 0 0 auto;
+    width: 75%;
+  }
+
+  .history-card .row.g-0 > .col-md-3 {
+    flex: 0 0 auto;
+    width: 100%;
+    margin-top: 1rem;
   }
 }
 </style>

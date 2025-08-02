@@ -7,9 +7,6 @@
           <i class="bi bi-clock-history me-3"></i>
           Lịch sử mượn sách
         </h1>
-        <p class="page-subtitle">
-          Theo dõi tất cả các lần mượn và trả sách của bạn
-        </p>
       </div>
 
       <!-- Summary Stats -->
@@ -63,80 +60,25 @@
         </div>
       </div>
 
-      <!-- Filters and Search -->
-      <div class="filters-section mb-4">
+      <!-- Status Tabs -->
+      <div class="status-tabs mb-4">
         <div class="client-card">
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-3">
-                <label class="form-label">Tìm kiếm</label>
-                <input
-                  v-model="filters.search"
-                  type="text"
-                  class="form-control"
-                  placeholder="Tên sách, tác giả..."
-                  @keyup.enter="fetchHistory"
-                />
-              </div>
-
-              <div class="col-md-2">
-                <label class="form-label">Trạng thái</label>
-                <select
-                  v-model="filters.status"
-                  class="form-select"
-                  @change="fetchHistory"
-                >
-                  <option value="">Tất cả</option>
-                  <option value="Đã trả">Đã trả</option>
-                  <option value="Đã mượn">Đang mượn</option>
-                  <option value="overdue">Quá hạn</option>
-                  <option value="ontime">Trả đúng hạn</option>
-                  <option value="late">Trả muộn</option>
-                </select>
-              </div>
-
-              <div class="col-md-2">
-                <label class="form-label">Từ ngày</label>
-                <input
-                  v-model="filters.startDate"
-                  type="date"
-                  class="form-control"
-                  @change="fetchHistory"
-                />
-              </div>
-
-              <div class="col-md-2">
-                <label class="form-label">Đến ngày</label>
-                <input
-                  v-model="filters.endDate"
-                  type="date"
-                  class="form-control"
-                  @change="fetchHistory"
-                />
-              </div>
-
-              <div class="col-md-2">
-                <label class="form-label">Sắp xếp</label>
-                <select
-                  v-model="filters.sort"
-                  class="form-select"
-                  @change="fetchHistory"
-                >
-                  <option value="newest">Mới nhất</option>
-                  <option value="oldest">Cũ nhất</option>
-                  <option value="book-title">Tên sách A-Z</option>
-                  <option value="due-date">Ngày trả</option>
-                </select>
-              </div>
-
-              <div class="col-md-1 d-flex align-items-end">
-                <button
-                  @click="resetFilters"
-                  class="btn btn-outline-secondary w-100"
-                >
-                  <i class="bi bi-arrow-clockwise"></i>
-                </button>
-              </div>
+          <div class="card-body p-0">
+            <div class="nav nav-tabs" role="tablist">
+              <button
+                v-for="tab in statusTabs"
+                :key="tab.value"
+                class="nav-link"
+                :class="{ active: activeTab === tab.value }"
+                @click="setActiveTab(tab.value)"
+                type="button"
+              >
+                <i :class="tab.icon" class="me-2"></i>
+                {{ tab.label }}
+                <span v-if="tab.count !== undefined" class="badge ms-2" :class="tab.badgeClass">
+                  {{ tab.count }}
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -165,34 +107,15 @@
           </router-link>
         </div>
 
-        <!-- History Timeline -->
-        <div v-else class="history-timeline">
-          <div
-            v-for="(historyItem, index) in history"
-            :key="historyItem._id"
-            class="timeline-item"
-          >
+        <!-- History List -->
+        <div v-else class="history-list">
+          <div class="row g-3">
             <div
-              class="timeline-marker"
-              :class="getTimelineMarkerClass(historyItem)"
+              v-for="historyItem in history"
+              :key="historyItem._id"
+              class="col-12"
             >
-              <i :class="getTimelineIcon(historyItem)"></i>
-            </div>
-
-            <div class="timeline-content">
               <HistoryCard :history="historyItem" />
-            </div>
-
-            <!-- Date Separator -->
-            <div
-              v-if="shouldShowDateSeparator(historyItem, index)"
-              class="date-separator"
-            >
-              {{
-                formatDateSeparator(
-                  historyItem.NgayMuon || historyItem.createdAt
-                )
-              }}
             </div>
           </div>
         </div>
@@ -246,14 +169,6 @@
           </nav>
         </div>
       </div>
-
-      <!-- Export Button -->
-      <div class="export-section mt-4 text-center">
-        <button @click="exportHistory" class="btn btn-outline-success">
-          <i class="bi bi-download me-2"></i>
-          Xuất lịch sử (Excel)
-        </button>
-      </div>
     </div>
   </div>
 </template>
@@ -275,16 +190,57 @@ export default {
     const history = ref([]);
     const summary = ref({});
     const isLoading = ref(false);
+    const activeTab = ref("all");
 
     const filters = reactive({
-      search: "",
-      status: "",
-      startDate: "",
-      endDate: "",
-      sort: "newest",
       page: 1,
       limit: 10,
     });
+
+    const statusTabs = computed(() => [
+      {
+        value: "all",
+        label: "Tất cả",
+        icon: "bi bi-list-ul",
+        count: summary.value.total || 0,
+        badgeClass: "bg-secondary"
+      },
+      {
+        value: "Đã duyệt",
+        label: "Đã duyệt",
+        icon: "bi bi-check-circle",
+        count: summary.value.approved || 0,
+        badgeClass: "bg-info"
+      },
+      {
+        value: "Từ chối",
+        label: "Từ chối",
+        icon: "bi bi-x-circle",
+        count: summary.value.rejected || 0,
+        badgeClass: "bg-danger"
+      },
+      {
+        value: "Đang mượn",
+        label: "Đang mượn",
+        icon: "bi bi-book",
+        count: summary.value.borrowing || 0,
+        badgeClass: "bg-primary"
+      },
+      {
+        value: "Đã trả",
+        label: "Đã trả",
+        icon: "bi bi-check-square",
+        count: summary.value.returned || 0,
+        badgeClass: "bg-success"
+      },
+      {
+        value: "overdue",
+        label: "Quá hạn",
+        icon: "bi bi-exclamation-triangle",
+        count: summary.value.overdue || 0,
+        badgeClass: "bg-warning"
+      }
+    ]);
 
     const pagination = reactive({
       current: 1,
@@ -332,23 +288,16 @@ export default {
         const params = {
           page: filters.page,
           limit: filters.limit,
-          sort: filters.sort,
         };
 
-        if (filters.search) params.search = filters.search;
-        if (filters.status) {
-          if (filters.status === "overdue") {
+        // Apply status filter based on active tab
+        if (activeTab.value !== "all") {
+          if (activeTab.value === "overdue") {
             params.overdue = true;
-          } else if (filters.status === "ontime") {
-            params.ontime = true;
-          } else if (filters.status === "late") {
-            params.late = true;
           } else {
-            params.status = filters.status;
+            params.status = activeTab.value;
           }
         }
-        if (filters.startDate) params.startDate = filters.startDate;
-        if (filters.endDate) params.endDate = filters.endDate;
 
         const response = await api.borrowing.getBorrowHistory(params);
 
@@ -357,7 +306,7 @@ export default {
           Object.assign(pagination, response.pagination);
 
           // Calculate summary
-          calculateSummary();
+          await calculateSummary();
         }
       } catch (error) {
         console.error("Error fetching history:", error);
@@ -367,86 +316,53 @@ export default {
       }
     };
 
-    const calculateSummary = () => {
-      const total = pagination.total;
-      const returned = history.value.filter(
-        (h) => h.TrangThai === "Đã trả"
-      ).length;
-      const overdue = history.value.filter((h) => isOverdue(h)).length;
-      const onTime = history.value.filter(
-        (h) => h.TrangThai === "Đã trả" && !isReturnedLate(h)
-      ).length;
+    const calculateSummary = async () => {
+      try {
+        // Fetch all data without filters to get accurate counts
+        const allDataResponse = await api.borrowing.getBorrowHistory({
+          page: 1,
+          limit: 1000, // Get a large number to capture all records
+        });
 
-      summary.value = {
-        total,
-        returned,
-        overdue,
-        onTimeRate: returned > 0 ? Math.round((onTime / returned) * 100) : 0,
-      };
+        if (allDataResponse.success) {
+          const allHistory = allDataResponse.data;
+          
+          summary.value = {
+            total: allDataResponse.pagination.total || 0,
+            approved: allHistory.filter(h => h.TrangThai === "Đã duyệt").length,
+            rejected: allHistory.filter(h => h.TrangThai === "Từ chối").length,
+            borrowing: allHistory.filter(h => h.TrangThai === "Đang mượn").length,
+            returned: allHistory.filter(h => h.TrangThai === "Đã trả").length,
+            overdue: allHistory.filter(h => isOverdue(h)).length,
+          };
+        }
+      } catch (error) {
+        console.error("Error calculating summary:", error);
+        // Fallback to current pagination data
+        const currentHistory = history.value;
+        
+        summary.value = {
+          total: pagination.total || 0,
+          approved: currentHistory.filter(h => h.TrangThai === "Đã duyệt").length,
+          rejected: currentHistory.filter(h => h.TrangThai === "Từ chối").length,
+          borrowing: currentHistory.filter(h => h.TrangThai === "Đang mượn").length,
+          returned: currentHistory.filter(h => h.TrangThai === "Đã trả").length,
+          overdue: currentHistory.filter(h => isOverdue(h)).length,
+        };
+      }
+    };
+
+    const setActiveTab = (tab) => {
+      activeTab.value = tab;
+      filters.page = 1; // Reset to first page
+      fetchHistory();
     };
 
     const isOverdue = (historyItem) => {
-      if (historyItem.TrangThai !== "Đã mượn") return false;
+      if (historyItem.TrangThai !== "Đang mượn") return false;
       const dueDate = new Date(historyItem.NgayTraDuKien);
       const now = new Date();
       return now > dueDate;
-    };
-
-    const isReturnedLate = (historyItem) => {
-      if (historyItem.TrangThai !== "Đã trả" || !historyItem.NgayTraThucTe)
-        return false;
-      const dueDate = new Date(historyItem.NgayTraDuKien);
-      const returnDate = new Date(historyItem.NgayTraThucTe);
-      return returnDate > dueDate;
-    };
-
-    const getTimelineMarkerClass = (historyItem) => {
-      if (historyItem.TrangThai === "Đã trả") {
-        return isReturnedLate(historyItem) ? "warning" : "success";
-      }
-      if (isOverdue(historyItem)) return "danger";
-      if (historyItem.TrangThai === "Đã mượn") return "primary";
-      return "secondary";
-    };
-
-    const getTimelineIcon = (historyItem) => {
-      if (historyItem.TrangThai === "Đã trả") return "bi bi-check-circle";
-      if (isOverdue(historyItem)) return "bi bi-exclamation-triangle";
-      if (historyItem.TrangThai === "Đã mượn") return "bi bi-book";
-      return "bi bi-clock";
-    };
-
-    const shouldShowDateSeparator = (historyItem, index) => {
-      if (index === 0) return true;
-
-      const currentDate = new Date(
-        historyItem.NgayMuon || historyItem.createdAt
-      );
-      const prevDate = new Date(
-        history.value[index - 1].NgayMuon || history.value[index - 1].createdAt
-      );
-
-      return currentDate.toDateString() !== prevDate.toDateString();
-    };
-
-    const formatDateSeparator = (date) => {
-      const dateObj = new Date(date);
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(today.getDate() - 1);
-
-      if (dateObj.toDateString() === today.toDateString()) {
-        return "Hôm nay";
-      } else if (dateObj.toDateString() === yesterday.toDateString()) {
-        return "Hôm qua";
-      } else {
-        return dateObj.toLocaleDateString("vi-VN", {
-          weekday: "long",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        });
-      }
     };
 
     const changePage = (page) => {
@@ -459,67 +375,20 @@ export default {
       }
     };
 
-    const resetFilters = () => {
-      Object.assign(filters, {
-        search: "",
-        status: "",
-        startDate: "",
-        endDate: "",
-        sort: "newest",
-        page: 1,
-      });
-      fetchHistory();
-    };
-
     const getEmptyMessage = () => {
-      if (
-        filters.search ||
-        filters.status ||
-        filters.startDate ||
-        filters.endDate
-      ) {
-        return "Không tìm thấy kết quả phù hợp với bộ lọc của bạn.";
+      if (activeTab.value === "all") {
+        return "Bạn chưa mượn sách nào. Hãy khám phá và mượn những cuốn sách yêu thích!";
       }
-      return "Bạn chưa mượn sách nào. Hãy khám phá và mượn những cuốn sách yêu thích!";
-    };
-
-    const exportHistory = async () => {
-      try {
-        toast.info("Đang tạo file Excel...");
-
-        const params = {
-          export: true,
-          format: "excel",
-        };
-
-        if (filters.search) params.search = filters.search;
-        if (filters.status) params.status = filters.status;
-        if (filters.startDate) params.startDate = filters.startDate;
-        if (filters.endDate) params.endDate = filters.endDate;
-
-        const response = await api.get("/muonsach/my-history", {
-          params,
-          responseType: "blob",
-        });
-
-        // Create download link
-        const url = window.URL.createObjectURL(new Blob([response]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute(
-          "download",
-          `lich-su-muon-sach-${new Date().toISOString().split("T")[0]}.xlsx`
-        );
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
-
-        toast.success("Xuất file Excel thành công");
-      } catch (error) {
-        console.error("Error exporting history:", error);
-        toast.error("Có lỗi khi xuất file Excel");
-      }
+      
+      const messages = {
+        "Đã duyệt": "Không có yêu cầu mượn sách nào đã được duyệt.",
+        "Từ chối": "Không có yêu cầu mượn sách nào bị từ chối.",
+        "Đang mượn": "Bạn hiện không đang mượn sách nào.",
+        "Đã trả": "Bạn chưa trả sách nào.",
+        "overdue": "Không có sách nào quá hạn."
+      };
+      
+      return messages[activeTab.value] || "Không có dữ liệu.";
     };
 
     // Lifecycle
@@ -533,16 +402,13 @@ export default {
       isLoading,
       filters,
       pagination,
+      activeTab,
+      statusTabs,
       getVisiblePages,
       fetchHistory,
+      setActiveTab,
       changePage,
-      resetFilters,
       getEmptyMessage,
-      exportHistory,
-      getTimelineMarkerClass,
-      getTimelineIcon,
-      shouldShowDateSeparator,
-      formatDateSeparator,
     };
   },
 };
@@ -616,84 +482,49 @@ export default {
   font-size: 0.9rem;
 }
 
-.history-timeline {
-  position: relative;
-  padding-left: 2rem;
+.status-tabs .nav-tabs {
+  border: none;
+  background: #f8fafc;
+  border-radius: var(--border-radius);
+  padding: 0.5rem;
 }
 
-.history-timeline::before {
-  content: "";
-  position: absolute;
-  left: 15px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: #e5e7eb;
-}
-
-.timeline-item {
-  position: relative;
-  margin-bottom: 2rem;
-}
-
-.timeline-marker {
-  position: absolute;
-  left: -2rem;
-  top: 1rem;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+.status-tabs .nav-link {
+  border: none;
+  border-radius: calc(var(--border-radius) - 0.25rem);
+  color: #64748b;
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  margin-right: 0.25rem;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.9rem;
-  border: 3px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-.timeline-marker.primary {
-  background: var(--primary-color);
-}
-.timeline-marker.success {
-  background: var(--success-color);
-}
-.timeline-marker.warning {
-  background: var(--warning-color);
-}
-.timeline-marker.danger {
-  background: var(--danger-color);
-}
-.timeline-marker.secondary {
-  background: #6c757d;
-}
-
-.timeline-content {
-  margin-left: 1rem;
-}
-
-.date-separator {
-  position: absolute;
-  left: -8rem;
-  top: 0;
-  background: var(--gradient-primary);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
   white-space: nowrap;
-  box-shadow: var(--box-shadow);
 }
 
-.filters-section .client-card {
-  border: 1px solid #e5e7eb;
+.status-tabs .nav-link:hover {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
 }
 
-.export-section {
-  border-top: 1px solid #e5e7eb;
-  padding-top: 2rem;
+.status-tabs .nav-link.active {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+}
+
+.status-tabs .nav-link .badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.status-tabs .nav-link.active .badge {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white;
+}
+
+.history-list {
+  min-height: 200px;
 }
 
 @media (max-width: 768px) {
@@ -711,21 +542,19 @@ export default {
     font-size: 1.5rem;
   }
 
-  .history-timeline {
-    padding-left: 1.5rem;
+  .status-tabs .nav-tabs {
+    flex-wrap: wrap;
+    padding: 0.25rem;
   }
 
-  .timeline-marker {
-    left: -1.5rem;
-    width: 24px;
-    height: 24px;
-    font-size: 0.8rem;
+  .status-tabs .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
   }
 
-  .date-separator {
-    position: static;
-    margin-bottom: 1rem;
-    display: inline-block;
+  .status-tabs .nav-link .badge {
+    font-size: 0.7rem;
   }
 }
 </style>

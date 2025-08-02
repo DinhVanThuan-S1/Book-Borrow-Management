@@ -15,9 +15,6 @@ import Login from "@/views/auth/Login.vue";
 import Register from "@/views/auth/Register.vue";
 
 // User Dashboard
-import Dashboard from "@/views/user/Dashboard.vue";
-import Profile from "@/views/user/Profile.vue";
-import MyBooks from "@/views/user/MyBooks.vue";
 import BorrowHistory from "@/views/user/BorrowHistory.vue";
 import Favorites from "@/views/user/Favorites.vue";
 
@@ -88,34 +85,8 @@ const routes = [
     path: "/tai-khoan",
     component: ClientLayout,
     meta: { requiresAuth: true },
+    redirect: "/tai-khoan/yeu-thich",
     children: [
-      {
-        path: "",
-        name: "Dashboard",
-        component: Dashboard,
-        meta: {
-          title: "Trang cá nhân",
-          requiresAuth: true,
-        },
-      },
-      {
-        path: "thong-tin",
-        name: "Profile",
-        component: Profile,
-        meta: {
-          title: "Thông tin cá nhân",
-          requiresAuth: true,
-        },
-      },
-      {
-        path: "sach-dang-muon",
-        name: "MyBooks",
-        component: MyBooks,
-        meta: {
-          title: "Sách đang mượn",
-          requiresAuth: true,
-        },
-      },
       {
         path: "lich-su-muon",
         name: "BorrowHistory",

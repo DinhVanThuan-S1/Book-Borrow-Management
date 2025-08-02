@@ -128,29 +128,6 @@
               </div>
 
               <div class="view-controls">
-                <div class="btn-group me-3" role="group">
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    id="grid-view"
-                    v-model="viewMode"
-                    value="grid"
-                  />
-                  <label class="btn btn-outline-primary" for="grid-view">
-                    <i class="bi bi-grid-3x3-gap"></i>
-                  </label>
-                  <input
-                    type="radio"
-                    class="btn-check"
-                    id="list-view"
-                    v-model="viewMode"
-                    value="list"
-                  />
-                  <label class="btn btn-outline-primary" for="list-view">
-                    <i class="bi bi-list"></i>
-                  </label>
-                </div>
-
                 <select
                   v-model="filters.sort"
                   class="form-select"
@@ -252,10 +229,9 @@
             </button>
           </div>
 
-          <!-- Books Grid/List -->
+          <!-- Books Grid -->
           <div v-else>
-            <!-- Grid View -->
-            <div v-if="viewMode === 'grid'" class="row">
+            <div class="row">
               <div
                 v-for="book in books"
                 :key="book._id"
@@ -264,65 +240,60 @@
                 <BookCard :book="book" />
               </div>
             </div>
-
-            <!-- List View -->
-            <div v-else class="books-list">
-              <BookListItem
-                v-for="book in books"
-                :key="book._id"
-                :book="book"
-                class="mb-3"
-              />
-            </div>
           </div>
 
           <!-- Pagination -->
           <div v-if="pagination.pages > 1" class="pagination-wrapper">
-            <nav>
-              <ul class="pagination justify-content-center">
-                <li
-                  class="page-item"
-                  :class="{ disabled: pagination.current <= 1 }"
-                >
-                  <button
-                    class="page-link"
-                    @click="changePage(pagination.current - 1)"
-                    :disabled="pagination.current <= 1"
+            <div>
+              <nav>
+                <ul class="pagination justify-content-center mb-0">
+                  <li
+                    class="page-item"
+                    :class="{ disabled: pagination.current <= 1 }"
                   >
-                    <i class="bi bi-chevron-left"></i>
-                  </button>
-                </li>
+                    <button
+                      class="page-link"
+                      @click="changePage(pagination.current - 1)"
+                      :disabled="pagination.current <= 1"
+                      title="Trang trước"
+                    >
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+                  </li>
 
-                <li
-                  v-for="page in getVisiblePages"
-                  :key="page"
-                  class="page-item"
-                  :class="{ active: page === pagination.current }"
-                >
-                  <button
-                    v-if="page !== '...'"
-                    class="page-link"
-                    @click="changePage(page)"
+                  <li
+                    v-for="page in getVisiblePages"
+                    :key="page"
+                    class="page-item"
+                    :class="{ active: page === pagination.current }"
                   >
-                    {{ page }}
-                  </button>
-                  <span v-else class="page-link">...</span>
-                </li>
+                    <button
+                      v-if="page !== '...'"
+                      class="page-link"
+                      @click="changePage(page)"
+                      :title="`Trang ${page}`"
+                    >
+                      {{ page }}
+                    </button>
+                    <span v-else class="page-link disabled">...</span>
+                  </li>
 
-                <li
-                  class="page-item"
-                  :class="{ disabled: pagination.current >= pagination.pages }"
-                >
-                  <button
-                    class="page-link"
-                    @click="changePage(pagination.current + 1)"
-                    :disabled="pagination.current >= pagination.pages"
+                  <li
+                    class="page-item"
+                    :class="{ disabled: pagination.current >= pagination.pages }"
                   >
-                    <i class="bi bi-chevron-right"></i>
-                  </button>
-                </li>
-              </ul>
-            </nav>
+                    <button
+                      class="page-link"
+                      @click="changePage(pagination.current + 1)"
+                      :disabled="pagination.current >= pagination.pages"
+                      title="Trang sau"
+                    >
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </li>
+                </ul>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -336,13 +307,11 @@ import { useRoute, useRouter } from "vue-router";
 import { useToast } from "vue-toastification";
 import api from "@/services/api";
 import BookCard from "@/components/common/BookCard.vue";
-import BookListItem from "@/components/common/BookListItem.vue";
 
 export default {
   name: "BookCatalog",
   components: {
     BookCard,
-    BookListItem,
   },
   setup() {
     const route = useRoute();
@@ -353,7 +322,6 @@ export default {
     const categories = ref([]);
     const publishers = ref([]);
     const isLoading = ref(false);
-    const viewMode = ref("grid");
 
     const currentYear = new Date().getFullYear();
     
@@ -637,7 +605,6 @@ export default {
       categories,
       publishers,
       isLoading,
-      viewMode,
       filters,
       pagination,
       currentYear,
@@ -754,11 +721,61 @@ export default {
   color: var(--danger-color);
 }
 
-.books-list {
+.pagination-wrapper {
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.pagination-container {
   background: white;
   border-radius: var(--border-radius);
+  padding: 1.5rem;
   box-shadow: var(--box-shadow);
-  padding: 1rem;
+}
+
+.pagination {
+  --bs-pagination-padding-x: 0.75rem;
+  --bs-pagination-padding-y: 0.5rem;
+  --bs-pagination-font-size: 0.95rem;
+  --bs-pagination-color: var(--primary-color);
+  --bs-pagination-bg: var(--light-color);
+  --bs-pagination-border-width: 1px;
+  --bs-pagination-border-color: #dee2e6;
+  --bs-pagination-border-radius: 0.375rem;
+  --bs-pagination-hover-color: #ffffff;
+  --bs-pagination-hover-bg: var(--primary-color);
+  --bs-pagination-hover-border-color: var(--primary-color);
+  --bs-pagination-focus-color: var(--primary-color);
+  --bs-pagination-focus-bg: var(--light-color);
+  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  --bs-pagination-active-color: #ffffff;
+  --bs-pagination-active-bg: var(--primary-color);
+  --bs-pagination-active-border-color: var(--primary-color);
+  --bs-pagination-disabled-color: #6c757d;
+  --bs-pagination-disabled-bg: #ffffff;
+  --bs-pagination-disabled-border-color: #dee2e6;
+}
+
+.page-link {
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, var(--primary-color), #0056b3);
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.page-item:not(.disabled) .page-link:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 @media (max-width: 991px) {
@@ -767,14 +784,12 @@ export default {
     margin-bottom: 2rem;
   }
 
-  .view-controls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-
   .results-info {
     margin-bottom: 1rem;
+  }
+
+  .pagination-container {
+    padding: 1rem;
   }
 }
 
@@ -797,6 +812,17 @@ export default {
 
   .filter-tag {
     margin: 0.25rem 0.125rem;
+  }
+
+  .pagination {
+    --bs-pagination-padding-x: 0.5rem;
+    --bs-pagination-padding-y: 0.375rem;
+    --bs-pagination-font-size: 0.875rem;
+  }
+
+  .pagination-container {
+    padding: 0.75rem;
+    margin: 1rem 0;
   }
 }
 </style>

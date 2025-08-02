@@ -119,27 +119,6 @@
                 </li>
                 <li><hr class="dropdown-divider" /></li>
                 <li>
-                  <router-link to="/tai-khoan" class="dropdown-item">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    Trang cá nhân
-                  </router-link>
-                </li>
-                <li>
-                  <router-link
-                    to="/tai-khoan/sach-dang-muon"
-                    class="dropdown-item"
-                  >
-                    <i class="bi bi-book me-2"></i>
-                    Sách đang mượn
-                    <span
-                      v-if="borrowingCount > 0"
-                      class="badge bg-primary ms-2"
-                    >
-                      {{ borrowingCount }}
-                    </span>
-                  </router-link>
-                </li>
-                <li>
                   <router-link to="/tai-khoan/yeu-thich" class="dropdown-item">
                     <i class="bi bi-heart me-2"></i>
                     Yêu thích
@@ -158,12 +137,6 @@
                   >
                     <i class="bi bi-clock-history me-2"></i>
                     Lịch sử mượn
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/tai-khoan/thong-tin" class="dropdown-item">
-                    <i class="bi bi-gear me-2"></i>
-                    Cài đặt
                   </router-link>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
@@ -205,7 +178,6 @@ export default {
 
     const searchQuery = ref("");
     const showSearchModal = ref(false);
-    const borrowingCount = ref(0);
     const favoritesCount = ref(0);
 
     const quickSearch = () => {
@@ -232,12 +204,7 @@ export default {
       if (!authStore.isAuthenticated) return;
 
       try {
-        const [borrowsRes, favoritesRes] = await Promise.all([
-          api.borrowing.getMyBorrows({ limit: 1, status: "Đã mượn" }),
-          api.favorites.getMyFavorites({ limit: 1 }),
-        ]);
-
-        borrowingCount.value = borrowsRes.pagination?.total || 0;
+        const favoritesRes = await api.favorites.getMyFavorites({ limit: 1 });
         favoritesCount.value = favoritesRes.pagination?.total || 0;
       } catch (error) {
         console.error("Error fetching user stats:", error);
@@ -252,7 +219,6 @@ export default {
       authStore,
       searchQuery,
       showSearchModal,
-      borrowingCount,
       favoritesCount,
       quickSearch,
       logout,

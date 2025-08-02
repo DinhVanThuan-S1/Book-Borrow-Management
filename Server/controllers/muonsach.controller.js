@@ -32,9 +32,16 @@ class MuonSachController {
         );
       }
 
+      // Convert client query parameters to server format
+      const queryParams = { ...req.query };
+      if (queryParams.status) {
+        queryParams.trangthai = queryParams.status;
+        delete queryParams.status;
+      }
+
       const result = await MuonSachService.getLichSuMuonSach(
         req.user.id,
-        req.query
+        queryParams
       );
       return ApiResponse.paginated(res, result.lichSu, result.pagination);
     } catch (error) {

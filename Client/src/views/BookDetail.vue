@@ -530,6 +530,7 @@ export default {
     });
 
     return {
+      authStore,
       book,
       relatedBooks,
       isLoading,

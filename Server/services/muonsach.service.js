@@ -95,6 +95,8 @@ class MuonSachService {
       page = PAGINATION.DEFAULT_PAGE,
       limit = PAGINATION.DEFAULT_LIMIT,
       trangthai = "",
+      status = "",
+      overdue = false,
     } = queryParams;
 
     const query = {
@@ -103,8 +105,16 @@ class MuonSachService {
     };
 
     // Lọc theo trạng thái
-    if (trangthai && Object.values(MUON_SACH_STATUS).includes(trangthai)) {
+    if (status && Object.values(MUON_SACH_STATUS).includes(status)) {
+      query.TrangThai = status;
+    } else if (trangthai && Object.values(MUON_SACH_STATUS).includes(trangthai)) {
       query.TrangThai = trangthai;
+    }
+
+    // Lọc theo quá hạn
+    if (overdue === true || overdue === "true") {
+      query.TrangThai = MUON_SACH_STATUS.DANG_MUON;
+      query.NgayTraDuKien = { $lt: new Date() };
     }
 
     const skip = (page - 1) * limit;
@@ -114,11 +124,21 @@ class MuonSachService {
       TheoDoiMuonSach.find(query)
         .populate({
           path: "MaSach",
-          select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB",
-          populate: {
-            path: "MaNXB",
-            select: "TenNXB"
-          }
+          select: "MaSach TenSach TacGia BiaSach DonGia NamXuatBan MaNXB MaDM SoQuyen",
+          populate: [
+            {
+              path: "MaNXB",
+              select: "TenNXB"
+            },
+            {
+              path: "MaDM",
+              select: "TenDM"
+            }
+          ]
+        })
+        .populate({
+          path: "MaDocGia",
+          select: "HoTen Email"
         })
         .sort({ createdAt: -1 })
         .skip(skip)
