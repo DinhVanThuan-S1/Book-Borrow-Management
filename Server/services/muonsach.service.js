@@ -113,8 +113,17 @@ class MuonSachService {
 
     // Lọc theo quá hạn
     if (overdue === true || overdue === "true") {
-      query.TrangThai = MUON_SACH_STATUS.DANG_MUON;
-      query.NgayTraDuKien = { $lt: new Date() };
+      query.$or = [
+        // Items that are actively borrowed but overdue
+        {
+          TrangThai: MUON_SACH_STATUS.DANG_MUON,
+          NgayTraDuKien: { $lt: new Date() }
+        },
+        // Items with explicit overdue status
+        {
+          TrangThai: MUON_SACH_STATUS.QUA_HAN
+        }
+      ];
     }
 
     const skip = (page - 1) * limit;

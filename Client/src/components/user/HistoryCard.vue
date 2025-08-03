@@ -25,11 +25,11 @@
                 <i class="bi bi-person me-1"></i>
                 {{ history.MaSach?.TacGia }}
               </span>
-              <span class="category">
-                <i class="bi bi-tag me-1"></i>
-                {{ history.MaSach?.MaDM?.TenDM }}
-              </span>
             </div>
+            <span class="category">
+                <i class="bi bi-tag"></i>
+                {{ history.MaSach?.MaDM?.TenDM }}
+            </span>
           </div>
         </div>
       </div>
@@ -47,16 +47,6 @@
               <i class="bi bi-exclamation-triangle me-1"></i>
               Phí phạt: {{ formatCurrency(history.PhiPhat || 0) }}
             </div>
-          </div>
-
-          <div class="history-actions">
-            <button
-              @click="viewBookDetail"
-              class="btn btn-outline-primary btn-sm w-100"
-            >
-              <i class="bi bi-info-circle me-2"></i>
-              Chi tiết sách
-            </button>
           </div>
         </div>
       </div>
@@ -81,6 +71,10 @@ export default {
 
     // Computed
     const isOverdue = computed(() => {
+      // Items with explicit overdue status
+      if (props.history.TrangThai === "Quá hạn") return true;
+      
+      // Items that are actively borrowed but overdue
       if (props.history.TrangThai !== "Đang mượn") return false;
       const dueDate = new Date(props.history.NgayTraDuKien);
       const now = new Date();
@@ -122,7 +116,6 @@ export default {
       if (isReturnedLate.value) return "warning";
 
       const classes = {
-        "Chờ duyệt": "warning",
         "Đã duyệt": "info",
         "Đang mượn": "primary",
         "Đã trả": "success",
@@ -136,7 +129,6 @@ export default {
       if (isReturnedLate.value) return "bi bi-clock-history";
 
       const icons = {
-        "Chờ duyệt": "bi bi-clock",
         "Đã duyệt": "bi bi-check-circle",
         "Đang mượn": "bi bi-book",
         "Đã trả": "bi bi-check-square",
@@ -224,7 +216,7 @@ export default {
 }
 
 .book-image-container {
-  height: 140px;
+  height: 150px;
   overflow: hidden;
   border-radius: var(--border-radius);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

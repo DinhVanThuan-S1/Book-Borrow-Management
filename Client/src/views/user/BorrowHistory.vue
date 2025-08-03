@@ -359,6 +359,10 @@ export default {
     };
 
     const isOverdue = (historyItem) => {
+      // Items with explicit overdue status
+      if (historyItem.TrangThai === "Quá hạn") return true;
+      
+      // Items that are actively borrowed but overdue
       if (historyItem.TrangThai !== "Đang mượn") return false;
       const dueDate = new Date(historyItem.NgayTraDuKien);
       const now = new Date();
