@@ -11,7 +11,16 @@ export const useAuthStore = defineStore("auth", {
 
   getters: {
     isAuthenticated: (state) => !!state.token && !!state.user,
-    userName: (state) => state.user?.HoTenDocGia || "",
+    userName: (state) => {
+      if (state.user?.HoTenNV) {
+        // For staff/admin (NhanVien)
+        return state.user.HoTenNV;
+      } else if (state.user?.HoLot && state.user?.Ten) {
+        // For readers (DocGia) - combine HoLot and Ten
+        return `${state.user.HoLot} ${state.user.Ten}`;
+      }
+      return "";
+    },
     userEmail: (state) => state.user?.Email || "",
     userPhone: (state) => state.user?.DienThoai || "",
     userAddress: (state) => state.user?.DiaChi || "",
@@ -19,8 +28,11 @@ export const useAuthStore = defineStore("auth", {
     userGender: (state) => state.user?.GioiTinh || "",
     userBirthDate: (state) => state.user?.NgaySinh || "",
     userInitials: (state) => {
-      if (!state.user?.HoTenDocGia) return "U";
-      const names = state.user.HoTenDocGia.split(" ");
+      const fullName = state.user?.HoTenNV || 
+                      (state.user?.HoLot && state.user?.Ten ? 
+                       `${state.user.HoLot} ${state.user.Ten}` : "");
+      if (!fullName) return "U";
+      const names = fullName.split(" ");
       return names.length > 1
         ? names[0][0] + names[names.length - 1][0]
         : names[0][0];

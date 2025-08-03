@@ -93,31 +93,14 @@
             <!-- User Menu -->
             <div v-else class="nav-item dropdown">
               <button
-                class="btn btn-outline-light dropdown-toggle d-flex align-items-center"
+                class="btn btn-outline-light dropdown-toggle btn-sm d-flex align-items-center"
                 data-bs-toggle="dropdown"
               >
-                <div class="user-avatar me-3">
-                  <img
-                    v-if="authStore.userAvatar"
-                    :src="authStore.userAvatar"
-                    :alt="authStore.userName"
-                    class="avatar-img"
-                  />
-                  <div v-else class="avatar-placeholder">
-                    {{ authStore.userInitials }}
-                  </div>
-                </div>
-                <span class="d-none d-md-inline">{{ authStore.userName }}</span>
+                <i class="bi bi-person me-2"></i>
+                <span>{{ authStore.userName }}</span>
               </button>
 
               <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <h6 class="dropdown-header">
-                    <i class="bi bi-person-circle me-2"></i>
-                    {{ authStore.userName }}
-                  </h6>
-                </li>
-                <li><hr class="dropdown-divider" /></li>
                 <li>
                   <router-link to="/tai-khoan/yeu-thich" class="dropdown-item">
                     <i class="bi bi-heart me-2"></i>
@@ -139,7 +122,6 @@
                     Lịch sử mượn
                   </router-link>
                 </li>
-                <li><hr class="dropdown-divider" /></li>
                 <li>
                   <button @click="logout" class="dropdown-item text-danger">
                     <i class="bi bi-box-arrow-right me-2"></i>
@@ -260,34 +242,6 @@ export default {
   border-color: rgba(255, 255, 255, 0.5);
   color: white;
   box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: white;
 }
 
 .dropdown-menu {

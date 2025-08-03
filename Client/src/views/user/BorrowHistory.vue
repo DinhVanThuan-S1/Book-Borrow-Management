@@ -389,7 +389,7 @@ export default {
         "Từ chối": "Không có yêu cầu mượn sách nào bị từ chối.",
         "Đang mượn": "Bạn hiện không đang mượn sách nào.",
         "Đã trả": "Bạn chưa trả sách nào.",
-        "overdue": "Không có sách nào quá hạn."
+        "Quá hạn": "Không có sách nào quá hạn."
       };
       
       return messages[activeTab.value] || "Không có dữ liệu.";
