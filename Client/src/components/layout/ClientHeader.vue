@@ -102,18 +102,6 @@
 
               <ul class="dropdown-menu dropdown-menu-end">
                 <li>
-                  <router-link to="/tai-khoan/yeu-thich" class="dropdown-item">
-                    <i class="bi bi-heart me-2"></i>
-                    Yêu thích
-                    <span
-                      v-if="favoritesCount > 0"
-                      class="badge bg-danger ms-2"
-                    >
-                      {{ favoritesCount }}
-                    </span>
-                  </router-link>
-                </li>
-                <li>
                   <router-link
                     to="/tai-khoan/lich-su-muon"
                     class="dropdown-item"
@@ -160,7 +148,6 @@ export default {
 
     const searchQuery = ref("");
     const showSearchModal = ref(false);
-    const favoritesCount = ref(0);
 
     const quickSearch = () => {
       if (searchQuery.value.trim()) {
@@ -183,14 +170,7 @@ export default {
     };
 
     const fetchUserStats = async () => {
-      if (!authStore.isAuthenticated) return;
-
-      try {
-        const favoritesRes = await api.favorites.getMyFavorites({ limit: 1 });
-        favoritesCount.value = favoritesRes.pagination?.total || 0;
-      } catch (error) {
-        console.error("Error fetching user stats:", error);
-      }
+      // Removed favorites functionality
     };
 
     onMounted(() => {
@@ -201,7 +181,6 @@ export default {
       authStore,
       searchQuery,
       showSearchModal,
-      favoritesCount,
       quickSearch,
       logout,
     };

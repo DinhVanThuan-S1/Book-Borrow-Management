@@ -175,15 +175,6 @@ export default {
     cancelRequest: (borrowId) => api.delete(`/muonsach/cancel/${borrowId}`),
   },
 
-  // Favorites APIs
-  favorites: {
-    getMyFavorites: (params) => api.get("/yeuthich/my-favorites", { params }),
-    add: (bookId) => api.post("/yeuthich", { MaSach: bookId }),
-    remove: (bookId) => api.delete(`/yeuthich/${bookId}`),
-    check: (bookId) => api.get(`/yeuthich/check/${bookId}`),
-    sync: (bookIds) => api.post("/yeuthich/sync", { books: bookIds }),
-  },
-
   // Stats APIs
   stats: {
     getOverview: () => api.get("/thongke/overview"),

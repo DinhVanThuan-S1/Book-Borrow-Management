@@ -8,7 +8,6 @@ const sachRoutes = require("./sach.route");
 const docgiaRoutes = require("./docgia.route");
 const nhanvienRoutes = require("./nhanvien.route");
 const muonsachRoutes = require("./muonsach.route");
-const yeuthichRoutes = require("./yeuthich.route");
 const nhaxuatbanRoutes = require("./nhaxuatban.route");
 const thongkeRoutes = require("./thongke.route");
 
@@ -19,7 +18,6 @@ router.use("/sach", sachRoutes);
 router.use("/docgia", docgiaRoutes);
 router.use("/nhanvien", nhanvienRoutes);
 router.use("/muonsach", muonsachRoutes);
-router.use("/yeuthich", yeuthichRoutes);
 router.use("/nhaxuatban", nhaxuatbanRoutes);
 router.use("/thongke", thongkeRoutes);
 
@@ -37,7 +35,6 @@ router.get("/", (req, res) => {
       docgia: "/api/docgia - Quản lý độc giả",
       nhanvien: "/api/nhanvien - Quản lý nhân viên",
       muonsach: "/api/muonsach - Quản lý mượn sách",
-      yeuthich: "/api/yeuthich - Quản lý yêu thích",
       nhaxuatban: "/api/nhaxuatban - Quản lý nhà xuất bản",
       thongke: "/api/thongke - Thống kê hệ thống",
     },

@@ -16,7 +16,6 @@ import Register from "@/views/auth/Register.vue";
 
 // User Dashboard
 import BorrowHistory from "@/views/user/BorrowHistory.vue";
-import Favorites from "@/views/user/Favorites.vue";
 
 const routes = [
   // Public Routes
@@ -85,7 +84,7 @@ const routes = [
     path: "/tai-khoan",
     component: ClientLayout,
     meta: { requiresAuth: true },
-    redirect: "/tai-khoan/yeu-thich",
+    redirect: "/tai-khoan/lich-su-muon",
     children: [
       {
         path: "lich-su-muon",
@@ -93,15 +92,6 @@ const routes = [
         component: BorrowHistory,
         meta: {
           title: "Lịch sử mượn sách",
-          requiresAuth: true,
-        },
-      },
-      {
-        path: "yeu-thich",
-        name: "Favorites",
-        component: Favorites,
-        meta: {
-          title: "Sách yêu thích",
           requiresAuth: true,
         },
       },

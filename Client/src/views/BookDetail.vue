@@ -82,14 +82,12 @@
               </button>
 
               <button
-                @click="toggleFavorite"
+                @click="showFavoriteMessage"
                 class="btn-favorite"
-                :class="{ active: isFavorite }"
-                :disabled="togglingFavorite"
+                title="Yêu thích"
               >
-                <span v-if="togglingFavorite" class="spinner"></span>
-                <i v-else :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
-                {{ isFavorite ? "Đã yêu thích" : "Yêu thích" }}
+                <i class="bi bi-heart"></i>
+                Yêu thích
               </button>
             </div>
           </div>
@@ -237,8 +235,6 @@ export default {
     const relatedBooks = ref([]);
     const isLoading = ref(false);
     const error = ref(false);
-    const isFavorite = ref(false);
-    const togglingFavorite = ref(false);
     const requesting = ref(false);
 
     const canBorrow = computed(() => {
@@ -335,17 +331,6 @@ export default {
       }
     };
 
-    const checkFavoriteStatus = async () => {
-      if (!authStore.isAuthenticated || !book.value._id) return;
-
-      try {
-        const response = await api.favorites.check(book.value._id);
-        isFavorite.value = response.data.isFavorite;
-      } catch (error) {
-        console.error("Error checking favorite status:", error);
-      }
-    };
-
     const requestBorrow = async () => {
       if (!authStore.isAuthenticated) {
         router.push({
@@ -373,33 +358,8 @@ export default {
       }
     };
 
-    const toggleFavorite = async () => {
-      if (!authStore.isAuthenticated) {
-        router.push({
-          name: "Login",
-          query: { redirect: route.fullPath },
-        });
-        return;
-      }
-
-      togglingFavorite.value = true;
-
-      try {
-        if (isFavorite.value) {
-          await api.favorites.remove(book.value._id);
-          isFavorite.value = false;
-          toast.info("Đã xóa khỏi danh sách yêu thích");
-        } else {
-          await api.favorites.add(book.value._id);
-          isFavorite.value = true;
-          toast.success("Đã thêm vào danh sách yêu thích");
-        }
-      } catch (error) {
-        console.error("Error toggling favorite:", error);
-        toast.error(error.response?.data?.message || "Có lỗi xảy ra khi cập nhật danh sách yêu thích!");
-      } finally {
-        togglingFavorite.value = false;
-      }
+    const showFavoriteMessage = () => {
+      // Nút tượng trưng, không cần thông báo
     };
 
     const shareBook = (platform) => {
@@ -509,19 +469,6 @@ export default {
       }
     );
 
-    // Watch for authentication changes
-    watch(
-      () => authStore.isAuthenticated,
-      () => {
-        checkFavoriteStatus();
-      }
-    );
-
-    // Watch for book changes
-    watch(book, () => {
-      checkFavoriteStatus();
-    });
-
     // Lifecycle
     onMounted(() => {
       if (route.params.id) {
@@ -535,8 +482,6 @@ export default {
       relatedBooks,
       isLoading,
       error,
-      isFavorite,
-      togglingFavorite,
       requesting,
       canBorrow,
       availabilityClass,
@@ -544,7 +489,7 @@ export default {
       availabilityIcon,
       borrowButtonText,
       requestBorrow,
-      toggleFavorite,
+      showFavoriteMessage,
       shareBook,
       copyLink,
       getBookImage,
@@ -692,20 +637,9 @@ export default {
   cursor: pointer;
 }
 
-.btn-favorite:hover:not(:disabled) {
+.btn-favorite:hover {
   border-color: #ef4444;
   background: #fef2f2;
-}
-
-.btn-favorite.active {
-  background: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-.btn-favorite:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .spinner {

@@ -71,20 +71,11 @@
         </button>
 
         <button
-          @click="toggleFavorite"
-          class="btn btn-sm"
-          :class="isFavorite ? 'btn-danger' : 'btn-outline-danger'"
+          @click="showFavoriteMessage"
+          class="btn btn-outline-danger btn-sm"
           title="Yêu thích"
-          :disabled="togglingFavorite"
         >
-          <span
-            v-if="togglingFavorite"
-            class="spinner-border spinner-border-sm"
-          ></span>
-          <i
-            v-else
-            :class="isFavorite ? 'bi bi-heart-fill' : 'bi bi-heart'"
-          ></i>
+          <i class="bi bi-heart"></i>
         </button>
       </div>
     </div>
@@ -92,7 +83,7 @@
 </template>
 
 <script>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "vue-toastification";
@@ -115,8 +106,6 @@ export default {
     const authStore = useAuthStore();
     const toast = useToast();
 
-    const isFavorite = ref(false);
-    const togglingFavorite = ref(false);
     const requesting = ref(false);
 
     const canBorrow = computed(() => {
@@ -199,52 +188,11 @@ export default {
       }
     };
 
-    const toggleFavorite = async () => {
-      if (!authStore.isAuthenticated) {
-        router.push({
-          name: "Login",
-          query: { redirect: router.currentRoute.value.fullPath },
-        });
-        return;
-      }
-
-      togglingFavorite.value = true;
-
-      try {
-        if (isFavorite.value) {
-          await api.favorites.remove(props.book._id);
-          isFavorite.value = false;
-          toast.info("Đã xóa khỏi danh sách yêu thích");
-        } else {
-          await api.favorites.add(props.book._id);
-          isFavorite.value = true;
-          toast.success("Đã thêm vào danh sách yêu thích");
-        }
-      } catch (error) {
-        console.error("Error toggling favorite:", error);
-      } finally {
-        togglingFavorite.value = false;
-      }
+    const showFavoriteMessage = () => {
+      // Nút tượng trưng, không cần thông báo
     };
-
-    const checkFavoriteStatus = async () => {
-      if (!authStore.isAuthenticated) return;
-
-      try {
-        const response = await api.favorites.check(props.book._id);
-        isFavorite.value = response.data.isFavorite;
-      } catch (error) {
-        console.error("Error checking favorite status:", error);
-      }
-    };
-
-    onMounted(() => {
-      checkFavoriteStatus();
-    });
 
     return {
-      isFavorite,
-      togglingFavorite,
       requesting,
       canBorrow,
       availabilityClass,
@@ -256,7 +204,7 @@ export default {
       handleImageError,
       viewDetails,
       requestBorrow,
-      toggleFavorite,
+      showFavoriteMessage,
     };
   },
 };
