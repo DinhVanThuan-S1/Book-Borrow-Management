@@ -74,26 +74,9 @@ export const useAuthStore = defineStore("auth", {
       this.isLoading = true;
       try {
         const response = await api.auth.register(userData);
-
-        // Check if response has the expected structure
-        if (response.data && response.data.token) {
-          this.token = response.data.token;
-          // User data is in response.data (without the token)
-          const { token, ...userInfo } = response.data;
-          this.user = userInfo;
-
-          // Save to localStorage safely
-          localStorage.setItem("client_token", this.token);
-          localStorage.setItem("client_user", JSON.stringify(this.user));
-        } else {
-          console.error("Unexpected response structure:", response);
-          throw new Error("Invalid response format");
-        }
-
+        // Không tự động đăng nhập, chỉ trả về response để component xử lý
         return response;
       } catch (error) {
-        // Clear any partial data on error
-        this.logout();
         throw error;
       } finally {
         this.isLoading = false;

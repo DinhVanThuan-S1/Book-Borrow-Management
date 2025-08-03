@@ -100,13 +100,13 @@
             </div>
             <div class="contact-item mb-3">
               <i class="bi bi-telephone text-primary me-2"></i>
-              <a href="tel:+84123456789" class="footer-link">
+              <a href="#" class="footer-link">
                 0382906852
               </a>
             </div>
             <div class="contact-item mb-3">
               <i class="bi bi-envelope text-primary me-2"></i>
-              <a href="mailto:dinhthuan836@gmail.com" class="footer-link">
+              <a href="#" class="footer-link">
                 dinhthuan836@gmail.com
               </a>
             </div>

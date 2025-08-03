@@ -146,7 +146,7 @@ router.beforeEach(async (to, from, next) => {
 
   // Redirect authenticated users away from guest routes
   if (to.meta.guest && authStore.isAuthenticated) {
-    next({ name: "Dashboard" });
+    next({ name: "Home" });
     return;
   }
 

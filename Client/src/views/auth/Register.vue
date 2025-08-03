@@ -397,10 +397,9 @@ export default {
 
         await authStore.register(registrationData);
 
-        // Note: Success message is automatically shown by API interceptor
-        // toast.success(
-        //   "Đăng ký tài khoản thành công! Chào mừng bạn đến với thư viện!"
-        // );
+        toast.success(
+          "Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục."
+        );
 
         // Redirect to login page after successful registration
         router.push("/auth/dang-nhap");
