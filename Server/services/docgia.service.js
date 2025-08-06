@@ -41,24 +41,65 @@ class DocGiaService {
     const skip = (page - 1) * limit;
     const limitNum = Math.min(parseInt(limit), PAGINATION.MAX_LIMIT);
 
-    // Tạo query với collation cho Vietnamese nếu cần
-    let docgiasQuery = DocGia.find(query)
-      .select("-Password") // Không trả về password
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limitNum);
+    // Sử dụng aggregation để kết hợp thông tin độc giả với số sách đang mượn
+    const TheoDoiMuonSach = require("../models/TheoDoiMuonSach.model");
+    const { MUON_SACH_STATUS } = require("../utils/constants");
+    
+    let pipeline = [
+      { $match: query },
+      {
+        $lookup: {
+          from: "theodoimuonsaches", // Collection name trong MongoDB
+          let: { docgiaId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$MaDocGia", "$$docgiaId"] },
+                    { $eq: ["$TrangThai", MUON_SACH_STATUS.DANG_MUON] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "activeBorrows"
+        }
+      },
+      {
+        $addFields: {
+          soSachDangMuon: { $size: "$activeBorrows" }
+        }
+      },
+      {
+        $project: {
+          Password: 0, // Không trả về password
+          activeBorrows: 0 // Không cần trả về array này
+        }
+      }
+    ];
 
-    // Áp dụng collation Vietnamese cho sắp xếp theo tên
+    // Thêm sorting
+    pipeline.push({ $sort: sortOption });
+
+    // Thêm pagination
+    pipeline.push(
+      { $skip: skip },
+      { $limit: limitNum }
+    );
+
+    // Thực hiện aggregation với collation nếu cần
+    const aggregateOptions = {};
     if (needsCollation) {
-      docgiasQuery = docgiasQuery.collation({
+      aggregateOptions.collation = {
         locale: "vi",
         strength: 1, // Primary level comparison (ignore case and accents)
         numericOrdering: true,
-      });
+      };
     }
 
     const [docgias, total] = await Promise.all([
-      docgiasQuery,
+      DocGia.aggregate(pipeline, aggregateOptions),
       DocGia.countDocuments(query),
     ]);
 
@@ -357,6 +398,10 @@ class DocGiaService {
       [SORT_OPTIONS.Z_TO_A]: {
         sortOption: { HoLot: -1, Ten: -1 },
         needsCollation: true,
+      },
+      [SORT_OPTIONS.MOST_BORROWED]: {
+        sortOption: { soSachDangMuon: -1, createdAt: -1 }, // Secondary sort by creation date
+        needsCollation: false,
       },
     };
 

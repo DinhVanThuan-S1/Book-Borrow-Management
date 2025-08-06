@@ -136,8 +136,6 @@
                 >
                   <option value="newest">Mới nhất</option>
                   <option value="oldest">Cũ nhất</option>
-                  <option value="a-to-z">Tên A-Z</option>
-                  <option value="z-to-a">Tên Z-A</option>
                 </select>
               </div>
             </div>
@@ -243,57 +241,55 @@
           </div>
 
           <!-- Pagination -->
-          <div v-if="pagination.pages > 1" class="pagination-wrapper">
-            <div>
-              <nav>
-                <ul class="pagination justify-content-center mb-0">
-                  <li
-                    class="page-item"
-                    :class="{ disabled: pagination.current <= 1 }"
+          <div v-if="pagination.pages > 1" class="card-footer">
+            <nav>
+              <ul class="pagination justify-content-center mb-0">
+                <li
+                  class="page-item"
+                  :class="{ disabled: pagination.current <= 1 }"
+                >
+                  <button
+                    class="page-link"
+                    @click="changePage(pagination.current - 1)"
+                    :disabled="pagination.current <= 1"
+                    title="Trang trước"
                   >
-                    <button
-                      class="page-link"
-                      @click="changePage(pagination.current - 1)"
-                      :disabled="pagination.current <= 1"
-                      title="Trang trước"
-                    >
-                      <i class="bi bi-chevron-left"></i>
-                    </button>
-                  </li>
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+                </li>
 
-                  <li
-                    v-for="page in getVisiblePages"
-                    :key="page"
-                    class="page-item"
-                    :class="{ active: page === pagination.current }"
+                <li
+                  v-for="page in getVisiblePages"
+                  :key="page"
+                  class="page-item"
+                  :class="{ active: page === pagination.current }"
+                >
+                  <button
+                    v-if="page !== '...'"
+                    class="page-link"
+                    @click="changePage(page)"
+                    :title="`Trang ${page}`"
                   >
-                    <button
-                      v-if="page !== '...'"
-                      class="page-link"
-                      @click="changePage(page)"
-                      :title="`Trang ${page}`"
-                    >
-                      {{ page }}
-                    </button>
-                    <span v-else class="page-link disabled">...</span>
-                  </li>
+                    {{ page }}
+                  </button>
+                  <span v-else class="page-link">...</span>
+                </li>
 
-                  <li
-                    class="page-item"
-                    :class="{ disabled: pagination.current >= pagination.pages }"
+                <li
+                  class="page-item"
+                  :class="{ disabled: pagination.current >= pagination.pages }"
+                >
+                  <button
+                    class="page-link"
+                    @click="changePage(pagination.current + 1)"
+                    :disabled="pagination.current >= pagination.pages"
+                    title="Trang sau"
                   >
-                    <button
-                      class="page-link"
-                      @click="changePage(pagination.current + 1)"
-                      :disabled="pagination.current >= pagination.pages"
-                      title="Trang sau"
-                    >
-                      <i class="bi bi-chevron-right"></i>
-                    </button>
-                  </li>
-                </ul>
-              </nav>
-            </div>
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
@@ -721,60 +717,80 @@ export default {
   color: var(--danger-color);
 }
 
-.pagination-wrapper {
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-}
-
-.pagination-container {
-  background: white;
-  border-radius: var(--border-radius);
-  padding: 1.5rem;
-  box-shadow: var(--box-shadow);
-}
-
+/* Custom Pagination Styles */
 .pagination {
-  --bs-pagination-padding-x: 0.75rem;
-  --bs-pagination-padding-y: 0.5rem;
-  --bs-pagination-font-size: 0.95rem;
-  --bs-pagination-color: var(--primary-color);
-  --bs-pagination-bg: var(--light-color);
-  --bs-pagination-border-width: 1px;
-  --bs-pagination-border-color: #dee2e6;
-  --bs-pagination-border-radius: 0.375rem;
-  --bs-pagination-hover-color: #ffffff;
-  --bs-pagination-hover-bg: var(--primary-color);
-  --bs-pagination-hover-border-color: var(--primary-color);
-  --bs-pagination-focus-color: var(--primary-color);
-  --bs-pagination-focus-bg: var(--light-color);
-  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-  --bs-pagination-active-color: #ffffff;
-  --bs-pagination-active-bg: var(--primary-color);
-  --bs-pagination-active-border-color: var(--primary-color);
-  --bs-pagination-disabled-color: #6c757d;
-  --bs-pagination-disabled-bg: #ffffff;
-  --bs-pagination-disabled-border-color: #dee2e6;
+  gap: 0.25rem;
 }
 
-.page-link {
-  transition: all 0.3s ease;
+.pagination .page-link {
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border-radius: 0.375rem;
   font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.page-item.active .page-link {
-  background: linear-gradient(135deg, var(--primary-color), #0056b3);
-  border-color: var(--primary-color);
+.pagination .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.page-item:not(.disabled) .page-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
+  outline: 0;
 }
 
-.page-item.disabled .page-link {
-  opacity: 0.5;
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: none;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #adb5bd;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
   cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Navigation arrows styling */
+.pagination .page-link i {
+  font-size: 0.875rem;
+}
+
+/* Card footer styling for pagination */
+.card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1.25rem 1.5rem;
 }
 </style>

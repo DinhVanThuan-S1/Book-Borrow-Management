@@ -16,7 +16,7 @@
         </h6>
 
         <div class="row">
-          <div class="col-md-7 mb-3">
+          <div class="col-md-7 mb-2">
             <label for="hoLot" class="form-label">Họ và tên đệm</label>
             <input
               id="hoLot"
@@ -32,7 +32,7 @@
             </div>
           </div>
 
-          <div class="col-md-5 mb-3">
+          <div class="col-md-5 mb-2">
             <label for="ten" class="form-label">Tên</label>
             <input
               id="ten"
@@ -50,7 +50,7 @@
         </div>
 
         <div class="row">
-          <div class="col-md-7 mb-3">
+          <div class="col-md-7 mb-2">
             <label for="ngaySinh" class="form-label">Ngày sinh</label>
             <input
               id="ngaySinh"
@@ -66,7 +66,7 @@
             </div>
           </div>
 
-          <div class="col-md-5 mb-3">
+          <div class="col-md-5 mb-2">
             <label for="phai" class="form-label">Giới tính</label>
             <select
               id="phai"
@@ -92,7 +92,7 @@
           Thông tin liên hệ
         </h6>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="email" class="form-label">Email</label>
           <div class="input-group">
             <span class="input-group-text">
@@ -114,7 +114,7 @@
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="dienThoai" class="form-label">Số điện thoại</label>
           <div class="input-group">
             <span class="input-group-text">
@@ -135,14 +135,14 @@
           </div>
         </div>
 
-        <div class="mb-2">
+        <div class="mb-0">
           <label for="diaChi" class="form-label">Địa chỉ</label>
           <textarea
             id="diaChi"
             v-model="form.DiaChi"
             class="form-control"
             :class="{ 'is-invalid': errors.DiaChi }"
-            rows="3"
+            rows="2"
             placeholder="Số nhà, đường, phường, quận, thành phố..."
             required
           ></textarea>
@@ -159,7 +159,7 @@
           Bảo mật tài khoản
         </h6>
 
-        <div class="mb-3">
+        <div class="mb-2">
           <label for="password" class="form-label">Mật khẩu</label>
           <div class="input-group">
             <span class="input-group-text">
@@ -188,7 +188,7 @@
           </div>
         </div>
 
-        <div class="mb-3">
+        <div class="mb-0">
           <label for="confirmPassword" class="form-label"
             >Xác nhận mật khẩu</label
           >
@@ -223,7 +223,7 @@
       </div>
 
       <!-- Terms and Conditions -->
-      <div class="mb-3">
+      <div class="mb-2">
         <div class="form-check">
           <input
             id="agreeTerms"
@@ -426,11 +426,11 @@ export default {
 <style scoped>
 .register-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .register-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--dark-color);
   margin-bottom: 0.5rem;
@@ -444,15 +444,15 @@ export default {
 .form-section {
   background: #f8f9fa;
   border-radius: 0.5rem;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
   border-left: 4px solid var(--primary-color);
 }
 
 .section-title {
   color: var(--dark-color);
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
 }
@@ -472,10 +472,10 @@ export default {
 }
 
 .register-btn {
-  padding: 0.75rem;
+  padding: 0.625rem;
   font-weight: 600;
   border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .auth-divider {

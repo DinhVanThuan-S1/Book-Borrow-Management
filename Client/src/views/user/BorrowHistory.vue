@@ -9,6 +9,30 @@
         </h1>
       </div>
 
+      <!-- Status Tabs -->
+      <div class="status-tabs mb-4">
+        <div class="client-card">
+          <div class="card-body p-0">
+            <div class="nav nav-tabs" role="tablist">
+              <button
+                v-for="tab in statusTabs"
+                :key="tab.value"
+                class="nav-link"
+                :class="{ active: activeTab === tab.value }"
+                @click="setActiveTab(tab.value)"
+                type="button"
+              >
+                <i :class="tab.icon" class="me-1"></i>
+                {{ tab.label }}
+                <span v-if="tab.count !== undefined" class="badge ms-1" :class="tab.badgeClass">
+                  {{ tab.count }}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Summary Stats -->
       <div class="row mb-4">
         <div class="col-md-3 mb-3">
@@ -60,30 +84,6 @@
         </div>
       </div>
 
-      <!-- Status Tabs -->
-      <div class="status-tabs mb-4">
-        <div class="client-card">
-          <div class="card-body p-0">
-            <div class="nav nav-tabs" role="tablist">
-              <button
-                v-for="tab in statusTabs"
-                :key="tab.value"
-                class="nav-link"
-                :class="{ active: activeTab === tab.value }"
-                @click="setActiveTab(tab.value)"
-                type="button"
-              >
-                <i :class="tab.icon" class="me-2"></i>
-                {{ tab.label }}
-                <span v-if="tab.count !== undefined" class="badge ms-2" :class="tab.badgeClass">
-                  {{ tab.count }}
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- History Content -->
       <div class="history-content">
         <!-- Loading -->
@@ -113,7 +113,7 @@
             <div
               v-for="historyItem in history"
               :key="historyItem._id"
-              class="col-12"
+              class="col-md-6"
             >
               <HistoryCard :history="historyItem" />
             </div>
@@ -121,9 +121,9 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="pagination.pages > 1" class="pagination-wrapper">
+        <div v-if="pagination.pages > 1" class="card-footer">
           <nav>
-            <ul class="pagination justify-content-center">
+            <ul class="pagination justify-content-center mb-0">
               <li
                 class="page-item"
                 :class="{ disabled: pagination.current <= 1 }"
@@ -498,12 +498,13 @@ export default {
   border-radius: calc(var(--border-radius) - 0.25rem);
   color: #64748b;
   font-weight: 500;
-  padding: 0.75rem 1.5rem;
+  padding: 0.5rem 0.75rem;
   margin-right: 0.25rem;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   white-space: nowrap;
+  font-size: 0.9rem;
 }
 
 .status-tabs .nav-link:hover {
@@ -518,8 +519,8 @@ export default {
 }
 
 .status-tabs .nav-link .badge {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.2rem 0.4rem;
 }
 
 .status-tabs .nav-link.active .badge {
@@ -529,5 +530,82 @@ export default {
 
 .history-list {
   min-height: 200px;
+}
+
+/* Custom Pagination Styles */
+.pagination {
+  gap: 0.25rem;
+}
+
+.pagination .page-link {
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  min-width: 40px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pagination .page-link:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
+  outline: 0;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: none;
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #adb5bd;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pagination .page-item.disabled .page-link:hover {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Navigation arrows styling */
+.pagination .page-link i {
+  font-size: 0.875rem;
+}
+
+/* Card footer styling for pagination */
+.card-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  padding: 1.25rem 1.5rem;
 }
 </style>

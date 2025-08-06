@@ -259,6 +259,11 @@ export default {
   margin-bottom: 1rem;
 }
 
+.category {
+  font-size: 0.9rem;
+  color: #9ca3af;
+}
+
 .history-status {
   padding: 1.5rem;
   height: 100%;
@@ -268,7 +273,7 @@ export default {
 }
 
 .status-badge {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.8rem;
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: 600;

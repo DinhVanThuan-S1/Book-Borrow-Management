@@ -14,21 +14,6 @@
         <div class="auth-content">
           <router-view />
         </div>
-
-        <!-- Footer -->
-        <div class="auth-footer">
-          <p class="text-center text-muted">
-            &copy; {{ new Date().getFullYear() }} Thư Viện Online. Phát triển
-            bởi
-            <a
-              href="https://github.com/DinhVanThuan-S1"
-              target="_blank"
-              class="text-decoration-none"
-            >
-              DinhVanThuan-S1
-            </a>
-          </p>
-        </div>
       </div>
     </div>
 

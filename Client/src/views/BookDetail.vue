@@ -191,23 +191,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Related Books -->
-      <section v-if="relatedBooks.length > 0" class="related-books mt-5">
-        <h3 class="section-title mb-4">
-          <i class="bi bi-bookmark me-2"></i>
-          Sách liên quan
-        </h3>
-        <div class="row">
-          <div
-            v-for="relatedBook in relatedBooks"
-            :key="relatedBook._id"
-            class="col-lg-3 col-md-4 col-sm-6 mb-4"
-          >
-            <BookCard :book="relatedBook" />
-          </div>
-        </div>
-      </section>
     </div>
   </div>
 </template>
@@ -232,7 +215,6 @@ export default {
     const toast = useToast();
 
     const book = ref({});
-    const relatedBooks = ref([]);
     const isLoading = ref(false);
     const error = ref(false);
     const requesting = ref(false);
@@ -279,9 +261,6 @@ export default {
 
           // Update page title
           document.title = `${book.value.TenSach} - Thư viện trực tuyến`;
-
-          // Fetch related books based on category
-          fetchRelatedBooks();
         }
       } catch (err) {
         console.error("Error fetching book:", err);
@@ -291,43 +270,6 @@ export default {
         }
       } finally {
         isLoading.value = false;
-      }
-    };
-
-    const fetchRelatedBooks = async () => {
-      try {
-        const categoryId = getCategoryId(book.value);
-        if (categoryId) {
-          const response = await api.books.getByCategory(categoryId, {
-            limit: 8,
-          });
-          if (response.success && response.data) {
-            // Xử lý cấu trúc response khác nhau
-            let books = [];
-            
-            // Trường hợp response.data là array trực tiếp
-            if (Array.isArray(response.data)) {
-              books = response.data;
-            }
-            // Trường hợp response.data có property sach
-            else if (response.data.sach && Array.isArray(response.data.sach)) {
-              books = response.data.sach;
-            }
-            // Trường hợp response.data có property data
-            else if (response.data.data && Array.isArray(response.data.data)) {
-              books = response.data.data;
-            }
-
-            // Lọc bỏ sách hiện tại khỏi danh sách liên quan
-            relatedBooks.value = books
-              .filter((item) => item._id !== book.value._id)
-              .slice(0, 4);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching related books:", error);
-        // Không hiển thị lỗi cho user, chỉ không hiện related books
-        relatedBooks.value = [];
       }
     };
 
@@ -479,7 +421,6 @@ export default {
     return {
       authStore,
       book,
-      relatedBooks,
       isLoading,
       error,
       requesting,
@@ -873,27 +814,5 @@ export default {
 
 .share-btn.copy {
   background: #64748b;
-}
-
-/* Related Books */
-.related-books {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 1.5rem;
-}
-
-.section-title i {
-  color: #6366f1;
 }
 </style>

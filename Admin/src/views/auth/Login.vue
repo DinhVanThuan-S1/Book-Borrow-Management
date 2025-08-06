@@ -83,18 +83,6 @@
           {{ isLoading ? "Đang đăng nhập..." : "Đăng nhập" }}
         </button>
       </form>
-
-      <div class="login-footer">
-        <div class="demo-accounts">
-          <h6>Tài khoản demo:</h6>
-          <div class="demo-account" @click="fillDemoAccount('admin')">
-            <strong>Admin:</strong> admin@library.com / admin123
-          </div>
-          <div class="demo-account" @click="fillDemoAccount('staff')">
-            <strong>Nhân viên:</strong> nhanvien@library.com / nhanvien123
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>

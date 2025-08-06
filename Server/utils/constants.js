@@ -52,6 +52,7 @@ module.exports = {
     Z_TO_A: "z-a",
     PRICE_LOW: "price-low",
     PRICE_HIGH: "price-high",
+    MOST_BORROWED: "most-borrowed",
   },
 
   // File upload
