@@ -190,7 +190,6 @@ import api from "@/services/api";
 import SearchForm from "@/components/common/SearchForm.vue";
 import FeaturedBooks from "@/components/sections/FeaturedBooks.vue";
 import NewBooks from "@/components/sections/NewBooks.vue";
-import CategoriesGrid from "@/components/sections/CategoriesGrid.vue";
 
 export default {
   name: "Home",
@@ -198,7 +197,6 @@ export default {
     SearchForm,
     FeaturedBooks,
     NewBooks,
-    CategoriesGrid,
   },
   setup() {
     const router = useRouter();
@@ -207,11 +205,9 @@ export default {
     const stats = ref({});
     const featuredBooks = ref([]);
     const newBooks = ref([]);
-    const categories = ref([]);
 
     const loadingFeatured = ref(false);
     const loadingNew = ref(false);
-    const loadingCategories = ref(false);
 
     const fetchStats = async () => {
       try {
@@ -276,36 +272,6 @@ export default {
       }
     };
 
-    const fetchCategories = async () => {
-      try {
-        loadingCategories.value = true;
-        const response = await api.categories.getWithStats();
-        if (response.data && Array.isArray(response.data)) {
-          categories.value = response.data.slice(0, 8);
-        } else if (response && Array.isArray(response)) {
-          categories.value = response.slice(0, 8);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-        // Fallback với danh sách danh mục cơ bản
-        try {
-          const basicResponse = await api.categories.getAll();
-          if (basicResponse.data && Array.isArray(basicResponse.data)) {
-            categories.value = basicResponse.data.slice(0, 8);
-          } else if (basicResponse && Array.isArray(basicResponse)) {
-            categories.value = basicResponse.slice(0, 8);
-          } else {
-            categories.value = [];
-          }
-        } catch (basicError) {
-          console.error("Error fetching basic categories:", basicError);
-          categories.value = [];
-        }
-      } finally {
-        loadingCategories.value = false;
-      }
-    };
-
     const handleSearch = (searchData) => {
       router.push({
         name: "BookCatalog",
@@ -320,7 +286,6 @@ export default {
       fetchStats();
       fetchFeaturedBooks();
       fetchNewBooks();
-      fetchCategories();
     });
 
     return {
@@ -328,10 +293,8 @@ export default {
       stats,
       featuredBooks,
       newBooks,
-      categories,
       loadingFeatured,
       loadingNew,
-      loadingCategories,
       handleSearch,
     };
   },
