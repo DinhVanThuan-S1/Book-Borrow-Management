@@ -47,16 +47,8 @@
 
           <!-- User Actions -->
           <div class="navbar-nav">
-            <!-- Search Button -->
-            <button
-              class="btn btn-outline-light me-2 d-lg-none"
-              @click="showSearchModal = true"
-            >
-              <i class="bi bi-search"></i>
-            </button>
-
-            <!-- Quick Search (Desktop) -->
-            <div class="nav-item me-2 d-none d-lg-block">
+            <!-- Quick Search -->
+            <div class="nav-item me-2">
               <form @submit.prevent="quickSearch" class="search-form">
                 <div class="input-group input-group-sm">
                   <input
@@ -122,9 +114,6 @@
         </div>
       </div>
     </nav>
-
-    <!-- Mobile Search Modal -->
-    <SearchModal :show="showSearchModal" @close="showSearchModal = false" />
   </header>
 </template>
 
@@ -134,20 +123,15 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useToast } from "vue-toastification";
 import api from "@/services/api";
-import SearchModal from "@/components/modals/SearchModal.vue";
 
 export default {
   name: "ClientHeader",
-  components: {
-    SearchModal,
-  },
   setup() {
     const router = useRouter();
     const authStore = useAuthStore();
     const toast = useToast();
 
     const searchQuery = ref("");
-    const showSearchModal = ref(false);
 
     const quickSearch = () => {
       if (searchQuery.value.trim()) {
@@ -180,7 +164,6 @@ export default {
     return {
       authStore,
       searchQuery,
-      showSearchModal,
       quickSearch,
       logout,
     };

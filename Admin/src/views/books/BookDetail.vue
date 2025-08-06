@@ -76,46 +76,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Quick Stats -->
-        <div class="admin-card mt-4">
-          <div class="card-header-custom">
-            <h5 class="mb-0">
-              <i class="bi bi-bar-chart me-2"></i>
-              Thống kê nhanh
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-6">
-                <div class="stat-item text-center">
-                  <div class="stat-value text-primary">{{ book.SoQuyen }}</div>
-                  <div class="stat-label">Số lượng</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-item text-center">
-                  <div class="stat-value text-info">{{ borrowedCount }}</div>
-                  <div class="stat-label">Đã mượn</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-item text-center">
-                  <div class="stat-value text-success">
-                    {{ availableCount }}
-                  </div>
-                  <div class="stat-label">Còn lại</div>
-                </div>
-              </div>
-              <div class="col-6">
-                <div class="stat-item text-center">
-                  <div class="stat-value text-warning">{{ favoriteCount }}</div>
-                  <div class="stat-label">Yêu thích</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Book Information -->
@@ -212,129 +172,6 @@
             </div>
           </div>
         </div>
-
-        <!-- Additional Information -->
-        <div class="admin-card mt-4">
-          <div class="card-header-custom">
-            <h5 class="mb-0">
-              <i class="bi bi-clock-history me-2"></i>
-              Thông tin bổ sung
-            </h5>
-          </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <div class="info-group">
-                  <label class="info-label">Ngày thêm</label>
-                  <div class="info-value">
-                    <i class="bi bi-calendar-plus me-2 text-muted"></i>
-                    {{ formatDate(book.createdAt) }}
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-group">
-                  <label class="info-label">Cập nhật lần cuối</label>
-                  <div class="info-value">
-                    <i class="bi bi-calendar-check me-2 text-muted"></i>
-                    {{ formatDate(book.updatedAt) }}
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-group">
-                  <label class="info-label">Trạng thái</label>
-                  <div class="info-value">
-                    <span
-                      class="badge"
-                      :class="book.SoQuyen > 0 ? 'bg-success' : 'bg-danger'"
-                    >
-                      {{ book.SoQuyen > 0 ? "Có sẵn" : "Hết sách" }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="info-group">
-                  <label class="info-label">Người tạo</label>
-                  <div class="info-value">
-                    <i class="bi bi-person me-2 text-muted"></i>
-                    {{ book.NguoiTao.HoTenNV || "Chưa cập nhật" }}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Borrowing History -->
-    <div class="admin-card mt-4" v-if="book._id">
-      <div
-        class="card-header-custom d-flex justify-content-between align-items-center"
-      >
-        <h5 class="mb-0">
-          <i class="bi bi-clock-history me-2"></i>
-          Lịch sử mượn sách
-        </h5>
-        <span class="badge bg-light text-dark"
-          >{{ borrowHistory.length }} lượt mượn</span
-        >
-      </div>
-      <div class="card-body">
-        <div
-          v-if="borrowHistory.length === 0"
-          class="text-center text-muted py-4"
-        >
-          <i class="bi bi-inbox display-4 d-block mb-3"></i>
-          <h6>Chưa có lịch sử mượn</h6>
-          <p>Sách này chưa được mượn lần nào</p>
-        </div>
-        <div v-else class="table-responsive">
-          <table class="table table-hover">
-            <thead class="table-light">
-              <tr>
-                <th>Độc giả</th>
-                <th>Ngày mượn</th>
-                <th>Ngày trả</th>
-                <th>Trạng thái</th>
-                <th>Ghi chú</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="record in borrowHistory" :key="record._id">
-                <td>
-                  <div>
-                    <div class="fw-bold">
-                      {{ record.MaDocGia?.HoLot }} {{ record.MaDocGia?.Ten }}
-                    </div>
-                    <small class="text-muted">{{
-                      record.MaDocGia?.Email
-                    }}</small>
-                  </div>
-                </td>
-                <td>{{ formatDate(record.NgayMuon) }}</td>
-                <td>
-                  {{
-                    record.NgayTraThucTe
-                      ? formatDate(record.NgayTraThucTe)
-                      : formatDate(record.NgayHenTra)
-                  }}
-                </td>
-                <td>
-                  <span
-                    class="badge"
-                    :class="getBorrowStatusClass(record.TrangThai)"
-                  >
-                    {{ getBorrowStatusText(record.TrangThai) }}
-                  </span>
-                </td>
-                <td>{{ record.GhiChu || "-" }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
   </div>
@@ -355,14 +192,8 @@ export default {
     const toast = useToast();
 
     const book = ref({});
-    const borrowHistory = ref([]);
     const isLoading = ref(false);
     const error = ref("");
-
-    // Stats
-    const borrowedCount = ref(0);
-    const availableCount = ref(0);
-    const favoriteCount = ref(0);
 
     // Methods
     const fetchBookDetail = async () => {
@@ -375,11 +206,6 @@ export default {
 
         if (response.success) {
           book.value = response.data;
-          availableCount.value = book.value.SoQuyen;
-
-          // Fetch additional stats
-          await fetchBorrowHistory();
-          await fetchStats();
         } else {
           error.value = "Không tìm thấy thông tin sách";
         }
@@ -388,47 +214,6 @@ export default {
         error.value = "Có lỗi khi tải thông tin sách";
       } finally {
         isLoading.value = false;
-      }
-    };
-
-    const fetchBorrowHistory = async () => {
-      try {
-        const bookId = route.params.id;
-        const response = await api.get(`/muonsach/sach/${bookId}`);
-
-        if (response.success) {
-          borrowHistory.value = response.data || [];
-
-          // Calculate borrowed count (currently borrowed)
-          borrowedCount.value = borrowHistory.value.filter(
-            (record) => record.TrangThai === "DANG_MUON"
-          ).length;
-
-          // Update available count
-          availableCount.value = book.value.SoQuyen - borrowedCount.value;
-        } else {
-          borrowHistory.value = [];
-          borrowedCount.value = 0;
-          availableCount.value = book.value.SoQuyen;
-        }
-      } catch (err) {
-        console.error("Error fetching borrow history:", err);
-        // Set default values on error
-        borrowHistory.value = [];
-        borrowedCount.value = 0;
-        availableCount.value = book.value.SoQuyen;
-      }
-    };
-
-    const fetchStats = async () => {
-      try {
-        const bookId = route.params.id;
-        // Fetch favorite count if API exists
-        // const favoriteResponse = await api.get(`/yeuthich/sach/${bookId}/count`);
-        // favoriteCount.value = favoriteResponse.data.count || 0;
-        favoriteCount.value = 0; // Placeholder
-      } catch (err) {
-        console.error("Error fetching stats:", err);
       }
     };
 
@@ -463,32 +248,6 @@ export default {
       if (quantity > 5) return `Còn ${quantity} quyển`;
       if (quantity > 0) return `Sắp hết (${quantity} quyển)`;
       return "Hết sách";
-    };
-
-    const getBorrowStatusClass = (status) => {
-      switch (status) {
-        case "DANG_MUON":
-          return "bg-warning";
-        case "DA_TRA":
-          return "bg-success";
-        case "QUA_HAN":
-          return "bg-danger";
-        default:
-          return "bg-secondary";
-      }
-    };
-
-    const getBorrowStatusText = (status) => {
-      switch (status) {
-        case "DANG_MUON":
-          return "Đang mượn";
-        case "DA_TRA":
-          return "Đã trả";
-        case "QUA_HAN":
-          return "Quá hạn";
-        default:
-          return "Không xác định";
-      }
     };
 
     const deleteBook = async () => {
@@ -535,19 +294,13 @@ export default {
 
     return {
       book,
-      borrowHistory,
       isLoading,
       error,
-      borrowedCount,
-      availableCount,
-      favoriteCount,
       getBookImage,
       formatCurrency,
       formatDate,
       getStockStatusClass,
       getStockStatusText,
-      getBorrowStatusClass,
-      getBorrowStatusText,
       deleteBook,
     };
   },
@@ -584,30 +337,6 @@ export default {
   font-size: 1rem;
   color: #212529;
   font-weight: 500;
-}
-
-.stat-item {
-  padding: 1rem;
-  border-radius: 0.5rem;
-  background: #f8f9fa;
-  transition: all 0.3s ease;
-}
-
-.stat-item:hover {
-  background: #e9ecef;
-  transform: translateY(-2px);
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: #6c757d;
-  margin-top: 0.25rem;
 }
 
 .breadcrumb {

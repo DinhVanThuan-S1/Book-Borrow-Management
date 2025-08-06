@@ -1,3 +1,4 @@
+<!-- Thanh tìm kiếm ở trang chủ -->
 <template>
   <div class="search-form-container">
     <form @submit.prevent="handleSearch" class="search-form">

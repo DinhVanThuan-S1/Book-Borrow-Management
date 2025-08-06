@@ -110,65 +110,6 @@
               </div>
             </div>
           </div>
-
-          <!-- Statistics -->
-          <div class="row mt-4">
-            <div class="col-12">
-              <div class="card">
-                <div class="card-header">
-                  <h6 class="mb-0">
-                    <i class="bi bi-graph-up me-2"></i>
-                    Thống kê hoạt động mượn sách
-                  </h6>
-                </div>
-                <div class="card-body">
-                  <div v-if="isLoading" class="text-center p-3">
-                    <div
-                      class="spinner-border spinner-border-sm text-primary"
-                      role="status"
-                    >
-                      <span class="visually-hidden">Đang tải...</span>
-                    </div>
-                    <div class="mt-2">Đang tải thống kê...</div>
-                  </div>
-                  <div v-else class="row text-center">
-                    <div class="col-6 col-lg-3 mb-3">
-                      <div class="stat-card border rounded p-3">
-                        <h4 class="text-primary mb-1">
-                          {{ stats.totalBorrows || 0 }}
-                        </h4>
-                        <small class="text-muted">Tổng lượt mượn</small>
-                      </div>
-                    </div>
-                    <div class="col-6 col-lg-3 mb-3">
-                      <div class="stat-card border rounded p-3">
-                        <h4 class="text-success mb-1">
-                          {{ stats.returned || 0 }}
-                        </h4>
-                        <small class="text-muted">Đã trả</small>
-                      </div>
-                    </div>
-                    <div class="col-6 col-lg-3 mb-3">
-                      <div class="stat-card border rounded p-3">
-                        <h4 class="text-warning mb-1">
-                          {{ stats.borrowing || 0 }}
-                        </h4>
-                        <small class="text-muted">Đang mượn</small>
-                      </div>
-                    </div>
-                    <div class="col-6 col-lg-3 mb-3">
-                      <div class="stat-card border rounded p-3">
-                        <h4 class="text-danger mb-1">
-                          {{ stats.overdue || 0 }}
-                        </h4>
-                        <small class="text-muted">Quá hạn</small>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -176,9 +117,7 @@
 </template>
 
 <script>
-import { ref, watch } from "vue";
 import { useToast } from "vue-toastification";
-import api from "@/services/api";
 
 export default {
   name: "UserDetailModal",
@@ -192,36 +131,12 @@ export default {
       default: null,
     },
   },
-  emits: ["close", "view-history"],
+  emits: ["close"],
   setup(props, { emit }) {
     const toast = useToast();
-    const isLoading = ref(false);
-    const stats = ref({});
-
-    const loadUserStats = async () => {
-      if (!props.user?._id) return;
-
-      isLoading.value = true;
-      try {
-        const response = await api.get(`/docgia/${props.user._id}/activity`);
-        if (response.success) {
-          stats.value = response.data;
-        }
-      } catch (error) {
-        console.error("Error loading user stats:", error);
-        toast.error("Có lỗi khi tải thống kê độc giả");
-      } finally {
-        isLoading.value = false;
-      }
-    };
 
     const closeModal = () => {
       emit("close");
-    };
-
-    const viewBorrowHistory = () => {
-      emit("view-history", props.user);
-      closeModal();
     };
 
     const getFullName = (user) => {
@@ -253,31 +168,8 @@ export default {
       });
     };
 
-    // Watch for user changes
-    watch(
-      () => props.user,
-      (user) => {
-        if (user && props.show) {
-          loadUserStats();
-        }
-      }
-    );
-
-    // Watch for show changes
-    watch(
-      () => props.show,
-      (show) => {
-        if (show && props.user) {
-          loadUserStats();
-        }
-      }
-    );
-
     return {
-      isLoading,
-      stats,
       closeModal,
-      viewBorrowHistory,
       getFullName,
       getUserInitials,
       getUserAvatar,
@@ -385,15 +277,6 @@ export default {
   justify-content: center;
   font-weight: 600;
   font-size: 2.5rem;
-}
-
-.stat-card {
-  transition: all 0.15s ease-in-out;
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .bg-pink {

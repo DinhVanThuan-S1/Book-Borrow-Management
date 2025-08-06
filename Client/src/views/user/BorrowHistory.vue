@@ -4,7 +4,7 @@
       <!-- Page Header -->
       <div class="page-header mb-4">
         <h1 class="page-title">
-          <i class="bi bi-clock-history me-3"></i>
+          <!-- <i class="bi bi-clock-history me-3"></i> -->
           Lịch sử mượn sách
         </h1>
       </div>

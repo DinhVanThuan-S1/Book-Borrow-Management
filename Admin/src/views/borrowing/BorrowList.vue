@@ -419,7 +419,6 @@ export default {
     const borrows = ref([]);
     const stats = ref({});
     const isLoading = ref(false);
-    const showQuickLendModal = ref(false);
     const showDetailModal = ref(false);
     const selectedBorrow = ref(null);
 
@@ -908,7 +907,6 @@ export default {
       borrows,
       stats,
       isLoading,
-      showQuickLendModal,
       showDetailModal,
       selectedBorrow,
       filters,

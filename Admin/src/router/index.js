@@ -29,9 +29,6 @@ import StaffList from "@/views/users/StaffList.vue";
 // Borrowing Management
 import BorrowList from "@/views/borrowing/BorrowList.vue";
 
-// Reports
-import Reports from "@/views/reports/Reports.vue";
-
 const routes = [
   {
     path: "/login",
@@ -142,16 +139,6 @@ const routes = [
         meta: {
           title: "Quản lý mượn sách",
           icon: "bi-arrow-left-right",
-          sidebar: true,
-        },
-      },
-      {
-        path: "/reports",
-        name: "Reports",
-        component: Reports,
-        meta: {
-          title: "Báo cáo thống kê",
-          icon: "bi-graph-up",
           sidebar: true,
         },
       },
