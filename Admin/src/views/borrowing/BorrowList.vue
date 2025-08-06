@@ -1012,88 +1012,67 @@ export default {
   border-color: transparent;
 }
 
-/* Pagination styling */
+/* Custom Pagination Styles */
 .pagination {
-  --bs-pagination-padding-x: 0.875rem;
-  --bs-pagination-padding-y: 0.625rem;
-  --bs-pagination-font-size: 0.875rem;
-  --bs-pagination-color: #495057;
-  --bs-pagination-bg: #fff;
-  --bs-pagination-border-width: 1px;
-  --bs-pagination-border-color: #e0e6ed;
-  --bs-pagination-border-radius: 0.5rem;
-  --bs-pagination-hover-color: #fff;
-  --bs-pagination-hover-bg: #0d6efd;
-  --bs-pagination-hover-border-color: #0d6efd;
-  --bs-pagination-focus-color: #fff;
-  --bs-pagination-focus-bg: #0d6efd;
-  --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-  --bs-pagination-active-color: #fff;
-  --bs-pagination-active-bg: #0d6efd;
-  --bs-pagination-active-border-color: #0d6efd;
-  --bs-pagination-disabled-color: #adb5bd;
-  --bs-pagination-disabled-bg: #f8f9fa;
-  --bs-pagination-disabled-border-color: #e0e6ed;
+  gap: 0.25rem;
 }
 
 .pagination .page-link {
-  position: relative;
-  display: block;
-  color: var(--bs-pagination-color);
-  text-decoration: none;
-  background-color: var(--bs-pagination-bg);
-  border: var(--bs-pagination-border-width) solid var(--bs-pagination-border-color);
-  transition: all 0.3s ease-in-out;
+  border: 1px solid #dee2e6;
+  color: #6c757d;
+  padding: 0.5rem 0.75rem;
+  margin: 0;
+  border-radius: 0.375rem;
   font-weight: 500;
-  border-radius: var(--bs-pagination-border-radius) !important;
-  margin: 0 0.125rem;
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
   min-width: 40px;
-  height: 40px;
+  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .pagination .page-link:hover {
-  z-index: 2;
-  color: var(--bs-pagination-hover-color);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: transparent;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background-color: #f8f9fa;
+  border-color: #0d6efd;
+  color: #0d6efd;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .pagination .page-link:focus {
-  z-index: 3;
-  color: var(--bs-pagination-focus-color);
-  background-color: var(--bs-pagination-focus-bg);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  border-color: #0d6efd;
   outline: 0;
-  box-shadow: var(--bs-pagination-focus-box-shadow);
-  border-color: var(--bs-pagination-focus-bg);
 }
 
 .pagination .page-item.active .page-link {
-  z-index: 3;
-  color: var(--bs-pagination-active-color);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  transform: translateY(-1px);
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
+}
+
+.pagination .page-item.active .page-link:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: none;
 }
 
 .pagination .page-item.disabled .page-link {
-  color: var(--bs-pagination-disabled-color);
-  pointer-events: none;
-  background-color: var(--bs-pagination-disabled-bg);
-  border-color: var(--bs-pagination-disabled-border-color);
+  color: #adb5bd;
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.6;
 }
 
 .pagination .page-item.disabled .page-link:hover {
-  background-color: var(--bs-pagination-disabled-bg);
-  border-color: var(--bs-pagination-disabled-border-color);
-  color: var(--bs-pagination-disabled-color);
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
+  color: #adb5bd;
   transform: none;
   box-shadow: none;
 }
@@ -1101,20 +1080,13 @@ export default {
 /* Navigation arrows styling */
 .pagination .page-link i {
   font-size: 0.875rem;
-  font-weight: 600;
 }
 
 /* Card footer styling for pagination */
 .card-footer {
-  background: linear-gradient(to right, #f8f9fa 0%, #e9ecef 100%);
+  background-color: #f8f9fa;
   border-top: 1px solid #dee2e6;
   padding: 1.25rem 1.5rem;
-}
-
-/* Pagination container styling */
-.pagination {
-  margin: 0;
-  gap: 0.25rem;
 }
 
 /* Reset button styling */
