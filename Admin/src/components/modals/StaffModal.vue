@@ -480,19 +480,4 @@ export default {
   opacity: 0.65;
   cursor: not-allowed;
 }
-
-@media (max-width: 768px) {
-  .modal-container {
-    margin: 0.5rem;
-    max-width: calc(100% - 1rem);
-  }
-
-  .modal-body {
-    padding: 1rem;
-  }
-
-  .modal-footer {
-    padding: 1rem;
-  }
-}
 </style>

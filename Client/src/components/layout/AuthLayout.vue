@@ -146,22 +146,4 @@ export default {
   padding: 1rem 2rem 2rem;
 }
 
-@media (max-width: 576px) {
-  .auth-container {
-    padding: 1rem;
-  }
-
-  .auth-card {
-    border-radius: 0.5rem;
-  }
-
-  .auth-header,
-  .auth-content {
-    padding: 1.5rem;
-  }
-
-  .auth-footer {
-    padding: 1rem 1.5rem 1.5rem;
-  }
-}
 </style>

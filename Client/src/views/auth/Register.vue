@@ -516,23 +516,4 @@ export default {
 .invalid-feedback {
   display: block;
 }
-
-@media (max-width: 576px) {
-  .register-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .register-title {
-    font-size: 1.5rem;
-  }
-
-  .form-section {
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .section-title {
-    font-size: 0.9rem;
-  }
-}
 </style>

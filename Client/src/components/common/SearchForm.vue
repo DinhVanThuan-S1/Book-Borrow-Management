@@ -193,19 +193,4 @@ export default {
   font-size: 0.85rem;
   padding: 0.4rem 0.8rem;
 }
-
-@media (max-width: 768px) {
-  .search-form-container {
-    padding: 1.5rem;
-  }
-
-  .quick-filters {
-    text-align: center;
-  }
-
-  .filter-label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-}
 </style>

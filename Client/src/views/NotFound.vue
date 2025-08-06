@@ -79,18 +79,4 @@ export default {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
 }
-
-@media (max-width: 768px) {
-  .error-title {
-    font-size: 4rem;
-  }
-
-  .error-subtitle {
-    font-size: 1.5rem;
-  }
-
-  .error-description {
-    font-size: 1rem;
-  }
-}
 </style>

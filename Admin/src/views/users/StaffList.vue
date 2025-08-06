@@ -760,26 +760,4 @@ export default {
 .bg-pink {
   background-color: #e91e63 !important;
 }
-
-@media (max-width: 768px) {
-  .table-responsive {
-    font-size: 0.875rem;
-  }
-
-  .user-avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-
-  .btn-group .btn {
-    width: 35px;
-    height: 32px;
-  }
-
-  .table td {
-    height: auto;
-    padding: 0.5rem 0.375rem;
-  }
-}
 </style>

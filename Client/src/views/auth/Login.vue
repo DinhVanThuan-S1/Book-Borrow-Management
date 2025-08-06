@@ -280,13 +280,4 @@ export default {
   display: block;
 }
 
-@media (max-width: 576px) {
-  .login-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .login-title {
-    font-size: 1.5rem;
-  }
-}
 </style>

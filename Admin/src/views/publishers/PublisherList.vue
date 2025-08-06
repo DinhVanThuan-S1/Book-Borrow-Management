@@ -685,17 +685,4 @@ code {
 .pagination .page-link i {
   font-size: 0.875rem;
 }
-
-/* Responsive pagination */
-@media (max-width: 576px) {
-  .pagination .page-link {
-    padding: 0.375rem 0.5rem;
-    font-size: 0.875rem;
-    min-width: 35px;
-  }
-
-  .card-footer {
-    padding: 0.75rem 1rem;
-  }
-}
 </style>

@@ -415,35 +415,4 @@ export default {
   line-height: 1.6;
   margin: 0;
 }
-
-@media (max-width: 768px) {
-  .hero-title {
-    font-size: 2.5rem;
-  }
-
-  .hero-actions {
-    text-align: center;
-  }
-
-  .hero-actions .btn {
-    display: block;
-    width: 100%;
-    margin: 0.5rem 0;
-  }
-
-  .floating-books {
-    width: 250px;
-    height: 250px;
-  }
-
-  .book-float {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
-  }
-
-  .section-title {
-    font-size: 2rem;
-  }
-}
 </style>

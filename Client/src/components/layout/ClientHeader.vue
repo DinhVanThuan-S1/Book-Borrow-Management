@@ -225,14 +225,4 @@ export default {
 .badge {
   font-size: 0.7rem;
 }
-
-@media (max-width: 991px) {
-  .navbar-nav {
-    text-align: center;
-  }
-
-  .nav-item {
-    margin: 0.25rem 0;
-  }
-}
 </style>

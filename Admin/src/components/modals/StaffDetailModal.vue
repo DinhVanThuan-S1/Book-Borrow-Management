@@ -274,30 +274,4 @@ code {
   border-radius: 0.25rem;
   font-size: 0.875rem;
 }
-
-@media (max-width: 768px) {
-  .modal-container {
-    margin: 0.5rem;
-    max-width: calc(100% - 1rem);
-  }
-
-  .modal-body {
-    padding: 1rem;
-  }
-
-  .modal-footer {
-    padding: 1rem;
-    flex-direction: column;
-  }
-
-  .modal-footer .btn {
-    width: 100%;
-  }
-
-  .staff-avatar-large {
-    width: 80px;
-    height: 80px;
-    font-size: 2rem;
-  }
-}
 </style>

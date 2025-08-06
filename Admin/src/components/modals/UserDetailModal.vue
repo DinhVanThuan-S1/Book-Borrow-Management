@@ -308,29 +308,4 @@ export default {
     opacity: 1;
   }
 }
-
-@media (max-width: 768px) {
-  .modal-container {
-    width: 95%;
-    margin: 1rem;
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  .user-avatar-large,
-  .user-avatar-img-large,
-  .user-avatar-placeholder-large {
-    width: 80px;
-    height: 80px;
-  }
-
-  .user-avatar-placeholder-large {
-    font-size: 1.8rem;
-  }
-}
 </style>

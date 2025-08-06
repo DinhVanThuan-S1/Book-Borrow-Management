@@ -78,14 +78,4 @@ export default {
 .fade-leave-to {
   opacity: 0;
 }
-
-@media (max-width: 768px) {
-  .scroll-to-top-btn {
-    bottom: 1rem;
-    right: 1rem;
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
-  }
-}
 </style>

@@ -896,44 +896,4 @@ export default {
 .section-title i {
   color: #6366f1;
 }
-
-/* Responsive */
-@media (max-width: 991px) {
-  .book-image-wrapper {
-    position: static;
-    margin-bottom: 2rem;
-  }
-  
-  .book-title {
-    font-size: 1.875rem;
-  }
-  
-  .book-info-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .book-details {
-    padding: 1.5rem;
-  }
-  
-  .book-image-container {
-    padding: 1.5rem;
-  }
-  
-  .book-title {
-    font-size: 1.5rem;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .share-section {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-}
 </style>

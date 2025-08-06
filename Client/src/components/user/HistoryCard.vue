@@ -322,39 +322,4 @@ export default {
 .history-actions {
   margin-top: auto;
 }
-
-@media (max-width: 768px) {
-  .history-content {
-    padding: 1rem;
-  }
-
-  .history-status {
-    padding: 1rem;
-  }
-
-  .book-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .book-image-container {
-    height: 120px;
-  }
-
-  .history-card .row.g-0 > .col-md-2 {
-    flex: 0 0 auto;
-    width: 25%;
-  }
-
-  .history-card .row.g-0 > .col-md-7 {
-    flex: 0 0 auto;
-    width: 75%;
-  }
-
-  .history-card .row.g-0 > .col-md-3 {
-    flex: 0 0 auto;
-    width: 100%;
-    margin-top: 1rem;
-  }
-}
 </style>

@@ -530,35 +530,4 @@ export default {
 .history-list {
   min-height: 200px;
 }
-
-@media (max-width: 768px) {
-  .summary-card {
-    padding: 1rem;
-  }
-
-  .summary-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 1rem;
-  }
-
-  .summary-number {
-    font-size: 1.5rem;
-  }
-
-  .status-tabs .nav-tabs {
-    flex-wrap: wrap;
-    padding: 0.25rem;
-  }
-
-  .status-tabs .nav-link {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .status-tabs .nav-link .badge {
-    font-size: 0.7rem;
-  }
-}
 </style>

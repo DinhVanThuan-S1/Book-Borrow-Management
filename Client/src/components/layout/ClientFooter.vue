@@ -256,19 +256,4 @@ export default {
 .footer-links a {
   font-size: 0.9rem;
 }
-
-@media (max-width: 768px) {
-  .newsletter-form {
-    margin-bottom: 1rem;
-  }
-  
-  .app-download {
-    text-align: center;
-  }
-  
-  .footer-links {
-    text-align: center;
-    margin-top: 1rem;
-  }
-}
 </style>

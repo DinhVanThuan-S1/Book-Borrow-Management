@@ -504,18 +504,4 @@ export default {
     opacity: 1;
   }
 }
-
-@media (max-width: 768px) {
-  .modal-container {
-    width: 95%;
-    margin: 1rem;
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-footer {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
 </style>
