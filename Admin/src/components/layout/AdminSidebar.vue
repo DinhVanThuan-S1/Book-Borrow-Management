@@ -62,6 +62,11 @@ export default {
           title: "Book Management",
           icon: "bi bi-book",
         },
+                {
+          name: "BorrowList",
+          title: "Borrow Management",
+          icon: "bi bi-arrow-left-right",
+        },
         {
           name: "CategoryList",
           title: "Category Management",
@@ -76,11 +81,6 @@ export default {
           name: "UserList",
           title: "Reader Management",
           icon: "bi bi-people",
-        },
-        {
-          name: "BorrowList",
-          title: "Borrow Management",
-          icon: "bi bi-arrow-left-right",
         },
       ];
 

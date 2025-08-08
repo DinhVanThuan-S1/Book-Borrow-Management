@@ -1,3 +1,4 @@
+<!-- Thêm mới hoặc chỉnh sửa độc giả -->
 <template>
   <div v-if="show" class="modal-overlay" @click="closeModal">
     <div class="modal-container" @click.stop>

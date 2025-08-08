@@ -344,37 +344,23 @@ export default {
   justify-content: center;
   color: white;
   font-size: 2rem;
-  animation: float 3s ease-in-out infinite;
   box-shadow: var(--box-shadow);
 }
 
 .book-1 {
   top: 20%;
   left: 10%;
-  animation-delay: 0s;
 }
 
 .book-2 {
   top: 50%;
   right: 10%;
-  animation-delay: 1s;
   background: var(--gradient-secondary);
 }
 
 .book-3 {
   bottom: 20%;
   left: 30%;
-  animation-delay: 2s;
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
 }
 
 .stats-section {

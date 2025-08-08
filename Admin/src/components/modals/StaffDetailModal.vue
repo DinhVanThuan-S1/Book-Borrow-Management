@@ -1,3 +1,4 @@
+<!-- Chi tiết nhân viên -->
 <template>
   <div v-if="show" class="modal-overlay" @click="closeModal">
     <div class="modal-container" @click.stop>

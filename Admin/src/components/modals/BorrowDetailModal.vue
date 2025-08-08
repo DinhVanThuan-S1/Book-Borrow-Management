@@ -1,3 +1,4 @@
+<!-- Chi tiết phiếu mượn -->
 <template>
   <div
     v-if="show"
