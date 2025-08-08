@@ -26,10 +26,7 @@ app.use("/api", apiRoutes);
 // Route mặc định
 app.get("/", (req, res) => {
   res.json({
-    message: "Server Quản lý mượn sách đang hoạt động",
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-    api_docs: "/api",
+    message: "Server Quản lý mượn sách đang hoạt động"
   });
 });
 

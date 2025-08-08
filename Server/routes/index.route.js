@@ -21,7 +21,7 @@ router.use("/muonsach", muonsachRoutes);
 router.use("/nhaxuatban", nhaxuatbanRoutes);
 router.use("/thongke", thongkeRoutes);
 
-// Route mặc định cho API
+// Route mặc định cho API -> backend API
 router.get("/", (req, res) => {
   res.json({
     message: "Chào mừng đến với API Quản lý mượn sách",
