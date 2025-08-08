@@ -1,0 +1,474 @@
+===============================================================================
+                    LUỒNG HOẠT ĐỘNG DỰ ÁN QUẢN LÝ MƯỢN SÁCH
+                           (Book-Borrow-Management)
+===============================================================================
+
+I. TỔNG QUAN KIẾN TRÚC HỆTHỐNG
+===============================================================================
+
+1. CÔNG NGHỆ SỬ DỤNG
+   - Frontend: Vue.js 3 + Composition API + Pinia + Bootstrap
+   - Backend: Node.js + Express.js + MongoDB + Mongoose
+   - Kiến trúc: MEVN Stack
+   - Authentication: JWT (JSON Web Token)
+   - File Upload: Multer
+   - Validation: Express-validator
+
+2. CẤU TRÚC THƯ MỤC
+   Book-Borrow-Management/
+   ├── Server/          (Backend - Port 5000)
+   ├── Admin/           (Admin Frontend - Port 3001)
+   └── Client/          (User Frontend - Port 3000)
+
+3. LUỒNG DỮ LIỆU TỔNG QUAN
+   User/Admin ↔ Frontend (Vue.js) ↔ API (Express.js) ↔ Database (MongoDB)
+
+===============================================================================
+II. BACKEND - SERVER (Node.js + Express.js)
+===============================================================================
+
+1. CẤU TRÚC BACKEND
+   Server/
+   ├── config/
+   │   └── database.js          # Kết nối MongoDB
+   ├── controllers/             # Xử lý logic nghiệp vụ
+   │   ├── auth.controller.js
+   │   ├── sach.controller.js
+   │   ├── docgia.controller.js
+   │   ├── muonsach.controller.js
+   │   └── ...
+   ├── models/                  # Schema MongoDB
+   │   ├── DocGia.model.js
+   │   ├── Sach.model.js
+   │   ├── TheoDoiMuonSach.model.js
+   │   └── ...
+   ├── routes/                  # Định tuyến API
+   │   ├── index.route.js
+   │   ├── auth.route.js
+   │   ├── sach.route.js
+   │   └── ...
+   ├── services/                # Business logic
+   ├── middleware/              # Xác thực, validation
+   ├── utils/                   # Tiện ích
+   └── server.js                # Entry point
+
+2. DATABASE MODELS (MongoDB Collections)
+
+   a) DocGia (Độc giả)
+      - MaDocGia, HoLot, Ten, NgaySinh, GioiTinh
+      - DiaChi, DienThoai, Email, MatKhau
+      - Avatar, NgayTao, deleted
+
+   b) Sach (Sách)
+      - MaSach, TenSach, TacGia, MoTa, DonGia
+      - SoLuong, NamXuatBan, BiaSach, MaDM, MaNXB
+      - NgayTao, NguoiTao, deleted
+
+   c) TheoDoiMuonSach (Phiếu mượn)
+      - MaDocGia, MaSach, NgayMuon, NgayTra
+      - TrangThai: ["Đã duyệt", "Từ chối", "Đang mượn", "Đã trả"]
+      - NgayTao, deleted
+
+   d) NhanVien (Nhân viên)
+      - MSNV, HoTenNV, Email, MatKhau, ChucVu
+      - DiaChi, SoDienThoai, Avatar
+
+   e) DanhMuc (Danh mục sách)
+      - MaDM, TenDM, MoTa, NgayTao, NguoiTao
+
+   f) NhaXuatBan (Nhà xuất bản)
+      - MaNXB, TenNXB, DiaChi, DienThoai
+
+3. API ENDPOINTS CHÍNH
+
+   a) Authentication (/api/auth)
+      POST /register/docgia     # Đăng ký độc giả
+      POST /login/docgia        # Đăng nhập độc giả
+      POST /login/nhanvien      # Đăng nhập nhân viên
+      POST /refresh-token       # Làm mới token
+      GET  /me                  # Lấy thông tin user hiện tại
+      POST /logout              # Đăng xuất
+      PUT  /change-password     # Đổi mật khẩu
+
+   b) Quản lý sách (/api/sach)
+      GET    /                  # Lấy danh sách sách (public)
+      GET    /popular/top       # Sách phổ biến
+      GET    /:id               # Chi tiết sách
+      POST   /                  # Thêm sách (admin only)
+      PUT    /:id               # Cập nhật sách (admin only)
+      DELETE /:id               # Xóa sách (admin only)
+
+   c) Quản lý mượn sách (/api/muonsach)
+      GET    /                  # Danh sách phiếu mượn (admin)
+      POST   /                  # Tạo phiếu mượn (user)
+      PUT    /:id/status        # Cập nhật trạng thái (admin)
+      GET    /my-borrows        # Lịch sử mượn của user
+      DELETE /:id               # Hủy phiếu mượn
+
+   d) Quản lý độc giả (/api/docgia)
+      GET    /                  # Danh sách độc giả (admin)
+      GET    /:id               # Chi tiết độc giả
+      PUT    /:id               # Cập nhật thông tin
+      DELETE /:id               # Xóa độc giả (admin)
+
+4. MIDDLEWARE XỬ LÝ
+
+   a) auth.middleware.js
+      - authenticateToken()     # Xác thực JWT token
+      - requireEmployee()       # Yêu cầu quyền nhân viên
+      - requireAdmin()          # Yêu cầu quyền admin
+
+   b) overdue.middleware.js
+      - updateOverdueStatus()   # Cập nhật trạng thái quá hạn
+
+   c) upload.middleware.js
+      - Xử lý upload file ảnh bìa sách, avatar
+
+5. LUỒNG XỬ LÝ REQUEST
+   Client Request → Routes → Middleware → Controller → Service → Model → Database
+                                    ↓
+   Client Response ← JSON Response ← Controller ← Service ← Model ← Database
+
+===============================================================================
+III. FRONTEND - CLIENT (Vue.js - Giao diện người dùng)
+===============================================================================
+
+1. CẤU TRÚC FRONTEND CLIENT
+   Client/src/
+   ├── components/              # Components tái sử dụng
+   │   ├── common/             # Components chung
+   │   ├── sections/           # Sections trang chủ
+   │   └── user/               # Components user
+   ├── views/                  # Các trang chính
+   │   ├── Home.vue           # Trang chủ
+   │   ├── BookCatalog.vue    # Danh mục sách
+   │   ├── BookDetail.vue     # Chi tiết sách
+   │   ├── auth/              # Đăng nhập/đăng ký
+   │   └── user/              # Trang user
+   ├── stores/                # Pinia stores
+   │   ├── auth.js           # Quản lý authentication
+   │   ├── books.js          # Quản lý sách
+   │   └── borrows.js        # Quản lý mượn sách
+   ├── services/              # API services
+   │   └── api.js            # Axios instance + API calls
+   ├── router/               # Vue Router
+   └── main.js               # Entry point
+
+2. PINIA STORES (State Management)
+
+   a) auth.js (Quản lý xác thực)
+      State:
+      - user: null              # Thông tin user hiện tại
+      - token: string           # JWT token
+      - isLoading: boolean      # Trạng thái loading
+      
+      Actions:
+      - login()                 # Đăng nhập
+      - register()              # Đăng ký
+      - logout()                # Đăng xuất
+      - fetchMe()               # Lấy thông tin user
+      - updateProfile()         # Cập nhật profile
+
+   b) books.js (Quản lý sách)
+      State:
+      - books: []               # Danh sách sách
+      - featuredBooks: []       # Sách nổi bật
+      - categories: []          # Danh mục
+      - currentBook: null       # Sách hiện tại
+      
+      Actions:
+      - fetchBooks()            # Lấy danh sách sách
+      - fetchBookById()         # Lấy chi tiết sách
+      - searchBooks()           # Tìm kiếm sách
+
+   c) borrows.js (Quản lý mượn sách)
+      State:
+      - borrows: []             # Danh sách phiếu mượn
+      - borrowHistory: []       # Lịch sử mượn
+      
+      Actions:
+      - createBorrow()          # Tạo phiếu mượn
+      - fetchMyBorrows()        # Lấy lịch sử mượn
+      - cancelBorrow()          # Hủy phiếu mượn
+
+3. API SERVICES
+
+   api.js:
+   - Tạo axios instance với baseURL: http://localhost:5000/api
+   - Request interceptor: Thêm JWT token vào header
+   - Response interceptor: Xử lý lỗi, refresh token
+   - Export các method: get, post, put, delete
+
+   API Methods:
+   - auth: { login, register, logout, me }
+   - books: { getAll, getById, getPopular, search }
+   - borrows: { create, getMyBorrows, cancel }
+   - categories: { getAll }
+
+4. ROUTING (Vue Router)
+
+   Routes chính:
+   - /                       # Trang chủ
+   - /sach                   # Danh mục sách
+   - /sach/:id               # Chi tiết sách
+   - /auth/dang-nhap         # Đăng nhập
+   - /auth/dang-ky           # Đăng ký
+   - /profile                # Thông tin cá nhân
+   - /lich-su-muon           # Lịch sử mượn sách
+
+   Navigation Guards:
+   - requireAuth()           # Yêu cầu đăng nhập
+   - guest()                 # Chỉ cho phép guest
+
+5. LUỒNG HOẠT ĐỘNG CLIENT
+
+   a) Trang chủ (Home.vue):
+      - Hiển thị hero section
+      - Load sách nổi bật qua API
+      - Load sách mới nhất
+      - Hiển thị thống kê
+
+   b) Danh mục sách (BookCatalog.vue):
+      - Load danh sách sách từ API
+      - Tìm kiếm, lọc theo danh mục
+      - Phân trang
+      - Thêm vào yêu thích
+
+   c) Chi tiết sách (BookDetail.vue):
+      - Load thông tin chi tiết sách
+      - Hiển thị mô tả, tác giả, nhà xuất bản
+      - Nút mượn sách (yêu cầu đăng nhập)
+
+   d) Mượn sách:
+      User click "Mượn sách" → Kiểm tra đăng nhập → API tạo phiếu mượn → 
+      Hệ thống kiểm tra (số lượng sách, giới hạn mượn) → Tự động duyệt/từ chối
+
+===============================================================================
+IV. FRONTEND - ADMIN (Vue.js - Giao diện quản trị)
+===============================================================================
+
+1. CẤU TRÚC FRONTEND ADMIN
+   Admin/src/
+   ├── components/
+   │   └── layout/             # Layout components
+   │       ├── AdminLayout.vue
+   │       ├── AdminHeader.vue
+   │       └── AdminSidebar.vue
+   ├── views/
+   │   ├── Dashboard.vue       # Trang tổng quan
+   │   ├── books/              # Quản lý sách
+   │   ├── categories/         # Quản lý danh mục
+   │   ├── users/              # Quản lý người dùng
+   │   ├── borrows/            # Quản lý mượn sách
+   │   └── auth/               # Đăng nhập admin
+   ├── stores/                 # Pinia stores
+   └── services/               # API services
+
+2. TÍNH NĂNG ADMIN
+
+   a) Dashboard (Tổng quan):
+      - Thống kê tổng số sách
+      - Thống kê người dùng
+      - Thống kê mượn trả
+      - Biểu đồ thống kê theo thời gian
+
+   b) Quản lý sách:
+      - CRUD sách (Create, Read, Update, Delete)
+      - Upload ảnh bìa sách
+      - Tìm kiếm, lọc theo danh mục
+      - Phân trang, sắp xếp
+
+   c) Quản lý danh mục:
+      - CRUD danh mục sách
+      - Tìm kiếm danh mục
+
+   d) Quản lý người dùng:
+      - Xem danh sách độc giả
+      - Xem chi tiết, cập nhật thông tin
+      - Phân quyền user
+
+   e) Quản lý mượn sách:
+      - Xem danh sách phiếu mượn
+      - Thay đổi trạng thái phiếu mượn
+      - Lọc theo trạng thái
+      - Xử lý quá hạn
+
+3. LUỒNG XỬ LÝ PHIẾU MƯỢN
+
+   Độc giả tạo phiếu mượn → Hệ thống kiểm tra điều kiện → Tự động duyệt/từ chối
+   ↓
+   Admin xem phiếu đã duyệt → Chuyển trạng thái "Đang mượn" (khi độc giả lấy sách)
+   ↓
+   Admin chuyển trạng thái "Đã trả" (khi độc giả trả sách)
+
+   Quy tắc nghiệp vụ:
+   - Mỗi độc giả chỉ được mượn tối đa 5 quyển
+   - Kiểm tra số lượng sách còn lại
+   - Thời hạn mượn: 10 ngày
+   - Xóa mềm (soft delete) với trường "deleted: true"
+
+===============================================================================
+V. LUỒNG HOẠT ĐỘNG CHI TIẾT CÁC TÍNH NĂNG
+===============================================================================
+
+1. ĐĂNG KÝ - ĐĂNG NHẬP
+
+   a) Đăng ký độc giả:
+      Client form → Validation → API /auth/register/docgia → 
+      Hash password → Lưu DB → Trả về success
+
+   b) Đăng nhập:
+      Client form → API /auth/login → Verify password → 
+      Generate JWT → Client lưu token → Redirect
+
+   c) Xác thực request:
+      Client gửi request + JWT token → Middleware verify token → 
+      Cho phép truy cập hoặc trả lỗi 401
+
+2. QUẢN LÝ SÁCH
+
+   a) Hiển thị danh sách sách:
+      Client → API GET /sach → Service query DB → 
+      Populate danh mục, NXB → Trả về JSON → Client render
+
+   b) Thêm sách mới (Admin):
+      Admin form + upload ảnh → API POST /sach → 
+      Multer xử lý file → Validate data → Lưu DB → 
+      Trả về thông tin sách mới
+
+   c) Tìm kiếm sách:
+      Client input → API GET /sach?search=... → 
+      MongoDB text search → Trả về kết quả
+
+3. MƯỢN SÁCH
+
+   a) Tạo phiếu mượn:
+      User click "Mượn sách" → Check authentication → 
+      API POST /muonsach → Service kiểm tra:
+      * Số lượng sách > 0
+      * User chưa mượn quá 5 quyển
+      * Sách chưa được user mượn
+      → Tự động duyệt/từ chối → Cập nhật số lượng sách
+
+   b) Xử lý phiếu mượn (Admin):
+      Admin xem danh sách → Chọn phiếu → Cập nhật trạng thái:
+      * "Đang mượn": Độc giả đến lấy sách
+      * "Đã trả": Độc giả trả sách (số lượng +1)
+      * "Hủy": Độc giả không lấy (số lượng +1)
+
+4. THỐNG KÊ
+
+   Admin Dashboard → API /thongke → Service aggregate data:
+   - Count documents từ các collection
+   - Group by date cho biểu đồ
+   - Top sách được mượn nhiều
+   - Trả về JSON → Frontend render charts
+
+===============================================================================
+VI. BẢO MẬT VÀ XỬ LÝ LỖI
+===============================================================================
+
+1. BẢO MẬT
+   - JWT Authentication cho tất cả API cần bảo vệ
+   - Password hashing với bcrypt
+   - Input validation với express-validator
+   - File upload validation (size, type)
+   - CORS policy
+   - Rate limiting (có thể thêm)
+
+2. XỬ LÝ LỖI
+   - Try-catch trong tất cả controller
+   - Global error handler middleware
+   - Validation errors
+   - 404 handling
+   - Client error handling với toast notifications
+
+3. LOGGING
+   - Console.log cho development
+   - Error logging
+   - Request/Response logging (có thể thêm)
+
+===============================================================================
+VII. DEPLOYMENT VÀ ENVIRONMENT
+===============================================================================
+
+1. ENVIRONMENT VARIABLES (.env)
+   - PORT=5000
+   - MONGODB_URI=mongodb://localhost:27017/QuanLyMuonSach
+   - JWT_SECRET=your_jwt_secret
+   - JWT_REFRESH_SECRET=your_refresh_secret
+   - NODE_ENV=development
+
+2. SCRIPTS
+   - npm start: Chạy server production
+   - npm run dev: Chạy development với nodemon
+   - npm run build: Build frontend
+
+3. PORTS
+   - Backend: http://localhost:5000
+   - Client: http://localhost:3000
+   - Admin: http://localhost:3001
+
+===============================================================================
+VIII. TỐI ƯU HÓA VÀ BEST PRACTICES
+===============================================================================
+
+1. CODE STRUCTURE
+   - Separation of concerns (MVC pattern)
+   - Reusable components
+   - Service layer cho business logic
+   - Middleware cho cross-cutting concerns
+
+2. DATABASE
+   - Indexing cho search performance
+   - Populate cho join queries
+   - Soft delete thay vì hard delete
+   - Data validation với Mongoose schemas
+
+3. FRONTEND
+   - Lazy loading cho routes
+   - Component composition
+   - State management với Pinia
+   - Responsive design với Bootstrap
+
+4. PERFORMANCE
+   - Pagination cho large datasets
+   - Image optimization
+   - API response caching (có thể thêm)
+   - Debounce cho search input
+
+===============================================================================
+IX. TESTING VÀ DEBUGGING
+===============================================================================
+
+1. TESTING STRATEGY
+   - Unit tests cho services
+   - Integration tests cho APIs
+   - Component tests cho Vue components
+   - E2E tests cho user workflows
+
+2. DEBUGGING TOOLS
+   - Console debugging
+   - Network tab cho API calls
+   - Vue DevTools
+   - MongoDB Compass
+   - Postman cho API testing
+
+===============================================================================
+TỔNG KẾT
+===============================================================================
+
+Hệ thống Quản lý mượn sách được xây dựng theo kiến trúc MEVN với:
+
+- Backend RESTful API cung cấp dữ liệu
+- Frontend Client cho độc giả sử dụng
+- Frontend Admin cho quản lý hệ thống
+- Database MongoDB lưu trữ dữ liệu
+- Authentication JWT bảo mật
+- Real-time updates và responsive design
+
+Luồng dữ liệu: User Interface → API → Business Logic → Database
+Bảo mật: JWT + Validation + Authorization
+Performance: Pagination + Indexing + Optimization
+
+Hệ thống đảm bảo tính năng hoàn chỉnh cho việc quản lý mượn trả sách trong thư viện.
