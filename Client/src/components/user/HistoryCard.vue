@@ -273,9 +273,9 @@ export default {
 }
 
 .status-badge {
-  padding: 0.5rem 0.8rem;
+  padding: 0.3rem 0.4rem;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: white;
   text-align: center;

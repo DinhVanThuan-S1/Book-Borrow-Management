@@ -53,9 +53,7 @@ app.use((error, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server đang chạy trên port ${PORT}`);
-  console.log(`📚 API endpoint: http://localhost:${PORT}/api`);
-  console.log(`🌍 Server URL: http://localhost:${PORT}`);
+  console.log(`Server đang chạy trên port ${PORT}`);
 });
 
 module.exports = app;
